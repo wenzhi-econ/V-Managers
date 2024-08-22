@@ -8,6 +8,9 @@ This do file aims to replicate Figure 3 in the paper. Commands are copied from "
 *?? step 1. create a simplest possible dataset
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
+capture log close
+log using "${Results}/logfile_20240822_Figure3_PanelA", replace text
+
 use "${FinalData}/AllSameTeam2.dta", clear
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -262,7 +265,7 @@ global pretrend_LH_minus_LL_WZ = string(${pretrend_LH_minus_LL_WZ}, "%4.3f")
 display ${pretrend_LH_minus_LL_WZ}
 
 LH_minus_LL_WZ, event_prefix(FT) pre_window_len(34) post_window_len(86) 
-rename (quarter_index coefficients lower_bound upper_bound) (qi_Transfer_VM coeff_Transfer_VM lb_Transfer_VM up_Transfer_VM)
+rename (quarter_index coefficients lower_bound upper_bound) (qi_Transfer_WZ coeff_Transfer_WZ lb_Transfer_WZ up_Transfer_WZ)
 
 twoway ///
     (scatter coeff_Transfer_WZ qi_Transfer_WZ, lcolor(ebblue) mcolor(ebblue)) ///
@@ -298,3 +301,5 @@ twoway ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_CP})
 
 graph export "${Results}/Figure3_TransferSJVC_CP.png", replace
+
+log close
