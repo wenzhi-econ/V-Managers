@@ -237,39 +237,3 @@ tw scatter bQL1 etQL1 if etQL1>=-`endFQ36' & etQL1<=`endLQ84', lcolor(ebblue) mc
 xtitle(Quarters since manager change) title("`lab'", span pos(12)) legend(off) note("Pre-trends joint p-value=`jointL'")
 graph save  "$analysis/Results/0.Paper/2.2.Event LH/`Label'TransferSJVCELHQ7.gph", replace
 graph export "$analysis/Results/0.Paper/2.2.Event LH/`Label'TransferSJVCELHQ7.pdf", replace */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
