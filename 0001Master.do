@@ -16,6 +16,11 @@ set varabbrev off
 if	"`c(username)'" == "wang" {
     global user "E:/__RA/02MANAGERS"
 }
+
+if	"`c(username)'" == "wenzhi0" {
+    global user "C:/zMyFiles/RA/02MANAGERS"
+}
+
 if  "`c(username)'" =="virginiaminni" {
     global user "/Users/virginiaminni/Library/CloudStorage/Dropbox/Managers"
 }
