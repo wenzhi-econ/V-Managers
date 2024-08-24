@@ -18,7 +18,7 @@ keep ///
     TransferSJVC TransferFuncC LeaverPerm ChangeSalaryGradeC ///
     IDlse YearMonth IDlseMHR EarlyAgeM ///
     WL2 ///
-    FTHL FTLL FTHH FTLH
+    FTHL FTLL FTHH FTLH Ei
 
 order ///
     IDlse YearMonth ///
@@ -117,7 +117,7 @@ save "${FinalData}/temp_fig3.dta", replace
 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s1_3. construct a simplified dataset with only relevant variables 
+*-? s1_4. construct a simplified dataset with only relevant variables 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 capture log close
@@ -130,7 +130,7 @@ use "${FinalData}/temp_fig3.dta", clear
     // commented out when offically producing the results
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s1_4. construct global macros used in regressions 
+*-? s1_5. construct global macros used in regressions 
 *-?       using different aggregation methods 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
@@ -338,7 +338,7 @@ twoway ///
     (rcap lb_TransferFuncC_VM up_TransferFuncC_VM qi_TransferFuncC_VM, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    xtitle(Quarters since manager change) title("Lateral move, function", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_VM})
 
 graph export "${Results}/Figure3_TransferFuncC_VM.png", replace
@@ -364,7 +364,7 @@ twoway ///
     (rcap lb_TransferFuncC_WZ up_TransferFuncC_WZ qi_TransferFuncC_WZ, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    xtitle(Quarters since manager change) title("Lateral move, function", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_WZ})
 
 graph export "${Results}/Figure3_TransferFuncC_WZ.png", replace
@@ -389,7 +389,7 @@ twoway ///
     (rcap lb_TransferFuncC_CP up_TransferFuncC_CP qi_TransferFuncC_CP, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    xtitle(Quarters since manager change) title("Lateral move, function", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_CP})
 
 graph export "${Results}/Figure3_TransferFuncC_CP.png", replace
@@ -420,7 +420,7 @@ twoway ///
     (rcap lb_ChangeSalaryGradeC_VM up_ChangeSalaryGradeC_VM qi_ChangeSalaryGradeC_VM, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    xtitle(Quarters since manager change) title("Salary grade increase", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_VM})
 
 graph export "${Results}/Figure3_ChangeSalaryGradeC_VM.png", replace
@@ -446,7 +446,7 @@ twoway ///
     (rcap lb_ChangeSalaryGradeC_WZ up_ChangeSalaryGradeC_WZ qi_ChangeSalaryGradeC_WZ, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    xtitle(Quarters since manager change) title("Salary grade increase", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_WZ})
 
 graph export "${Results}/Figure3_ChangeSalaryGradeC_WZ.png", replace
@@ -471,7 +471,7 @@ twoway ///
     (rcap lb_ChangeSalaryGradeC_CP up_ChangeSalaryGradeC_CP qi_ChangeSalaryGradeC_CP, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    xtitle(Quarters since manager change) title("Salary grade increase", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_CP})
 
 graph export "${Results}/Figure3_ChangeSalaryGradeC_CP.png", replace
