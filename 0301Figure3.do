@@ -8,9 +8,6 @@ This do file aims to replicate Figure 3 in the paper. Commands are copied from "
 *?? step 1. create a simplest possible dataset
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-capture log close
-log using "${Results}/logfile_20240822_Figure3_PanelA", replace text
-
 use "${FinalData}/AllSameTeam2.dta", clear
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -118,10 +115,23 @@ foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
 
 save "${FinalData}/temp_fig3.dta", replace
 
-use "${FinalData}/temp_fig3.dta", clear 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s1_3. construct global macros used in regressions using different aggregation methods 
+*-? s1_3. construct a simplified dataset with only relevant variables 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+capture log close
+log using "${Results}/logfile_20240824_Figure3_PanelABD", replace text
+
+use "${FinalData}/temp_fig3.dta", clear 
+
+/* keep if inrange(_n, 1, 10000)  */
+    // used to test the codes
+    // commented out when offically producing the results
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s1_4. construct global macros used in regressions 
+*-?       using different aggregation methods 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 *!! Aggregation 1 (VM): Orignial Method
@@ -239,11 +249,11 @@ global pretrend_LH_minus_LL_VM = string(${pretrend_LH_minus_LL_VM}, "%4.3f")
 display ${pretrend_LH_minus_LL_VM}
 
 LH_minus_LL_VM, event_prefix(FT) pre_window_len(36) post_window_len(84) 
-rename (quarter_index coefficients lower_bound upper_bound) (qi_Transfer_VM coeff_Transfer_VM lb_Transfer_VM up_Transfer_VM)
+rename (quarter_index coefficients lower_bound upper_bound) (qi_TransferSJVC_VM coeff_TransferSJVC_VM lb_TransferSJVC_VM up_TransferSJVC_VM)
 
 twoway ///
-    (scatter coeff_Transfer_VM qi_Transfer_VM, lcolor(ebblue) mcolor(ebblue)) ///
-    (rcap lb_Transfer_VM up_Transfer_VM qi_Transfer_VM, lcolor(ebblue)) ///
+    (scatter coeff_TransferSJVC_VM qi_TransferSJVC_VM, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_TransferSJVC_VM up_TransferSJVC_VM qi_TransferSJVC_VM, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
     xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
@@ -265,11 +275,11 @@ global pretrend_LH_minus_LL_WZ = string(${pretrend_LH_minus_LL_WZ}, "%4.3f")
 display ${pretrend_LH_minus_LL_WZ}
 
 LH_minus_LL_WZ, event_prefix(FT) pre_window_len(34) post_window_len(86) 
-rename (quarter_index coefficients lower_bound upper_bound) (qi_Transfer_WZ coeff_Transfer_WZ lb_Transfer_WZ up_Transfer_WZ)
+rename (quarter_index coefficients lower_bound upper_bound) (qi_TransferSJVC_WZ coeff_TransferSJVC_WZ lb_TransferSJVC_WZ up_TransferSJVC_WZ)
 
 twoway ///
-    (scatter coeff_Transfer_WZ qi_Transfer_WZ, lcolor(ebblue) mcolor(ebblue)) ///
-    (rcap lb_Transfer_WZ up_Transfer_WZ qi_Transfer_WZ, lcolor(ebblue)) ///
+    (scatter coeff_TransferSJVC_WZ qi_TransferSJVC_WZ, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_TransferSJVC_WZ up_TransferSJVC_WZ qi_TransferSJVC_WZ, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
     xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
@@ -290,16 +300,181 @@ global pretrend_LH_minus_LL_CP = r(pretrend)
 global pretrend_LH_minus_LL_CP = string(${pretrend_LH_minus_LL_CP}, "%4.3f")
 display ${pretrend_LH_minus_LL_CP}
 LH_minus_LL_CP, event_prefix(FT) pre_window_len(36) post_window_len(84) 
-rename (quarter_index coefficients lower_bound upper_bound) (qi_Transfer_CP coeff_Transfer_CP lb_Transfer_CP up_Transfer_CP)
+rename (quarter_index coefficients lower_bound upper_bound) (qi_TransferSJVC_CP coeff_TransferSJVC_CP lb_TransferSJVC_CP up_TransferSJVC_CP)
 
 twoway ///
-    (scatter coeff_Transfer_CP qi_Transfer_CP, lcolor(ebblue) mcolor(ebblue)) ///
-    (rcap lb_Transfer_CP up_Transfer_CP qi_Transfer_CP, lcolor(ebblue)) ///
+    (scatter coeff_TransferSJVC_CP qi_TransferSJVC_CP, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_TransferSJVC_CP up_TransferSJVC_CP qi_TransferSJVC_CP, lcolor(ebblue)) ///
     , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
     xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
     xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_CP})
 
 graph export "${Results}/Figure3_TransferSJVC_CP.png", replace
+
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? Subfigure 2. Cross-functional Transfers
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? Subfigure 2_1. Cross-functional Transfers + VM Aggregation
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+eststo: reghdfe TransferFuncC ${reg_VM} ///
+    if ((Mngr_both_WL2==1 & (FT_LtoL==1 | FT_LtoH==1)) | (Never_ChangeM==1)) ///
+    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+
+pretrend_LH_minus_LL_VM, event_prefix(FT) pre_window_len(36)
+global pretrend_LH_minus_LL_VM = r(pretrend)
+global pretrend_LH_minus_LL_VM = string(${pretrend_LH_minus_LL_VM}, "%4.3f")
+display ${pretrend_LH_minus_LL_VM}
+
+LH_minus_LL_VM, event_prefix(FT) pre_window_len(36) post_window_len(84) 
+rename (quarter_index coefficients lower_bound upper_bound) (qi_TransferFuncC_VM coeff_TransferFuncC_VM lb_TransferFuncC_VM up_TransferFuncC_VM)
+
+twoway ///
+    (scatter coeff_TransferFuncC_VM qi_TransferFuncC_VM, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_TransferFuncC_VM up_TransferFuncC_VM qi_TransferFuncC_VM, lcolor(ebblue)) ///
+    , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
+    xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
+    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_VM})
+
+graph export "${Results}/Figure3_TransferFuncC_VM.png", replace
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? Subfigure 2_2. Cross-functional Transfers + WZ Aggregation
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+eststo: reghdfe TransferFuncC ${reg_WZ} ///
+    if ((Mngr_both_WL2==1 & (FT_LtoL==1 | FT_LtoH==1)) | (Never_ChangeM==1)) ///
+    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+
+pretrend_LH_minus_LL_WZ, event_prefix(FT) pre_window_len(34)
+global pretrend_LH_minus_LL_WZ = r(pretrend)
+global pretrend_LH_minus_LL_WZ = string(${pretrend_LH_minus_LL_WZ}, "%4.3f")
+display ${pretrend_LH_minus_LL_WZ}
+
+LH_minus_LL_WZ, event_prefix(FT) pre_window_len(34) post_window_len(86) 
+rename (quarter_index coefficients lower_bound upper_bound) (qi_TransferFuncC_WZ coeff_TransferFuncC_WZ lb_TransferFuncC_WZ up_TransferFuncC_WZ)
+
+twoway ///
+    (scatter coeff_TransferFuncC_WZ qi_TransferFuncC_WZ, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_TransferFuncC_WZ up_TransferFuncC_WZ qi_TransferFuncC_WZ, lcolor(ebblue)) ///
+    , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
+    xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
+    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_WZ})
+
+graph export "${Results}/Figure3_TransferFuncC_WZ.png", replace
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? Subfigure 2_3. Cross-functional Transfers + CP Aggregation
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+eststo: reghdfe TransferFuncC ${reg_CP} ///
+    if ((Mngr_both_WL2==1 & (FT_LtoL==1 | FT_LtoH==1)) | (Never_ChangeM==1)) ///
+    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+
+pretrend_LH_minus_LL_CP, event_prefix(FT) pre_window_len(36)
+global pretrend_LH_minus_LL_CP = r(pretrend)
+global pretrend_LH_minus_LL_CP = string(${pretrend_LH_minus_LL_CP}, "%4.3f")
+display ${pretrend_LH_minus_LL_CP}
+LH_minus_LL_CP, event_prefix(FT) pre_window_len(36) post_window_len(84) 
+rename (quarter_index coefficients lower_bound upper_bound) (qi_TransferFuncC_CP coeff_TransferFuncC_CP lb_TransferFuncC_CP up_TransferFuncC_CP)
+
+twoway ///
+    (scatter coeff_TransferFuncC_CP qi_TransferFuncC_CP, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_TransferFuncC_CP up_TransferFuncC_CP qi_TransferFuncC_CP, lcolor(ebblue)) ///
+    , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
+    xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
+    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_CP})
+
+graph export "${Results}/Figure3_TransferFuncC_CP.png", replace
+
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? Subfigure 4. Salary grade
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? Subfigure 4_1. Salary grade + VM Aggregation
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+eststo: reghdfe ChangeSalaryGradeC ${reg_VM} ///
+    if ((Mngr_both_WL2==1 & (FT_LtoL==1 | FT_LtoH==1)) | (Never_ChangeM==1)) ///
+    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+
+pretrend_LH_minus_LL_VM, event_prefix(FT) pre_window_len(36)
+global pretrend_LH_minus_LL_VM = r(pretrend)
+global pretrend_LH_minus_LL_VM = string(${pretrend_LH_minus_LL_VM}, "%4.3f")
+display ${pretrend_LH_minus_LL_VM}
+
+LH_minus_LL_VM, event_prefix(FT) pre_window_len(36) post_window_len(84) 
+rename (quarter_index coefficients lower_bound upper_bound) (qi_ChangeSalaryGradeC_VM coeff_ChangeSalaryGradeC_VM lb_ChangeSalaryGradeC_VM up_ChangeSalaryGradeC_VM)
+
+twoway ///
+    (scatter coeff_ChangeSalaryGradeC_VM qi_ChangeSalaryGradeC_VM, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_ChangeSalaryGradeC_VM up_ChangeSalaryGradeC_VM qi_ChangeSalaryGradeC_VM, lcolor(ebblue)) ///
+    , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
+    xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
+    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_VM})
+
+graph export "${Results}/Figure3_ChangeSalaryGradeC_VM.png", replace
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? Subfigure 4_2. Salary grade + WZ Aggregation
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+eststo: reghdfe ChangeSalaryGradeC ${reg_WZ} ///
+    if ((Mngr_both_WL2==1 & (FT_LtoL==1 | FT_LtoH==1)) | (Never_ChangeM==1)) ///
+    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+
+pretrend_LH_minus_LL_WZ, event_prefix(FT) pre_window_len(34)
+global pretrend_LH_minus_LL_WZ = r(pretrend)
+global pretrend_LH_minus_LL_WZ = string(${pretrend_LH_minus_LL_WZ}, "%4.3f")
+display ${pretrend_LH_minus_LL_WZ}
+
+LH_minus_LL_WZ, event_prefix(FT) pre_window_len(34) post_window_len(86) 
+rename (quarter_index coefficients lower_bound upper_bound) (qi_ChangeSalaryGradeC_WZ coeff_ChangeSalaryGradeC_WZ lb_ChangeSalaryGradeC_WZ up_ChangeSalaryGradeC_WZ)
+
+twoway ///
+    (scatter coeff_ChangeSalaryGradeC_WZ qi_ChangeSalaryGradeC_WZ, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_ChangeSalaryGradeC_WZ up_ChangeSalaryGradeC_WZ qi_ChangeSalaryGradeC_WZ, lcolor(ebblue)) ///
+    , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
+    xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
+    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_WZ})
+
+graph export "${Results}/Figure3_ChangeSalaryGradeC_WZ.png", replace
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? Subfigure 4_3. Salary grade + CP Aggregation
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+eststo: reghdfe ChangeSalaryGradeC ${reg_CP} ///
+    if ((Mngr_both_WL2==1 & (FT_LtoL==1 | FT_LtoH==1)) | (Never_ChangeM==1)) ///
+    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+
+pretrend_LH_minus_LL_CP, event_prefix(FT) pre_window_len(36)
+global pretrend_LH_minus_LL_CP = r(pretrend)
+global pretrend_LH_minus_LL_CP = string(${pretrend_LH_minus_LL_CP}, "%4.3f")
+display ${pretrend_LH_minus_LL_CP}
+LH_minus_LL_CP, event_prefix(FT) pre_window_len(36) post_window_len(84) 
+rename (quarter_index coefficients lower_bound upper_bound) (qi_ChangeSalaryGradeC_CP coeff_ChangeSalaryGradeC_CP lb_ChangeSalaryGradeC_CP up_ChangeSalaryGradeC_CP)
+
+twoway ///
+    (scatter coeff_ChangeSalaryGradeC_CP qi_ChangeSalaryGradeC_CP, lcolor(ebblue) mcolor(ebblue)) ///
+    (rcap lb_ChangeSalaryGradeC_CP up_ChangeSalaryGradeC_CP qi_ChangeSalaryGradeC_CP, lcolor(ebblue)) ///
+    , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
+    xlabel(-12(2)28) /// //ylabel(-0.05(0.05)0.2) ///
+    xtitle(Quarters since manager change) title(Lateral move, span pos(12)) ///
+    legend(off) note(Pre-trends joint p-value = ${pretrend_LH_minus_LL_CP})
+
+graph export "${Results}/Figure3_ChangeSalaryGradeC_CP.png", replace
+
 
 log close
