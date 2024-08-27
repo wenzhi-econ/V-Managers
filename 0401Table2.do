@@ -110,9 +110,9 @@ estpost summarize Female Cohort1 Cohort2 Cohort3 Cohort4 Econ Sci Hum Other, det
 esttab using "${Results}/Table2_SummaryStatistics.tex", ///
     replace ci(3) label nonotes noobs nomtitles collabels(,none) nonumbers ///
     cells("mean(fmt(%9.2fc)) sd(fmt(%8.1fc)) p1(fmt(%8.1fc)) p99(fmt(%8.1fc)) count(fmt(%12.0fc) )") ///
-    prehead("\begin{tabular}{lccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{SD} & \multicolumn{1}{c}{P1} & \multicolumn{1}{c}{P99} & \multicolumn{1}{c}{N} \\ ") ///
-    posthead("\multicolumn{6}{c}{\emph{Panel (a): gender, age and education}} \\") ///
-    prefoot(" ") postfoot("\hline")
+    prehead("\begin{tabular}{lccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{SD} & \multicolumn{1}{c}{P1} & \multicolumn{1}{c}{P99} & \multicolumn{1}{c}{N} \\ " "\hline \\ [-5pt]") ///
+    posthead("\multicolumn{6}{c}{\emph{Panel (a): gender, age and education}} \\ [+5pt]") ///
+    prefoot(" ") postfoot("\hline \\ [-5pt]")
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2. Panel B of Table 2: Work-related variables
@@ -155,8 +155,8 @@ esttab using "${Results}/Table2_SummaryStatistics.tex", ///
     append ci(3) label nonotes noobs nomtitles collabels(,none) nonumbers ///
     cells("mean(fmt(%9.2fc)) sd(fmt(%8.1fc)) p1(fmt(%8.1fc)) p99(fmt(%8.1fc)) count(fmt(%12.0fc) )") ///
     prehead(" ") /// 
-    posthead("\multicolumn{6}{c}{\emph{Panel (b): tenure, hierarchy and team size}} \\") ///
-    postfoot("\hline") prefoot(" ")
+    posthead("\multicolumn{6}{c}{\emph{Panel (b): tenure, hierarchy and team size}} \\ [+5pt]") ///
+    postfoot("\hline \\ [-5pt]") prefoot(" ")
 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -211,7 +211,7 @@ esttab using "${Results}/Table2_SummaryStatistics.tex", ///
     append ci(3) label nonotes noobs nomtitles collabels(,none) nonumbers ///
     cells("mean(fmt(%9.2fc)) sd(fmt(%8.1fc)) p1(fmt(%8.1fc)) p99(fmt(%8.1fc)) count(fmt(%12.0fc) )") ///
     prehead(" ") ///
-    posthead("\multicolumn{6}{c}{\emph{Panel (c): outcome variables}} \\") ///
+    posthead("\multicolumn{6}{c}{\emph{Panel (c): outcome variables}} \\ [+5pt]") ///
     prefoot(" ") ///
     postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker-month-year. The data contain personnel records for the entire white-collar employee base from January 2011 until December 2021. In Panel (a) cohort refers to the age group and education data is only available for a subset of workers. In Panel (b) work level denotes the hierarchical tier (from level 1 at the bottom to level 6). In Panel (c) salary information is only available since January 2015 and the data on performance ratings start in January 2017." "\end{tablenotes}") 
 
