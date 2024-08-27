@@ -263,7 +263,7 @@ $$
 \end{aligned}
 $$
 
-In my opinion, the sample in this regression should conclude only three types of workers:
+And the sample in this regression should include only three types of workers:
 1. **all** control workers, who didn't experience a manager change (this is a little different from the original regressions);
 2. workers who experienced a LtoL manager change and both involving managers are WL2;
 3. workers who experienced a LtoH manager change and both involving managers are WL2.
@@ -293,6 +293,8 @@ reghdfe LeaverPerm ${eventsXreltime_dummies} ///
 **I didn't include the HtoH and HtoL treatment groups in both regressions, so they are different from the original regression.**
 
 **And I didn't change the sample restriction variables, but I think it may be a good idea to distinguish between these event-related variables with other variables.**
+
+Maybe we should discuss more about this regression. This event-study analysis is a little tricky as the outcome variable is $Y_{i}$ rather than $Y_{it}$. I don't have too much experience to deal with this kind of regressions.
 
 ## 4.2. Results 
 
