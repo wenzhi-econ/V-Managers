@@ -127,7 +127,7 @@ log using "${Results}/logfile_20240905_Figure3_PanelABD", replace text
 
 use "${FinalData}/temp_fig3.dta", clear 
 
-keep if inrange(_n, 1, 10000) 
+/* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
     // commented out when offically producing the results
 
