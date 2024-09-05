@@ -25,7 +25,7 @@ order ///
     EarlyAgeM IDlseMHR ///
     TransferSJVC TransferFuncC LeaverPerm ChangeSalaryGradeC ///
     WL2 ///
-    FTLL FTLH FTHH  FTHL
+    FTLL FTLH FTHH FTHL
         // IDs, manager info, outcome variables, sample restriction variable, treatment info
 
 rename WL2 Mngr_both_WL2 
