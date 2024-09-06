@@ -128,7 +128,7 @@ log using "${Results}/logfile_20240905_Figure5", replace text
 
 use "${FinalData}/temp_fig5.dta", clear 
 
-/* keep if inrange(_n, 1, 10000)  */
+keep if inrange(_n, 1, 10000) 
     // used to test the codes
     // commented out when offically producing the results
 
@@ -195,9 +195,9 @@ coefplot  ///
     (LogPayBonus, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
     title("Pay + bonus (logs)", size(vlarge)) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) ///
-    xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2)
+    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
+    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
 
 graph export "${Results}/Figure5_FT_Gains_LogPayBonus.png", replace
 
@@ -226,10 +226,10 @@ coefplot  ///
     (LogPay, keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     (LogPay, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
-    title("Pay + bonus (logs)", size(vlarge)) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) ///
-    xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2)
+    title("Pay (logs)", size(vlarge)) ///
+    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
+    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
 
 graph export "${Results}/Figure5_FT_Gains_LogPay.png", replace
 
@@ -259,10 +259,10 @@ coefplot  ///
     (LogBonus, keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     (LogBonus, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
-    title("Pay + bonus (logs)", size(vlarge)) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) ///
-    xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2)
+    title("Bonus (logs)", size(vlarge)) ///
+    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
+    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
 
 graph export "${Results}/Figure5_FT_Gains_LogBonus.png", replace
 
@@ -292,9 +292,9 @@ coefplot  ///
     (PromWLC, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
     title("Pay + bonus (logs)", size(vlarge)) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) ///
-    xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2)
+    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
+    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
 
 graph export "${Results}/Figure5_FT_Gains_PromWLC.png", replace
 
