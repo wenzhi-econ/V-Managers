@@ -1,6 +1,6 @@
 
 /* 
-Lines 927 - 979 from "2.4.Event Study NoLoops"
+This do file compares employees' retention results between LtoL group and LtoH group.
 
 */
 
@@ -15,54 +15,26 @@ use "${FinalData}/AllSameTeam2.dta", clear
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 keep ///
-    TransferSJVC TransferFuncC LeaverPerm ChangeSalaryGradeC ///
+    LeaverPerm ///
     IDlse YearMonth IDlseMHR EarlyAgeM ///
-    WL2 KEi Ei ///
+    WL2 ///
     FTHL FTLL FTHH FTLH ///
     Office Func AgeBand Female
 
 order ///
     IDlse YearMonth ///
     EarlyAgeM IDlseMHR ///
-    TransferSJVC TransferFuncC LeaverPerm ChangeSalaryGradeC ///
-    WL2 KEi Ei ///
+    LeaverPerm ///
+    WL2 ///
     FTLL FTLH FTHH  FTHL ///
     Office Func AgeBand Female 
         // IDs, manager info, outcome variables, sample restriction variable, treatment info, covariates
 
-
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s1_2. sample restriction variables
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*todo: I don't really understand the sample restrictions here.
-*&& The original sample restriction condition is /* if KEi>-1 & WL2==1 & cohort30==1 */.
-*&& In the following comments, I copied some relative parts from do files used to generate KEi and cohort30 variables.
-*&& I won't investigate deeper what is happening behind these variables. 
 
 rename WL2 Mngr_both_WL2 
-
-/* generate ChangeM = 0 
-replace  ChangeM = 1 if (IDlse[_n]==IDlse[_n-1] & IDlseMHR[_n]!=IDlseMHR[_n-1])
-bysort IDlse: egen mm = min(YearMonth)
-replace ChangeM = 0  if YearMonth==mm & ChangeM==1
-drop mm 
-
-generate ChangeMR = 0 
-replace  ChangeMR = 1 if ChangeM==1 
-replace  ChangeMR = 0 if TransferInternal==1 | TransferSJ==1 
-replace  ChangeMR = . if ChangeM==.
-replace  ChangeMR = . if IDlseMHR==. 
-
-bysort IDlse: egen    EiChange = min(cond(ChangeM==1, YearMonth, .))
-bysort IDlse: egen    Ei       = mean(cond(ChangeMR==1 & YearMonth==EiChange, EiChange, .))
-replace ChangeMR = 0 if YearMonth>Ei & ChangeMR==1
-replace ChangeMR = 0 if ChangeMR==. 
-format Ei %tm 
-
-generate KEi = YearMonth - Ei   */
-
-generate cohort30 = 1 if Ei >=tm(2014m1) & Ei <=tm(2018m12)
-    // cohorts that have at least 36 months pre and after manager rotation 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s1_3. construct (individual level) event dummies 
@@ -99,110 +71,175 @@ label variable FT_HtoL "=1, if the worker experiences a high- to low-type manage
 label variable FT_HtoH "=1, if the worker experiences a high- to high-type manager change"
 label variable Never_ChangeM "=1, if the worker never experiences a manager change"
 
-*!! relative date to the event 
-generate Rel_Time = . 
-replace  Rel_Time = YearMonth - Calend_Time_FT_LtoL if Calend_Time_FT_LtoL !=. 
-replace  Rel_Time = YearMonth - Calend_Time_FT_LtoH if Calend_Time_FT_LtoH !=. 
-replace  Rel_Time = YearMonth - Calend_Time_FT_HtoL if Calend_Time_FT_HtoL !=. 
-replace  Rel_Time = YearMonth - Calend_Time_FT_HtoH if Calend_Time_FT_HtoH !=. 
-
-label variable Rel_Time "relative date to the event, missing if the event is Never_ChangeM"
-
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s1_4. construct "event * relative date" dummies 
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-summarize Rel_Time, detail // range: [-131, +130]
-
-*!! ordinary "event * relative date" dummies 
-local max_post_period = 84
-
-foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
-    forvalues time = 0/`max_post_period' {
-        generate byte `event'_X_Post`time' = `event' * (Rel_Time == `time')
-    }
-}
-
-*!! binned absorbing "event * relative date" dummies for pre- and post-event periods 
-foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
-    generate byte `event'_X_Post_After84 = `event' * (Rel_Time > 84)
-}
+*!! calendar time of the event 
+generate Event_Time = . 
+replace  Event_Time = Calend_Time_FT_LtoL if Calend_Time_FT_LtoL!=. & Event_Time==.
+replace  Event_Time = Calend_Time_FT_LtoH if Calend_Time_FT_LtoH!=. & Event_Time==.
+replace  Event_Time = Calend_Time_FT_HtoL if Calend_Time_FT_HtoL!=. & Event_Time==.
+replace  Event_Time = Calend_Time_FT_HtoH if Calend_Time_FT_HtoH!=. & Event_Time==.
+format   Event_Time %tm
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s1_5. save the dataset
+*-? s1_3. time when leaving the firm
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-save "${FinalData}/temp_fig3_panelc.dta", replace
+sort IDlse YearMonth
 
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? Subfigure 3. Exit from the firm
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+bysort IDlse: egen Leaver = max(LeaverPerm)
+
+bysort IDlse: egen temp = max(YearMonth)
+generate Leave_Time = . 
+replace  Leave_Time = temp if Leaver == 1
+format Leave_Time %tm
+drop temp
+
+generate Rel_Leave_Time = Leave_Time - Event_Time
+
+order IDlse YearMonth LeaverPerm Leaver Leave_Time Event_Time Rel_Leave_Time
+
+label variable Leaver "=1, if the worker left the firm during the dataset period"
+label variable Leave_Time "Time when the worker left the firm, missing if he stays during the sample period"
+label variable Rel_Leave_Time "Leave_Time - Event_Time"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? construct global macros used in regressions 
+*-? s1_4. outcome variables
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+generate Leave_1yr   = inrange(Rel_Leave_Time, 0, 12)
+generate Leave_2yrs  = inrange(Rel_Leave_Time, 0, 24)
+generate Leave_3yrs  = inrange(Rel_Leave_Time, 0, 36)
+generate Leave_4yrs  = inrange(Rel_Leave_Time, 0, 48)
+generate Leave_5yrs  = inrange(Rel_Leave_Time, 0, 60)
+generate Leave_6yrs  = inrange(Rel_Leave_Time, 0, 72)
+generate Leave_7yrs  = inrange(Rel_Leave_Time, 0, 84)
+generate Leave_8yrs  = inrange(Rel_Leave_Time, 0, 96)
+generate Leave_9yrs  = inrange(Rel_Leave_Time, 0, 108)
+generate Leave_10yrs = inrange(Rel_Leave_Time, 0, 120)
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s1_5. keep only a cross-sectional of dataset for four treatment groups
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+keep if (FT_LtoL==1) | (FT_LtoH==1) 
+    //&& keep only LtoL and LtoH groups
+keep if YearMonth == Event_Time 
+    //&& keep one observation for one worker, 
+    //&& this also ensures we are using control variables at the time of treatment
+keep if Mngr_both_WL2 == 1
+    //&& usual sample restriction
+
+keep  IDlse FT_LtoL FT_LtoH Event_Time Leaver Leave_Time Rel_Leave_Time Leave_* Office Func AgeBand Female IDlseMHR
+order IDlse FT_LtoL FT_LtoH Event_Time Leaver Leave_Time Rel_Leave_Time Leave_* Office Func AgeBand Female IDlseMHR
+
+save "${FinalData}/temp_exit_outcomes.dta", replace
 
 capture log close
 
-log using "${Results}/logfile_20240825_Figure3_PanelC", replace text
+log using "${Results}/logfile_20240906_ExitOutcomes", replace text
 
-use "${FinalData}/temp_fig3_panelc.dta", clear 
+use "${FinalData}/temp_exit_outcomes.dta", clear 
 
-/* keep if inrange(_n, 1, 10000)  */
-    // used to test the codes
-    // commented out when offically producing the results
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? regression set 1. don't consider time constraints
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-capture macro drop FT_LtoL_X_Post 
-capture macro drop FT_LtoH_X_Post 
-capture macro drop eventsXreltime_dummies
+global exit_outcomes Leave_1yr Leave_2yrs Leave_3yrs Leave_4yrs Leave_5yrs Leave_6yrs Leave_7yrs Leave_8yrs Leave_9yrs Leave_10yrs
 
-local max_post_period = 84
+foreach var in $exit_outcomes {
+    reghdfe `var' FT_LtoH, absorb(Office##Func##Event_Time AgeBand##Female) vce(cluster IDlseMHR)
 
-foreach event in FT_LtoL FT_LtoH {
-    forvalues time = 0/`max_post_period' {
-        global `event'_X_Post ${`event'_X_Post} `event'_X_Post`time'
-    }
-    global `event'_X_Post ${`event'_X_Post} `event'_X_Post_After84
+    eststo `var'
 }
-global eventsXreltime_dummies ${FT_LtoL_X_Post} ${FT_LtoH_X_Post} 
 
-display "${eventsXreltime_dummies}"
+coefplot ///
+    (Leave_1yr, keep(FT_LtoH) rename(FT_LtoH = "Leave 1 yr") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_2yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 2 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_3yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 3 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_4yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 4 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_5yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 5 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_6yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 6 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_7yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 7 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_8yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 8 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_9yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 9 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_10yrs, keep(FT_LtoH) rename(FT_LtoH = "Leave 10 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) ///
+    legend(off) xline(0, lpattern(dash)) ///
+    title("Without event time constraints")
 
-reghdfe LeaverPerm ${eventsXreltime_dummies} ///
-    if (Mngr_both_WL2==1 | Never_ChangeM==1) & KEi > -1 & cohort30==1 ///
-    , absorb(Office##Func##YearMonth  AgeBand##Female) vce(cluster IDlseMHR)
+graph export "${Results}/Figure3C_FT_Gains_ExitOutcomes.png", replace  
 
-    /* if KEi>-1 & WL2==1 & cohort30==1 */
 
-Exit_LH_minus_LL, event_prefix(FT) post_window_len(84)
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? regression set 2. consider time constraints
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-rename (quarter_index coefficients lower_bound upper_bound) (qi_LeaverPerm coeff_LeaverPerm lb_LeaverPerm up_LeaverPerm)
+summarize Event_Time, detail // max: 743
+global LastMonth = r(max)
 
-twoway ///
-    (scatter coeff_LeaverPerm qi_LeaverPerm, lcolor(ebblue) mcolor(ebblue)) ///
-    (rcap lb_LeaverPerm up_LeaverPerm qi_LeaverPerm, lcolor(ebblue)) ///
-    , yline(0, lcolor(maroon)) xline(0, lcolor(maroon)) ///
-    xlabel(0(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title("Exit", span pos(12)) ///
-    legend(off)
+global exit_outcomes Leave_1yr Leave_2yrs Leave_3yrs Leave_4yrs Leave_5yrs Leave_6yrs Leave_7yrs Leave_8yrs Leave_9yrs Leave_10yrs
+local i = 1
+foreach var in $exit_outcomes {
 
-graph export "${Results}/Figure3_LeaverPerm_wControls.png", replace
+    global LastPossibleEventTime = ${LastMonth} - 12 * `i'
 
-reghdfe LeaverPerm ${eventsXreltime_dummies} ///
-    if (Mngr_both_WL2==1) & KEi > -1 & cohort30==1 ///
-    , absorb(Office##Func##YearMonth  AgeBand##Female) vce(cluster IDlseMHR)
+    reghdfe `var' FT_LtoH if Event_Time <= ${LastPossibleEventTime}, absorb(Office##Func##Event_Time AgeBand##Female) vce(cluster IDlseMHR)
 
-Exit_LH_minus_LL, event_prefix(FT) post_window_len(84)
+    eststo `var'_TC
 
-rename (quarter_index coefficients lower_bound upper_bound) (qi_LeaverPerm_noC coeff_LeaverPerm_noC lb_LeaverPerm_noC up_LeaverPerm_noC)
+    local i  = `i' + 1
+}
 
-twoway ///
-    (scatter coeff_LeaverPerm_noC qi_LeaverPerm_noC, lcolor(ebblue) mcolor(ebblue)) ///
-    (rcap lb_LeaverPerm_noC up_LeaverPerm_noC qi_LeaverPerm_noC, lcolor(ebblue)) ///
-    , yline(0, lcolor(maroon)) xline(0, lcolor(maroon)) ///
-    xlabel(0(2)28) /// //ylabel(-0.05(0.05)0.2) ///
-    xtitle(Quarters since manager change) title("Exit", span pos(12)) ///
-    legend(off)
+coefplot ///
+    (Leave_1yr_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 1 yr") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_2yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 2 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_3yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 3 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_4yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 4 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_5yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 5 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_6yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 6 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_7yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 7 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_8yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 8 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_9yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 9 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    (Leave_10yrs_TC, keep(FT_LtoH) rename(FT_LtoH = "Leave 10 yrs") ciopts(lwidth(2 ..) lcolor(ebblue))) ///
+    , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) ///
+    legend(off) xline(0, lpattern(dash)) ///
+    title("With event time constraints")
 
-graph export "${Results}/Figure3_LeaverPerm_noControls.png", replace
+graph export "${Results}/Figure3C_FT_Gains_ExitOutcomes_timeconstraints.png", replace  
+
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? report the regression table
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+label variable FT_LtoH "L to H"
+global exit_outcomes Leave_1yr Leave_2yrs Leave_3yrs Leave_4yrs Leave_5yrs Leave_6yrs Leave_7yrs Leave_8yrs Leave_9yrs Leave_10yrs
+global exit_outcomes_TC Leave_1yr_TC Leave_2yrs_TC Leave_3yrs_TC Leave_4yrs_TC Leave_5yrs_TC Leave_6yrs_TC Leave_7yrs_TC Leave_8yrs_TC Leave_9yrs_TC Leave_10yrs_TC
+
+esttab $exit_outcomes using "${Results}/Figure3C_FT_Gains_ExitOutcomes.tex", ///
+    replace style(tex) fragment nocons label nofloat nobaselevels ///
+    nomtitles collabels(,none) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(FT_LtoH) ///
+    order(FT_LtoH) ///
+    b(3) se(2) ///
+    stats(r2 N, labels("R-squared" "Obs") fmt(%9.3f %9.0g)) ///
+    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccccccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Leave 1 yr} & \multicolumn{1}{c}{Leave 2 yrs} & \multicolumn{1}{c}{Leave 3 yrs} & \multicolumn{1}{c}{Leave 4 yrs} & \multicolumn{1}{c}{Leave 5 yrs} & \multicolumn{1}{c}{Leave 6 yrs} & \multicolumn{1}{c}{Leave 7 yrs} & \multicolumn{1}{c}{Leave 8 yrs} & \multicolumn{1}{c}{Leave 9 yrs} & \multicolumn{1}{c}{Leave 10 yrs} \\") ///
+    posthead("\multicolumn{11}{l}{\emph{Panel A: Without event time constraints}} \\") ///
+    prefoot("") ///
+    postfoot("\hline")
+
+
+esttab $exit_outcomes_TC using "${Results}/Figure3C_FT_Gains_ExitOutcomes.tex", ///
+    append style(tex) fragment nocons label nofloat nobaselevels ///
+    nomtitles collabels(,none) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(FT_LtoH) ///
+    order(FT_LtoH) ///
+    b(3) se(2) ///
+    stats(r2 N, labels("R-squared" "Obs") fmt(%9.3f %9.0g)) ///
+    prehead("") ///
+    posthead("\multicolumn{11}{l}{\emph{Panel B: With event time constraints}} \\") ///
+    prefoot("") ///
+    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. Sample includes only LtoL and LtoH groups. I report the regression coefficient on the dummy indicating the LtoH treatment group. The outcome variable indicates whether the worker left the firm within a given period after the manager change event. Control variables include the fixed effects of the interaction of office, function, and event time, as well as the interaction between age band and gender. Standard errors are clustered at manager level. Even time constraint means whether to keep only those workers whose outcome variable can be measured given the dataset period." "\end{tablenotes}")
 
 log close

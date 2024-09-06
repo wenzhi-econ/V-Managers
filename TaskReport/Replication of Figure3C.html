@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>1&period; Task Description</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="1-task-description">1. Task Description</h1>
+<ol>
+<li>Modify the event-study analysis on exit outcomes to a cross-sectional regression.</li>
+</ol>
+<h1 id="2-construct-outcome-variables">2. Construct Outcome Variables</h1>
+<p>The outcome variables are &quot;whether the worker left the firm within a given period of time after the event&quot;. The following are the key Stata codes that I used to construct the outcome variables. First, I identify those leavers using the variable <code>LeaverPerm</code>. Next, I identify their last time appearing in the dataset as their <code>Leave_Time</code>. Then, I construct the <code>Rel_Leave_Time</code> variable measuring the period between event time and leaving time. Finally, I am able to construct the desired outcome variables.</p>
+<pre><code>*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s1_3. time when leaving the firm
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+sort IDlse YearMonth
+
+bysort IDlse: egen Leaver = max(LeaverPerm)
+
+bysort IDlse: egen temp = max(YearMonth)
+generate Leave_Time = . 
+replace  Leave_Time = temp if Leaver == 1
+format Leave_Time %tm
+drop temp
+
+generate Rel_Leave_Time = Leave_Time - Event_Time
+
+order IDlse YearMonth LeaverPerm Leaver Leave_Time Event_Time Rel_Leave_Time
+
+label variable Leaver &quot;=1, if the worker left the firm during the dataset period&quot;
+label variable Leave_Time &quot;Time when the worker left the firm, missing if he stays during the sample period&quot;
+label variable Rel_Leave_Time &quot;Leave_Time - Event_Time&quot;
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s1_4. outcome variables
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+generate Leave_1yr   = inrange(Rel_Leave_Time, 0, 12)
+generate Leave_2yrs  = inrange(Rel_Leave_Time, 0, 24)
+generate Leave_3yrs  = inrange(Rel_Leave_Time, 0, 36)
+generate Leave_4yrs  = inrange(Rel_Leave_Time, 0, 48)
+generate Leave_5yrs  = inrange(Rel_Leave_Time, 0, 60)
+generate Leave_6yrs  = inrange(Rel_Leave_Time, 0, 72)
+generate Leave_7yrs  = inrange(Rel_Leave_Time, 0, 84)
+generate Leave_8yrs  = inrange(Rel_Leave_Time, 0, 96)
+generate Leave_9yrs  = inrange(Rel_Leave_Time, 0, 108)
+generate Leave_10yrs = inrange(Rel_Leave_Time, 0, 120)
+</code></pre>
+<h1 id="2-the-regression-i-run">2. The Regression I run</h1>
+<p>First, I make the following sample restrictions. I keep only LtoL and LtoH treatment groups (no control workers in the regression sample), and I keep only one observation for each worker (<code>keep if YearMonth == Event_Time</code>) and ensures that the I am using control variables at the time of treatment.</p>
+<pre><code>keep if (FT_LtoL==1) | (FT_LtoH==1) 
+    //&amp;&amp; keep only LtoL and LtoH groups
+keep if YearMonth == Event_Time 
+    //&amp;&amp; keep one observation for one worker, 
+    //&amp;&amp; this also ensures we are using control variables at the time of treatment
+keep if Mngr_both_WL2 == 1
+    //&amp;&amp; usual sample restriction
+</code></pre>
+<p>Second, following the original regression in the event-study, I run the following regressions, controlling for office, function, event time, age, and gender:</p>
+<pre><code>global exit_outcomes Leave_1yr Leave_2yrs Leave_3yrs Leave_4yrs Leave_5yrs Leave_6yrs Leave_7yrs Leave_8yrs Leave_9yrs Leave_10yrs
+
+foreach var in $exit_outcomes {
+    reghdfe `var' FT_LtoH, absorb(Office##Func##Event_Time AgeBand##Female) vce(cluster IDlseMHR)
+
+    eststo `var'
+}
+</code></pre>
+<p>However, one key issue is that if the event time is so late, we may not be able to observe, say, whether they left the firm within 10 years after the treatment. For example, if the event happened in 2015-12, since our latest period is 2021-12, we cannot tell if he left the firm within 10 years, but in the above method, they are classified as not.</p>
+<p>To overcome this issue, it is important to impose restrictions on the event time. Specifically, here is what I do:</p>
+<pre><code>summarize Event_Time, detail // max: 743
+global LastMonth = r(max)
+
+global exit_outcomes Leave_1yr Leave_2yrs Leave_3yrs Leave_4yrs Leave_5yrs Leave_6yrs Leave_7yrs Leave_8yrs Leave_9yrs Leave_10yrs
+local i = 1
+foreach var in $exit_outcomes {
+
+    global LastPossibleEventTime = ${LastMonth} - 12 * `i'
+
+    reghdfe `var' FT_LtoH if Event_Time &lt;= ${LastPossibleEventTime}, absorb(Office##Func##Event_Time AgeBand##Female) vce(cluster IDlseMHR)
+
+    eststo `var'_TC
+
+    local i  = `i' + 1
+}
+</code></pre>
+<p>The sample restriction condition <code>if Event_Time &lt;= ${LastPossibleEventTime}</code> matters a lot as it will decrease the sample size, and results between these two sets of regressions are different.</p>
+<h1 id="3-results">3. Results</h1>
+<p><img src="file:///e:\__RA\02MANAGERS\Paper Managers\DoFiles\TaskReport\Figure3_Summary\Figure3C_TableResults.png" alt="">
+<img src="file:///e:\__RA\02MANAGERS\Paper Managers\DoFiles\TaskReport\Figure3_Summary\Figure3C_FT_Gains_ExitOutcomes.png" alt="">
+<img src="file:///e:\__RA\02MANAGERS\Paper Managers\DoFiles\TaskReport\Figure3_Summary\Figure3C_FT_Gains_ExitOutcomes_timeconstraints.png" alt=""></p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
