@@ -90,7 +90,6 @@ label variable Rel_Time "relative date to the event, missing if the event is Nev
 summarize Rel_Time, detail // range: [-131, +130]
 
 *!! ordinary "event * relative date" dummies 
-
 local max_pre_period  = 36 
 local max_post_period = 84
 
@@ -106,7 +105,6 @@ foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
 }
 
 *!! binned absorbing "event * relative date" dummies for pre- and post-event periods 
-
 foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
     generate byte `event'_X_Pre_Before36 = `event' * (Rel_Time < -36)
 }
@@ -135,8 +133,6 @@ use "${FinalData}/temp_fig3.dta", clear
 *-? s1_5. construct global macros used in regressions 
 *-?       using different aggregation methods 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-*!! Aggregation 3 (CP): month -1 and month 0 adjusted
 *&& months -1, -2, and -3 are omitted as the reference group, so Line 127 iteration starts with 2
 *&& <-36, -36, -35, ..., -5, -4, 0, 1, 2, ...,  +83, +84, and >+84
 
