@@ -128,7 +128,7 @@ log using "${Results}/logfile_20240905_Figure5", replace text
 
 use "${FinalData}/temp_fig5.dta", clear 
 
-keep if inrange(_n, 1, 10000) 
+/* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
     // commented out when offically producing the results
 
@@ -196,10 +196,10 @@ coefplot  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
     title("Pay + bonus (logs)", size(vlarge)) ///
     graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
-    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
+    xlabel(0(0.05)0.15, labsize(vlarge)) xscale(range(0 0.15)) 
 
-graph export "${Results}/Figure5_FT_Gains_LogPayBonus.png", replace
+graph export "${Results}/Figure5A_FT_Gains_LogPayBonus.png", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? Subfigure B.  Pay (logs)
@@ -228,10 +228,10 @@ coefplot  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
     title("Pay (logs)", size(vlarge)) ///
     graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
-    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
+    xlabel(0(0.05)0.15, labsize(vlarge)) xscale(range(0 0.15)) 
 
-graph export "${Results}/Figure5_FT_Gains_LogPay.png", replace
+graph export "${Results}/Figure5B_FT_Gains_LogPay.png", replace
 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -261,10 +261,10 @@ coefplot  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
     title("Bonus (logs)", size(vlarge)) ///
     graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
-    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
+    xlabel(0(0.5)1.5, labsize(vlarge)) xscale(range(0 1.5)) 
 
-graph export "${Results}/Figure5_FT_Gains_LogBonus.png", replace
+graph export "${Results}/Figure5C_FT_Gains_LogBonus.png", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? Subfigure D. Work-level promotions
@@ -291,11 +291,11 @@ coefplot  ///
     (PromWLC, keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     (PromWLC, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
     , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
-    title("Pay + bonus (logs)", size(vlarge)) ///
+    title("Work-level promotions", size(vlarge)) ///
     graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) // ///
-    // xlabel(0(0.1)0.4, labsize(vlarge)) xscale(range(0 0.4)) /// 
+    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
+    xlabel(-0.01(0.01)0.05, labsize(vlarge)) xscale(range(0 0.05)) 
 
-graph export "${Results}/Figure5_FT_Gains_PromWLC.png", replace
+graph export "${Results}/Figure5D_FT_Gains_PromWLC.png", replace
 
 log close
