@@ -21,9 +21,9 @@ use "${FinalData}/AllSnapshotMCulture.dta", clear
 keep  IDlse YearMonth AgeBand Tenure WL Year
 order Tenure WL Year IDlse YearMonth AgeBand
 
-save "${FinalData}/temp_TwoAdditionalHFMeasure.dta", replace 
+save "${TempData}/temp_TwoAdditionalHFMeasure.dta", replace 
 
-use "${FinalData}/temp_TwoAdditionalHFMeasure.dta", clear 
+use "${TempData}/temp_TwoAdditionalHFMeasure.dta", clear 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-1. those whose exact age can be identified
