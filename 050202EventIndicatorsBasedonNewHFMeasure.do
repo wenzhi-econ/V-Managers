@@ -66,37 +66,50 @@ format Ei %tm
 
 *!! LtoH
 sort IDlse YearMonth
-generate FT_LtoH = 0 if EarlyAgeM!=.
-replace  FT_LtoH = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==1 & EarlyAgeM[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  FT_LtoH = 0 if ChangeMR ==0
+generate temp_FT_LtoH = 0 if EarlyAgeM!=.
+replace  temp_FT_LtoH = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==1 & EarlyAgeM[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_FT_LtoH = 0 if ChangeMR ==0
 
 *!! HtoL
 sort IDlse YearMonth
-generate FT_HtoL = 0 if EarlyAgeM!=.
-replace  FT_HtoL = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==0 & EarlyAgeM[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  FT_HtoL = 0 if ChangeMR ==0
+generate temp_FT_HtoL = 0 if EarlyAgeM!=.
+replace  temp_FT_HtoL = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==0 & EarlyAgeM[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_FT_HtoL = 0 if ChangeMR ==0
 
 *!! HtoH 
 sort IDlse YearMonth
-generate FT_HtoH = 0 if EarlyAgeM!=.
-replace  FT_HtoH = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==1 & EarlyAgeM[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  FT_HtoH = 0 if ChangeMR ==0
+generate temp_FT_HtoH = 0 if EarlyAgeM!=.
+replace  temp_FT_HtoH = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==1 & EarlyAgeM[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_FT_HtoH = 0 if ChangeMR ==0
 
 *!! LtoL 
 sort IDlse YearMonth
-generate FT_LtoL = 0 if EarlyAgeM!=.
-replace  FT_LtoL = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==0 & EarlyAgeM[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1] )
-replace  FT_LtoL = 0 if ChangeMR ==0
+generate temp_FT_LtoL = 0 if EarlyAgeM!=.
+replace  temp_FT_LtoL = 1 if (IDlse[_n]==IDlse[_n-1] & EarlyAgeM[_n]==0 & EarlyAgeM[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1] )
+replace  temp_FT_LtoL = 0 if ChangeMR ==0
 
 *!! four event dates
-bys IDlse: egen Calend_Time_FT_LtoH = mean(cond(FT_LtoH == 1, Ei,.)) 
-bys IDlse: egen Calend_Time_FT_HtoL = mean(cond(FT_HtoL == 1, Ei,.)) 
-bys IDlse: egen Calend_Time_FT_HtoH = mean(cond(FT_HtoH == 1, Ei,.)) 
-bys IDlse: egen Calend_Time_FT_LtoL = mean(cond(FT_LtoL == 1, Ei,.)) 
-format Calend_Time_FT_LtoH %tm
-format Calend_Time_FT_LtoL %tm
-format Calend_Time_FT_HtoH %tm
-format Calend_Time_FT_HtoL %tm
+bys IDlse: egen FT_Calend_Time_LtoH = mean(cond(temp_FT_LtoH == 1, Ei,.)) 
+bys IDlse: egen FT_Calend_Time_HtoL = mean(cond(temp_FT_HtoL == 1, Ei,.)) 
+bys IDlse: egen FT_Calend_Time_HtoH = mean(cond(temp_FT_HtoH == 1, Ei,.)) 
+bys IDlse: egen FT_Calend_Time_LtoL = mean(cond(temp_FT_LtoL == 1, Ei,.)) 
+format FT_Calend_Time_LtoH %tm
+format FT_Calend_Time_HtoL %tm
+format FT_Calend_Time_HtoH %tm
+format FT_Calend_Time_LtoL %tm
+
+*!! five event dummies: 4 types of treatment + 1 never-treated
+generate FT_LtoL = 0 
+replace  FT_LtoL = 1 if FT_Calend_Time_LtoL != .
+
+generate FT_LtoH = 0 
+replace  FT_LtoH = 1 if FT_Calend_Time_LtoH != .
+
+generate FT_HtoL = 0 
+replace  FT_HtoL = 1 if FT_Calend_Time_HtoL != .
+
+generate FT_HtoH = 0 
+replace  FT_HtoH = 1 if FT_Calend_Time_HtoH != .
 
 generate FT_Never_ChangeM = . 
 replace  FT_Never_ChangeM = 1 if FT_LtoH==0 & FT_HtoL==0 & FT_HtoH==0 & FT_LtoL==0
@@ -110,12 +123,18 @@ label variable FT_Never_ChangeM "=1, if the worker never experiences a manager c
 
 *!! relative date to the event 
 generate FT_Rel_Time = . 
-replace  FT_Rel_Time = YearMonth - Calend_Time_FT_LtoL if Calend_Time_FT_LtoL !=. 
-replace  FT_Rel_Time = YearMonth - Calend_Time_FT_LtoH if Calend_Time_FT_LtoH !=. 
-replace  FT_Rel_Time = YearMonth - Calend_Time_FT_HtoL if Calend_Time_FT_HtoL !=. 
-replace  FT_Rel_Time = YearMonth - Calend_Time_FT_HtoH if Calend_Time_FT_HtoH !=. 
+replace  FT_Rel_Time = YearMonth - FT_Calend_Time_LtoL if FT_Calend_Time_LtoL !=. 
+replace  FT_Rel_Time = YearMonth - FT_Calend_Time_LtoH if FT_Calend_Time_LtoH !=. 
+replace  FT_Rel_Time = YearMonth - FT_Calend_Time_HtoL if FT_Calend_Time_HtoL !=. 
+replace  FT_Rel_Time = YearMonth - FT_Calend_Time_HtoH if FT_Calend_Time_HtoH !=. 
 
 label variable FT_Rel_Time "relative date to event, . if event is Never_ChangeM or with unknown manager type"
+
+*!! only work level 2 managers 
+bysort IDlse: egen FT_FirstWL2M = max(cond(WLM==2 & FT_Rel_Time==-1, 1, 0))
+bysort IDlse: egen FT_LastWL2M  = max(cond(WLM==2 & FT_Rel_Time==0, 1, 0))
+generate FT_Mngr_both_WL2 = (FT_FirstWL2M ==1 & FT_LastWL2M ==1)
+label variable FT_Mngr_both_WL2 "Only works with work level 2 managers"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-2-2. Measure 2. HF2M (based on age at WL2)
@@ -123,37 +142,51 @@ label variable FT_Rel_Time "relative date to event, . if event is Never_ChangeM 
 
 *!! LtoH
 sort IDlse YearMonth
-generate HF2_LtoH = 0 if HF2M!=.
-replace  HF2_LtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==1 & HF2M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  HF2_LtoH = 0 if ChangeMR ==0
+generate temp_HF2_LtoH = 0 if HF2M!=.
+replace  temp_HF2_LtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==1 & HF2M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_HF2_LtoH = 0 if ChangeMR ==0
 
 *!! HtoL
 sort IDlse YearMonth
-generate HF2_HtoL = 0 if HF2M!=.
-replace  HF2_HtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==0 & HF2M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  HF2_HtoL = 0 if ChangeMR ==0
+generate temp_HF2_HtoL = 0 if HF2M!=.
+replace  temp_HF2_HtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==0 & HF2M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_HF2_HtoL = 0 if ChangeMR ==0
 
 *!! HtoH 
 sort IDlse YearMonth
-generate HF2_HtoH = 0 if HF2M!=.
-replace  HF2_HtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==1 & HF2M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  HF2_HtoH = 0 if ChangeMR ==0
+generate temp_HF2_HtoH = 0 if HF2M!=.
+replace  temp_HF2_HtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==1 & HF2M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_HF2_HtoH = 0 if ChangeMR ==0
 
 *!! LtoL 
 sort IDlse YearMonth
-generate HF2_LtoL = 0 if HF2M!=.
-replace  HF2_LtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==0 & HF2M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1] )
-replace  HF2_LtoL = 0 if ChangeMR ==0
+generate temp_HF2_LtoL = 0 if HF2M!=.
+replace  temp_HF2_LtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF2M[_n]==0 & HF2M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1] )
+replace  temp_HF2_LtoL = 0 if ChangeMR ==0
 
 *!! four event dates
-bys IDlse: egen HF2_Calend_Time_LtoH = mean(cond(HF2_LtoH == 1, Ei,.)) 
-bys IDlse: egen HF2_Calend_Time_HtoL = mean(cond(HF2_HtoL == 1, Ei,.)) 
-bys IDlse: egen HF2_Calend_Time_HtoH = mean(cond(HF2_HtoH == 1, Ei,.)) 
-bys IDlse: egen HF2_Calend_Time_LtoL = mean(cond(HF2_LtoL == 1, Ei,.)) 
+bys IDlse: egen HF2_Calend_Time_LtoH = mean(cond(temp_HF2_LtoH == 1, Ei,.)) 
+bys IDlse: egen HF2_Calend_Time_HtoL = mean(cond(temp_HF2_HtoL == 1, Ei,.)) 
+bys IDlse: egen HF2_Calend_Time_HtoH = mean(cond(temp_HF2_HtoH == 1, Ei,.)) 
+bys IDlse: egen HF2_Calend_Time_LtoL = mean(cond(temp_HF2_LtoL == 1, Ei,.)) 
 format HF2_Calend_Time_LtoH %tm
 format HF2_Calend_Time_HtoL %tm
 format HF2_Calend_Time_HtoH %tm
 format HF2_Calend_Time_LtoL %tm
+
+
+*!! five event dummies: 4 types of treatment + 1 never-treated
+generate HF2_LtoL = 0 
+replace  HF2_LtoL = 1 if HF2_Calend_Time_LtoL != .
+
+generate HF2_LtoH = 0 
+replace  HF2_LtoH = 1 if HF2_Calend_Time_LtoH != .
+
+generate HF2_HtoL = 0 
+replace  HF2_HtoL = 1 if HF2_Calend_Time_HtoL != .
+
+generate HF2_HtoH = 0 
+replace  HF2_HtoH = 1 if HF2_Calend_Time_HtoH != .
 
 generate HF2_Never_ChangeM = . 
 replace  HF2_Never_ChangeM = 1 if HF2_LtoH==0 & HF2_HtoL==0 & HF2_HtoH==0 & HF2_LtoL==0
@@ -186,37 +219,50 @@ label variable HF2_Mngr_both_WL2 "Only works with work level 2 managers"
 
 *!! LtoH
 sort IDlse YearMonth
-generate HF3_LtoH = 0 if HF3M!=.
-replace  HF3_LtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==1 & HF3M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  HF3_LtoH = 0 if ChangeMR ==0
+generate temp_HF3_LtoH = 0 if HF3M!=.
+replace  temp_HF3_LtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==1 & HF3M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_HF3_LtoH = 0 if ChangeMR ==0
 
 *!! HtoL
 sort IDlse YearMonth
-generate HF3_HtoL = 0 if HF3M!=.
-replace  HF3_HtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==0 & HF3M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  HF3_HtoL = 0 if ChangeMR ==0
+generate temp_HF3_HtoL = 0 if HF3M!=.
+replace  temp_HF3_HtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==0 & HF3M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_HF3_HtoL = 0 if ChangeMR ==0
 
 *!! HtoH 
 sort IDlse YearMonth
-generate HF3_HtoH = 0 if HF3M!=.
-replace  HF3_HtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==1 & HF3M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
-replace  HF3_HtoH = 0 if ChangeMR ==0
+generate temp_HF3_HtoH = 0 if HF3M!=.
+replace  temp_HF3_HtoH = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==1 & HF3M[_n-1]==1 & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  temp_HF3_HtoH = 0 if ChangeMR ==0
 
 *!! LtoL 
 sort IDlse YearMonth
-generate HF3_LtoL = 0 if HF3M!=.
-replace  HF3_LtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==0 & HF3M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1] )
-replace  HF3_LtoL = 0 if ChangeMR ==0
+generate temp_HF3_LtoL = 0 if HF3M!=.
+replace  temp_HF3_LtoL = 1 if (IDlse[_n]==IDlse[_n-1] & HF3M[_n]==0 & HF3M[_n-1]==0 & IDlseMHR[_n]!=IDlseMHR[_n-1] )
+replace  temp_HF3_LtoL = 0 if ChangeMR ==0
 
 *!! four event dates
-bys IDlse: egen HF3_Calend_Time_LtoH = mean(cond(HF3_LtoH == 1, Ei,.)) 
-bys IDlse: egen HF3_Calend_Time_HtoL = mean(cond(HF3_HtoL == 1, Ei,.)) 
-bys IDlse: egen HF3_Calend_Time_HtoH = mean(cond(HF3_HtoH == 1, Ei,.)) 
-bys IDlse: egen HF3_Calend_Time_LtoL = mean(cond(HF3_LtoL == 1, Ei,.)) 
+bys IDlse: egen HF3_Calend_Time_LtoH = mean(cond(temp_HF3_LtoH == 1, Ei,.)) 
+bys IDlse: egen HF3_Calend_Time_HtoL = mean(cond(temp_HF3_HtoL == 1, Ei,.)) 
+bys IDlse: egen HF3_Calend_Time_HtoH = mean(cond(temp_HF3_HtoH == 1, Ei,.)) 
+bys IDlse: egen HF3_Calend_Time_LtoL = mean(cond(temp_HF3_LtoL == 1, Ei,.)) 
 format HF3_Calend_Time_LtoH %tm
 format HF3_Calend_Time_HtoL %tm
 format HF3_Calend_Time_HtoH %tm
 format HF3_Calend_Time_LtoL %tm
+
+*!! five event dummies: 4 types of treatment + 1 never-treated
+generate HF3_LtoL = 0 
+replace  HF3_LtoL = 1 if HF3_Calend_Time_LtoL != .
+
+generate HF3_LtoH = 0 
+replace  HF3_LtoH = 1 if HF3_Calend_Time_LtoH != .
+
+generate HF3_HtoL = 0 
+replace  HF3_HtoL = 1 if HF3_Calend_Time_HtoL != .
+
+generate HF3_HtoH = 0 
+replace  HF3_HtoH = 1 if HF3_Calend_Time_HtoH != .
 
 generate HF3_Never_ChangeM = . 
 replace  HF3_Never_ChangeM = 1 if HF3_LtoH==0 & HF3_HtoL==0 & HF3_HtoH==0 & HF3_LtoL==0
@@ -247,12 +293,40 @@ label variable HF3_Mngr_both_WL2 "Only works with work level 2 managers"
 *?? step 3. construct "event * relative date" dummies
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-summarize FT_Rel_Time, detail  // range: [-131, +130]
-summarize HF2_Rel_Time, detail // range: [-131, +130]
-summarize HF3_Rel_Time, detail // range: [-113, +130]
+summarize FT_Rel_Time,  detail  // range: [-131, +130]
+summarize HF2_Rel_Time, detail  // range: [-131, +130]
+summarize HF3_Rel_Time, detail  // range: [-113, +130]
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-3-1. dummies for HF2
+*-? s-3-2. dummies for FT
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+*!! ordinary "event * relative date" dummies 
+local max_pre_period  = 36 
+local max_post_period = 84
+
+foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
+    forvalues time = 1/`max_pre_period' {
+        generate byte `event'_X_Pre`time' = `event' * (FT_Rel_Time == -`time')
+    }
+}
+foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
+    forvalues time = 0/`max_post_period' {
+        generate byte `event'_X_Post`time' = `event' * (FT_Rel_Time == `time')
+    }
+}
+
+*!! binned absorbing "event * relative date" dummies for pre- and post-event periods 
+foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
+    generate byte `event'_X_Pre_Before36 = `event' * (FT_Rel_Time < -36)
+}
+
+foreach event in FT_LtoL FT_LtoH FT_HtoL FT_HtoH {
+    generate byte `event'_X_Post_After84 = `event' * (FT_Rel_Time > 84)
+}
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-3-2. dummies for HF2
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 *!! ordinary "event * relative date" dummies 
@@ -280,7 +354,7 @@ foreach event in HF2_LtoL HF2_LtoH HF2_HtoL HF2_HtoH {
 }
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-3-2. dummies for HF3
+*-? s-3-3. dummies for HF3
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 *!! ordinary "event * relative date" dummies 
