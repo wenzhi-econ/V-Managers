@@ -99,7 +99,7 @@ display "${four_events_dummies}"
 
 foreach var in TransferSJC TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC {
     reghdfe `var' ${four_events_dummies} ///
-        if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+        if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
         , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
     
     *&& Quarter 8th estimate = the average of Month 22, Month 23, and Month 24 estimates
@@ -119,6 +119,6 @@ coefplot ///
     graphregion(margin(medium)) plotregion(margin(medium)) ///
     title("Effects of gaining a high-flyer manager")
 
-graph export "${Results}/FT_Gains_DecompTransferSJC.png", replace  
+graph export "${Results}/FT_Gains_DecompTransferSJC_OneQuarterEstimate.png", replace  
 
 log close

@@ -12,7 +12,7 @@ log using "${Results}/logfile_20240917_TransferOutcomes", replace text
 
 use "${TempData}/temp_MainOutcomesInEventStudies.dta", clear 
 
-/* keep if inrange(_n, 1, 10000)  */
+/* keep if inrange(_n, 1, 100000)  */
     // used to test the codes
     // commented out when offically producing the results
 
@@ -64,7 +64,7 @@ display "${four_events_dummies}"
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 reghdfe TransferSJVC ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -86,7 +86,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Lateral move", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_TransferSJVC})
 
-graph export "${Results}/FT_Gains_TransferSJVC.png", replace
+graph export "${Results}/FT_Gains_TransferSJVC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-1-2. Losing a HF manager
@@ -107,7 +107,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Lateral move", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_TransferSJVC})
 
-graph export "${Results}/FT_Loss_TransferSJVC.png", replace
+graph export "${Results}/FT_Loss_TransferSJVC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-1-3. Testing for asymmetries
@@ -133,14 +133,14 @@ twoway ///
     xtitle(Quarters since manager change) title("Lateral move", span pos(12)) ///
     legend(off) note("Pre-trends joint p-value = ${pretrend_TransferSJVC}" "Post coeffs. joint p-value = ${postevent_TransferSJVC}")
 
-graph export "${Results}/FT_GainsMinusLoss_TransferSJVC.png", replace
+graph export "${Results}/FT_GainsMinusLoss_TransferSJVC_AllEstimates.png", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? Outcome 2. Cross-functional Transfers
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 reghdfe TransferFuncC ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -162,7 +162,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Lateral move, function", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_TransferFuncC})
 
-graph export "${Results}/FT_Gains_TransferFuncC.png", replace
+graph export "${Results}/FT_Gains_TransferFuncC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-2-2. Losing a HF manager
@@ -183,7 +183,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Lateral move, function", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_TransferFuncC})
 
-graph export "${Results}/FT_Loss_TransferFuncC.png", replace
+graph export "${Results}/FT_Loss_TransferFuncC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-2-3. Testing for asymmetries
@@ -209,14 +209,14 @@ twoway ///
     xtitle(Quarters since manager change) title("Lateral move, function", span pos(12)) ///
     legend(off) note("Pre-trends joint p-value = ${pretrend_TransferFuncC}" "Post coeffs. joint p-value = ${postevent_TransferFuncC}")
 
-graph export "${Results}/FT_GainsMinusLoss_TransferFuncC.png", replace
+graph export "${Results}/FT_GainsMinusLoss_TransferFuncC_AllEstimates.png", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? Outcome 3. Work-level promotions
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 reghdfe PromWLC ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -238,7 +238,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Work-level promotions", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_PromWLC})
 
-graph export "${Results}/FT_Gains_PromWLC.png", replace
+graph export "${Results}/FT_Gains_PromWLC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-3-2. Losing a HF manager
@@ -259,7 +259,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Work-level promotions", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_PromWLC})
 
-graph export "${Results}/FT_Loss_PromWLC.png", replace
+graph export "${Results}/FT_Loss_PromWLC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-3-3. Testing for asymmetries
@@ -285,14 +285,14 @@ twoway ///
     xtitle(Quarters since manager change) title("Work-level promotions", span pos(12)) ///
     legend(off) note("Pre-trends joint p-value = ${pretrend_PromWLC}" "Post coeffs. joint p-value = ${postevent_PromWLC}")
 
-graph export "${Results}/FT_GainsMinusLoss_PromWLC.png", replace
+graph export "${Results}/FT_GainsMinusLoss_PromWLC_AllEstimates.png", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? Outcome 4.  Salary grade
+*?? Outcome 4. Salary grade
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 reghdfe ChangeSalaryGradeC ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -314,7 +314,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Salary grade increase", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_ChangeSalaryGradeC})
 
-graph export "${Results}/FT_Gains_ChangeSalaryGradeC.png", replace
+graph export "${Results}/FT_Gains_ChangeSalaryGradeC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-4-2. Losing a HF manager
@@ -335,7 +335,7 @@ twoway ///
     xtitle(Quarters since manager change) title("Salary grade increase", span pos(12)) ///
     legend(off) note(Pre-trends joint p-value = ${pretrend_ChangeSalaryGradeC})
 
-graph export "${Results}/FT_Loss_ChangeSalaryGradeC.png", replace
+graph export "${Results}/FT_Loss_ChangeSalaryGradeC_AllEstimates.png", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? O-4-3. Testing for asymmetries
@@ -361,6 +361,6 @@ twoway ///
     xtitle(Quarters since manager change) title("Salary grade increase", span pos(12)) ///
     legend(off) note("Pre-trends joint p-value = ${pretrend_ChangeSalaryGradeC}" "Post coeffs. joint p-value = ${postevent_ChangeSalaryGradeC}")
 
-graph export "${Results}/FT_GainsMinusLoss_ChangeSalaryGradeC.png", replace
+graph export "${Results}/FT_GainsMinusLoss_ChangeSalaryGradeC_AllEstimates.png", replace
 
 log close

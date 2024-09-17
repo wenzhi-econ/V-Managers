@@ -66,7 +66,7 @@ display "${four_events_dummies}"
 eststo clear 
 
 reghdfe LogPayBonus ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
@@ -91,14 +91,14 @@ coefplot  ///
     xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
     xlabel(0(0.05)0.15, labsize(vlarge)) xscale(range(0 0.15)) 
 
-graph export "${Results}/FT_Gains_LogPayBonus.png", replace
+graph export "${Results}/FT_Gains_LogPayBonus_ThreeQuarterEstimates.png", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? Subfigure B.  Pay (logs)
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 reghdfe LogPay ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
@@ -123,7 +123,7 @@ coefplot  ///
     xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
     xlabel(0(0.05)0.15, labsize(vlarge)) xscale(range(0 0.15)) 
 
-graph export "${Results}/FT_Gains_LogPay.png", replace
+graph export "${Results}/FT_Gains_LogPay_ThreeQuarterEstimates.png", replace
 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -131,7 +131,7 @@ graph export "${Results}/FT_Gains_LogPay.png", replace
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 reghdfe LogBonus ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
@@ -156,14 +156,14 @@ coefplot  ///
     xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
     xlabel(0(0.5)1.5, labsize(vlarge)) xscale(range(0 1.5)) 
 
-graph export "${Results}/FT_Gains_LogBonus.png", replace
+graph export "${Results}/FT_Gains_LogBonus_ThreeQuarterEstimates.png", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? Subfigure D. Work-level promotions
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 reghdfe PromWLC ${four_events_dummies} ///
-    if ((Mngr_both_WL2==1) | (Never_ChangeM==1)) ///
+    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
     , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
 *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
@@ -188,6 +188,6 @@ coefplot  ///
     xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
     xlabel(-0.01(0.01)0.05, labsize(vlarge)) xscale(range(0 0.05)) 
 
-graph export "${Results}/FT_Gains_PromWLC.png", replace
+graph export "${Results}/FT_Gains_PromWLC_ThreeQuarterEstimates.png", replace
 
 log close
