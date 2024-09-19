@@ -22,32 +22,42 @@ use "${TempData}/temp_MainOutcomesInEventStudies.dta", clear
 *&& Months -1, -2, and -3 are omitted as the reference group, so in Lines 30 and 42, iteration ends with 4.
 *&& <-36, -36, -35, ..., -5, -4, 0, 1, 2, ...,  +83, +84, and >+84
 
+capture macro drop FT_LtoL_X_Pre
+capture macro drop FT_LtoL_X_Post
+capture macro drop FT_LtoH_X_Pre
+capture macro drop FT_LtoH_X_Post
+capture macro drop FT_HtoH_X_Pre
+capture macro drop FT_HtoH_X_Post
+capture macro drop FT_HtoL_X_Pre
+capture macro drop FT_HtoL_X_Post
+
 local max_pre_period  = 36 
-local max_post_period = 84
+local Lto_max_post_period = 84
+local Hto_max_post_period = 60
 
 foreach event in FT_LtoL FT_LtoH {
-    global `event'_X_Pre `event'_X_Pre_Before36
+    global `event'_X_Pre `event'_X_Pre_Before`max_pre_period'
     forvalues time = `max_pre_period'(-1)4 {
         global `event'_X_Pre ${`event'_X_Pre} `event'_X_Pre`time'
     }
 }
 foreach event in FT_LtoL FT_LtoH {
-    forvalues time = 0/`max_post_period' {
+    forvalues time = 0/`Lto_max_post_period' {
         global `event'_X_Post ${`event'_X_Post} `event'_X_Post`time'
     }
-    global `event'_X_Post ${`event'_X_Post} `event'_X_Post_After84
+    global `event'_X_Post ${`event'_X_Post} `event'_X_Post_After`Lto_max_post_period'
 }
 foreach event in FT_HtoH FT_HtoL {
-    global `event'_X_Pre `event'_X_Pre_Before36
+    global `event'_X_Pre `event'_X_Pre_Before`max_pre_period'
     forvalues time = `max_pre_period'(-1)4 {
         global `event'_X_Pre ${`event'_X_Pre} `event'_X_Pre`time'
     }
 }
 foreach event in FT_HtoH FT_HtoL {
-    forvalues time = 0/`max_post_period' {
+    forvalues time = 0/`Hto_max_post_period' {
         global `event'_X_Post ${`event'_X_Post} `event'_X_Post`time'
     }
-    global `event'_X_Post ${`event'_X_Post} `event'_X_Post_After84
+    global `event'_X_Post ${`event'_X_Post} `event'_X_Post_After`Hto_max_post_period'
 }
 
 global four_events_dummies ${FT_LtoL_X_Pre} ${FT_LtoL_X_Post} ${FT_LtoH_X_Pre} ${FT_LtoH_X_Post} ${FT_HtoH_X_Pre} ${FT_HtoH_X_Post} ${FT_HtoL_X_Pre} ${FT_HtoL_X_Post}
@@ -56,138 +66,61 @@ display "${four_events_dummies}"
 
     // FT_LtoL_X_Pre_Before36 FT_LtoL_X_Pre36 ... FT_LtoL_X_Pre4 FT_LtoL_X_Post0 FT_LtoL_X_Post1 ... FT_LtoL_X_Post84 FT_LtoL_X_Pre_After84 
     // FT_LtoH_X_Pre_Before36 FT_LtoH_X_Pre36 ... FT_LtoH_X_Pre4 FT_LtoH_X_Post0 FT_LtoH_X_Post1 ... FT_LtoH_X_Post84 FT_LtoH_X_Pre_After84 
-    // FT_HtoH_X_Pre_Before36 FT_HtoH_X_Pre36 ... FT_HtoH_X_Pre4 FT_HtoH_X_Post0 FT_HtoH_X_Post1 ... FT_HtoH_X_Post84 FT_HtoH_X_Pre_After84 
-    // FT_HtoL_X_Pre_Before36 FT_HtoL_X_Pre36 ... FT_HtoL_X_Pre4 FT_HtoL_X_Post0 FT_HtoL_X_Post1 ... FT_HtoL_X_Post84 FT_HtoL_X_Pre_After84 
+    // FT_HtoH_X_Pre_Before36 FT_HtoH_X_Pre36 ... FT_HtoH_X_Pre4 FT_HtoH_X_Post0 FT_HtoH_X_Post1 ... FT_HtoH_X_Post60 FT_HtoH_X_Pre_After60 
+    // FT_HtoL_X_Pre_Before36 FT_HtoL_X_Pre36 ... FT_HtoL_X_Pre4 FT_HtoL_X_Post0 FT_HtoL_X_Post1 ... FT_HtoL_X_Post60 FT_HtoL_X_Pre_After60 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? Subfigure A. Pay + bonus (logs)
+*?? step 1. run regressions and present quarterly coefficients 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-eststo clear 
+foreach var in LogPayBonus LogPay LogBonus PromWLC {
 
-reghdfe LogPayBonus ${four_events_dummies} ///
-    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
-    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+    if "`var'" == "LogPayBonus" global title "Pay + bonus (logs)"
+    if "`var'" == "LogPay"      global title "Pay (logs)"
+    if "`var'" == "LogBonus"    global title "Bonus (logs)"
+    if "`var'" == "PromWLC"     global title "Work-level promotions"
 
-*&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
-*&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
-*&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
-
-xlincom ///
-    (((FT_LtoH_X_Post34 - FT_LtoL_X_Post34) + (FT_LtoH_X_Post35 - FT_LtoL_X_Post35) + (FT_LtoH_X_Post36 - FT_LtoL_X_Post36))/3) ///
-    (((FT_LtoH_X_Post58 - FT_LtoL_X_Post58) + (FT_LtoH_X_Post59 - FT_LtoL_X_Post59) + (FT_LtoH_X_Post60 - FT_LtoL_X_Post60))/3) ///
-    (((FT_LtoH_X_Post82 - FT_LtoL_X_Post82) + (FT_LtoH_X_Post83 - FT_LtoL_X_Post83) + (FT_LtoH_X_Post84 - FT_LtoL_X_Post84))/3) ///
-    , level(95) post
-
-eststo LogPayBonus
-
-coefplot  ///
-    (LogPayBonus, keep(lc_1) rename(lc_1 = "12 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (LogPayBonus, keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (LogPayBonus, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
-    title("Pay + bonus (logs)", size(vlarge)) ///
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
-    xlabel(0(0.05)0.15, labsize(vlarge)) xscale(range(0 0.15)) 
-
-graph export "${Results}/FT_Gains_LogPayBonus_ThreeQuarterEstimates.png", replace
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? Subfigure B.  Pay (logs)
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-
-reghdfe LogPay ${four_events_dummies} ///
-    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
-    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
-
-*&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
-*&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
-*&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
-
-xlincom ///
-    (((FT_LtoH_X_Post34 - FT_LtoL_X_Post34) + (FT_LtoH_X_Post35 - FT_LtoL_X_Post35) + (FT_LtoH_X_Post36 - FT_LtoL_X_Post36))/3) ///
-    (((FT_LtoH_X_Post58 - FT_LtoL_X_Post58) + (FT_LtoH_X_Post59 - FT_LtoL_X_Post59) + (FT_LtoH_X_Post60 - FT_LtoL_X_Post60))/3) ///
-    (((FT_LtoH_X_Post82 - FT_LtoL_X_Post82) + (FT_LtoH_X_Post83 - FT_LtoL_X_Post83) + (FT_LtoH_X_Post84 - FT_LtoL_X_Post84))/3) ///
-    , level(95) post
-
-eststo LogPay
-
-coefplot  ///
-    (LogPay, keep(lc_1) rename(lc_1 = "12 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (LogPay, keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (LogPay, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
-    title("Pay (logs)", size(vlarge)) ///
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
-    xlabel(0(0.05)0.15, labsize(vlarge)) xscale(range(0 0.15)) 
-
-graph export "${Results}/FT_Gains_LogPay_ThreeQuarterEstimates.png", replace
+    if "`var'" == "PromWLC" {
+        global yaxis_setup "ylabel(-0.01(0.01)0.05) yscale(range(-0.01 0.05))"
+    } 
+    else if "`var'" == "LogBonus" {
+        global yaxis_setup "ylabel(0(0.5)1.5) yscale(range(0 1.5))"
+    }
+    else {
+        global yaxis_setup "ylabel(0(0.05)0.15) yscale(range(0 0.15))"
+    }
 
 
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? Subfigure C. Bonus (logs)
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+    reghdfe `var' ${four_events_dummies} ///
+        if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
+        , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
 
-reghdfe LogBonus ${four_events_dummies} ///
-    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
-    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+    *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
+    *&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
+    *&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
 
-*&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
-*&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
-*&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
+    xlincom ///
+        (((FT_LtoH_X_Post34 - FT_LtoL_X_Post34) + (FT_LtoH_X_Post35 - FT_LtoL_X_Post35) + (FT_LtoH_X_Post36 - FT_LtoL_X_Post36))/3) ///
+        (((FT_LtoH_X_Post58 - FT_LtoL_X_Post58) + (FT_LtoH_X_Post59 - FT_LtoL_X_Post59) + (FT_LtoH_X_Post60 - FT_LtoL_X_Post60))/3) ///
+        (((FT_LtoH_X_Post82 - FT_LtoL_X_Post82) + (FT_LtoH_X_Post83 - FT_LtoL_X_Post83) + (FT_LtoH_X_Post84 - FT_LtoL_X_Post84))/3) ///
+        , level(95) post
 
-xlincom ///
-    (((FT_LtoH_X_Post34 - FT_LtoL_X_Post34) + (FT_LtoH_X_Post35 - FT_LtoL_X_Post35) + (FT_LtoH_X_Post36 - FT_LtoL_X_Post36))/3) ///
-    (((FT_LtoH_X_Post58 - FT_LtoL_X_Post58) + (FT_LtoH_X_Post59 - FT_LtoL_X_Post59) + (FT_LtoH_X_Post60 - FT_LtoL_X_Post60))/3) ///
-    (((FT_LtoH_X_Post82 - FT_LtoL_X_Post82) + (FT_LtoH_X_Post83 - FT_LtoL_X_Post83) + (FT_LtoH_X_Post84 - FT_LtoL_X_Post84))/3) ///
-    , level(95) post
+    eststo `var'
 
-eststo LogBonus
+    coefplot  ///
+        (`var', keep(lc_1) rename(lc_1 = "12 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
+        (`var', keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
+        (`var', keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
+        , ciopts(lwidth(2 ..)) levels(95) vertical legend(off) ///
+        graphregion(margin(medium)) plotregion(margin(medium)) ///
+        msymbol(d) mcolor(white) ///
+        title("${title}", size(vlarge)) ///
+        yline(0, lpattern(dash)) ///
+        xlabel(, labsize(vlarge)) ///
+        ${yaxis_setup}
 
-coefplot  ///
-    (LogBonus, keep(lc_1) rename(lc_1 = "12 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (LogBonus, keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (LogBonus, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
-    title("Bonus (logs)", size(vlarge)) ///
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
-    xlabel(0(0.5)1.5, labsize(vlarge)) xscale(range(0 1.5)) 
+    graph save "${Results}/FT_Gains_ThreeQuarterEstimates_`var'.gph", replace
+}
 
-graph export "${Results}/FT_Gains_LogBonus_ThreeQuarterEstimates.png", replace
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? Subfigure D. Work-level promotions
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-
-reghdfe PromWLC ${four_events_dummies} ///
-    if ((FT_Mngr_both_WL2==1 & FT_Never_ChangeM==0) | (FT_Never_ChangeM==1)) ///
-    , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
-
-*&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
-*&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
-*&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
-
-xlincom ///
-    (((FT_LtoH_X_Post34 - FT_LtoL_X_Post34) + (FT_LtoH_X_Post35 - FT_LtoL_X_Post35) + (FT_LtoH_X_Post36 - FT_LtoL_X_Post36))/3) ///
-    (((FT_LtoH_X_Post58 - FT_LtoL_X_Post58) + (FT_LtoH_X_Post59 - FT_LtoL_X_Post59) + (FT_LtoH_X_Post60 - FT_LtoL_X_Post60))/3) ///
-    (((FT_LtoH_X_Post82 - FT_LtoL_X_Post82) + (FT_LtoH_X_Post83 - FT_LtoL_X_Post83) + (FT_LtoH_X_Post84 - FT_LtoL_X_Post84))/3) ///
-    , level(95) post
-
-eststo PromWLC
-
-coefplot  ///
-    (PromWLC, keep(lc_1) rename(lc_1 = "12 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (PromWLC, keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    (PromWLC, keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-    , ciopts(lwidth(2 ..)) levels(95) msymbol(d) mcolor(white) legend(off)  ///
-    title("Work-level promotions", size(vlarge)) ///
-    graphregion(margin(medium)) plotregion(margin(medium)) xsize(5) ysize(2) ///
-    xline(0, lpattern(dash)) ylabel(, labsize(vlarge)) xlabel(, labsize(vlarge)) ///
-    xlabel(-0.01(0.01)0.05, labsize(vlarge)) xscale(range(0 0.05)) 
-
-graph export "${Results}/FT_Gains_PromWLC_ThreeQuarterEstimates.png", replace
 
 log close
