@@ -173,9 +173,9 @@ program def postevent_Double_Diff, rclass
 
 syntax , event_prefix(string) [POST_window_len(integer 84)]
 
-local jointL "`event_prefix'_LtoH_X_Post_After`post_window_len' - `event_prefix'_LtoL_X_Post_After`post_window_len' - `event_prefix'_HtoL_X_Post_After`post_window_len' + `event_prefix'_HtoH_X_Post_After`post_window_len'" 
+local jointL "`event_prefix'_LtoH_X_Post0 - `event_prefix'_LtoL_X_Post0 - `event_prefix'_HtoL_X_Post0 + `event_prefix'_HtoH_X_Post0"
 
-forval t = 0(1)`post_window_len' {
+forval t = 1(1)`post_window_len' {
 	local jointL "`jointL' + `event_prefix'_LtoH_X_Post`t' - `event_prefix'_LtoL_X_Post`t' - `event_prefix'_HtoL_X_Post`t' + `event_prefix'_HtoH_X_Post`t'"
 }
 

@@ -1,10 +1,16 @@
 /* 
-This do file replicates Figure V in the paper. 
+This do file aims to replicate Figure V in the paper (June 14, 2024 version).
+The four outcome variables of interest are:
+    LogPayBonus LogPay LogBonus PromWLC
 
-Commands are mainly copied from "2.4 Event Study NoLoops.do" file.
+Input: 
+    "${TempData}/temp_MainOutcomesInEventStudies.dta"
+
+Output:
+    4 coefficient plots (4 outcome variables, 1 figure for each outcome variable)
 
 RA: WWZ 
-Time: 2024-09-05
+Time: 2024-09-19
 */
 
 capture log close

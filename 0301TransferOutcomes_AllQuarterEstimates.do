@@ -5,6 +5,15 @@ The four outcome variables of interest are:
     TransferFuncC -- cross-functional transfers
     PromWLC -- vertical moves
     ChangeSalaryGradeC -- salary grade increase
+
+Input: 
+    "${TempData}/temp_MainOutcomesInEventStudies.dta"
+
+Output:
+    12 coefficient plots (4 outcome variables, 3 figures for each outcome variable)
+
+RA: WWZ 
+Time: 2024-09-19
 */
 
 capture log close
@@ -12,7 +21,7 @@ log using "${Results}/logfile_20240919_TransferOutcomes", replace text
 
 use "${TempData}/temp_MainOutcomesInEventStudies.dta", clear 
 
-keep if inrange(_n, 1, 10000) 
+/* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
     // commented out when offically producing the results
 
