@@ -79,17 +79,13 @@ display "${four_events_dummies}"
 *?? step 1. run regressions and present quarterly coefficients 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-foreach var in LogPayBonus LogPay LogBonus PromWLC {
+foreach var in LogPayBonus LogPay LogBonus {
 
     if "`var'" == "LogPayBonus" global title "Pay + bonus (logs)"
     if "`var'" == "LogPay"      global title "Pay (logs)"
     if "`var'" == "LogBonus"    global title "Bonus (logs)"
-    if "`var'" == "PromWLC"     global title "Work-level promotions"
 
-    if "`var'" == "PromWLC" {
-        global yaxis_setup "ylabel(-0.01(0.01)0.05) yscale(range(-0.01 0.05))"
-    } 
-    else if "`var'" == "LogBonus" {
+    if "`var'" == "LogBonus" {
         global yaxis_setup "ylabel(0(0.5)1.5) yscale(range(0 1.5))"
     }
     else {
