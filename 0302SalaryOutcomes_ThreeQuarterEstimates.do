@@ -14,7 +14,7 @@ Time: 2024-09-19
 */
 
 capture log close
-log using "${Results}/logfile_20240917_SalaryOutcomes", replace text
+log using "${Results}/logfile_20240920_SalaryOutcomes", replace text
 
 use "${TempData}/temp_MainOutcomesInEventStudies.dta", clear 
 
