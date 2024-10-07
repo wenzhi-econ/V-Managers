@@ -5,7 +5,6 @@
 clear all
 set more off
 
-set matsize 11000
 set maxvar 32767
 set varabbrev off
 
@@ -18,7 +17,16 @@ if	"`c(username)'" == "wang" {
 }
 
 if	"`c(username)'" == "wenzhi0" {
-    global user "C:/zMyFiles/RA/02MANAGERS"
+    global user "/home/wenzhi0/JMP"
+    ssc install grstyle, replace
+    ssc install palettes, replace
+    ssc install colrspace, replace
+    ssc install schemepack, replace
+    ssc install ftools, replace
+    ssc install reghdfe, replace
+    ssc install xlincom, replace
+    ssc install coefplot, replace
+    ssc install estout, replace
 }
 
 if  "`c(username)'" =="virginiaminni" {
@@ -40,6 +48,7 @@ global Results      "${user}/Paper Managers/Results"
 global FinalData    "${user}/Paper Managers/Data"
 global RawMNEData   "${user}/Paper Managers/Data/01RawData/01MNEData"
 global RawONETData  "${user}/Paper Managers/Data/01RawData/02ONET"
+global RawCntyData  "${user}/Paper Managers/Data/01RawData/03Country"
 global TempData     "${user}/Paper Managers/Data/02TempData"
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -71,14 +80,27 @@ grstyle set plain, horizontal grid
 version 17.0
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? necessary programs 
+*?? main programs 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-/* do "${DoFiles}/0002CoefPrograms.do" */
-/* do "${DoFiles}/0101Managers.do" */
-/* do "${DoFiles}/0102Workers.do" */
-/* do "${DoFiles}/0103Events.do" */
-/* do "${DoFiles}/0201Figure3.do" */
 
-/* do "${DoFiles}/0003TestPrograms.do" */
-/* do "${DoFiles}/0301Figure3.do" */
+*-? Programs Used in Event Studies
+/* do "${DoFiles}/0201CoefPrograms_LHminusLL.do" 
+do "${DoFiles}/0202CoefPrograms_HLminusHH.do"
+do "${DoFiles}/0203CoefPrograms_Dual_TestingforAsymmetries.do" */
+
+/* *-? Event Studies
+do "${DoFiles}/0300DataPreparationforMainOutcomesInEventStudies.do"
+do "${DoFiles}/0301TransferOutcomes_AllQuarterEstimates.do"
+do "${DoFiles}/0302SalaryOutcomes_ThreeQuarterEstimates.do"
+
+*-? Event Studies with a Random Control Sample 
+do "${DoFiles}/050301EventStudies_RandomSample.do"
+
+*-? Event Studies with Control Workers who Have Low-Level Managers
+do "${DoFiles}/050302EventStudies_ControlWorkersWithWL2Mngr.do"
+
+*-? Event Studies without Control Workers
+do "${DoFiles}/050303EventStudies_WithoutControlWorkers.do" */
+
+*-? Event Studies with Two HF Measures
 

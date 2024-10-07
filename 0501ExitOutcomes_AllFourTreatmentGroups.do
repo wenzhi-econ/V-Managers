@@ -164,37 +164,6 @@ foreach var in $exit_outcomes {
 
     global LastPossibleEventTime = ${LastMonth} - 12 * `i'
 
-    reghdfe `var' FT_LtoL FT_LtoH FT_HtoH FT_HtoL if FT_Event_Time<=${LastPossibleEventTime} | FT_Never_ChangeM==1, vce(cluster IDlseMHR) absorb(Office##Func AgeBand##Female)
-        eststo `var'
-        test FT_LtoL = FT_LtoH
-            local p_Lto = r(p)
-            estadd scalar p_Lto = `p_Lto'
-        test FT_HtoH = FT_HtoL
-            local p_Hto = r(p)
-            estadd scalar p_Hto = `p_Hto'
-
-    local i  = `i' + 1
-}
-
-esttab $exit_outcomes using "${Results}/ExitOutcomes_AllGroups.tex", ///
-    replace style(tex) fragment nocons label nofloat nobaselevels nonumbers ///
-    nomtitles collabels(,none) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(FT_LtoL FT_LtoH FT_HtoH FT_HtoL) ///
-    order(FT_LtoL FT_LtoH FT_HtoH FT_HtoL) ///
-    b(3) se(2) ///
-    stats(p_values p_Lto p_Hto r2 N, labels("\hline p-values" "LtoL = LtoH" "HtoH = HtoL" "\hline R-squared" "Obs") fmt(%9.0g %9.3f %9.3f %9.3f %9.0g)) ///
-    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccccccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Leave 1yr} & \multicolumn{1}{c}{Leave 2yrs}  & \multicolumn{1}{c}{Leave 3yrs}  & \multicolumn{1}{c}{Leave 4yrs}  & \multicolumn{1}{c}{Leave 5yrs}  & \multicolumn{1}{c}{Leave 6yrs}  & \multicolumn{1}{c}{Leave 7yrs}  & \multicolumn{1}{c}{Leave 8yrs}  & \multicolumn{1}{c}{Leave 9yrs}  & \multicolumn{1}{c}{Leave 10yrs} \\ " "& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)}  & \multicolumn{1}{c}{(3)}  & \multicolumn{1}{c}{(4)}  & \multicolumn{1}{c}{(5)}  & \multicolumn{1}{c}{(6)}  & \multicolumn{1}{c}{(7)}  & \multicolumn{1}{c}{(8)}  & \multicolumn{1}{c}{(9)}  & \multicolumn{1}{c}{(10)} \\ ") ///
-    posthead("\hline") ///
-    prefoot("") ///
-    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. The regression sample is a cross-sectional of workers who are in the event study. Only those workers whose outcome variable can be measured given the dataset period are kept. The control group is the omitted group. The outcome variable indicates whether the worker left the firm within a given period after the manager change event. Control variables include the fixed effects of the interaction of office and function, as well as the interaction between age band and gender. For the four treatment groups, these controls are at the time of event, while for control workers, these controls are at the first observation. Standard errors are clustered at manager level (manager at the event date)." "\end{tablenotes}")
-
-
-local i = 1
-foreach var in $exit_outcomes {
-
-    global LastPossibleEventTime = ${LastMonth} - 12 * `i'
-
     reghdfe `var' FT_LtoH FT_HtoH FT_HtoL if FT_Event_Time<=${LastPossibleEventTime} & FT_Never_ChangeM==0, vce(cluster IDlseMHR) absorb(Office##Func AgeBand##Female)
         eststo `var'
         test FT_HtoH = FT_HtoL

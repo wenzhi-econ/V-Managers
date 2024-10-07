@@ -6,7 +6,7 @@ In particular, this do file investigates the role of including control workers.
 capture log close
 log using "${Results}/logfile_20240920_MainOutcomes_WithoutControlWorkers", replace text
 
-use "${TempData}/temp_MainOutcomesInEventStudies_Extensions.dta", clear
+use "${TempData}/temp_MainOutcomesInEventStudies.dta", clear
 
 /* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
@@ -61,11 +61,10 @@ display "${four_events_dummies}"
 *?? step 1. Transfer Outcomes 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-foreach var in TransferSJVC TransferFuncC PromWLC ChangeSalaryGradeC {
+foreach var in TransferSJVC TransferFuncC ChangeSalaryGradeC {
 
     if "`var'" == "TransferSJVC"       global title "Lateral move"
     if "`var'" == "TransferFuncC"      global title "Lateral move, function"
-    if "`var'" == "PromWLC"            global title "Work-level promotions"
     if "`var'" == "ChangeSalaryGradeC" global title "Salary grade increase"
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -141,43 +140,6 @@ foreach var in TransferSJVC TransferFuncC PromWLC ChangeSalaryGradeC {
         xtitle(Quarters since manager change) title("${title}", span pos(12)) ///
         legend(off) note("Pre-trends joint p-value = ${PTDiff_`var'}" "Post coeffs. joint p-value = ${postevent_`var'}")
     graph save "${Results}/WithoutControlWorkers_FT_GainsMinusLoss_AllEstimates_`var'.gph", replace
-
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-    *-? step 5. Additional Figure for "Work level promotions"
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-    if "`var'" == "PromWLC" {
-
-        global title "Work-level promotions"
-        global yaxis_setup "ylabel(-0.01(0.01)0.05) yscale(range(-0.01 0.05))"
-        
-        *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
-        *&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
-        *&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
-
-        xlincom ///
-            (((FT_LtoH_X_Post34 - FT_LtoL_X_Post34) + (FT_LtoH_X_Post35 - FT_LtoL_X_Post35) + (FT_LtoH_X_Post36 - FT_LtoL_X_Post36))/3) ///
-            (((FT_LtoH_X_Post58 - FT_LtoL_X_Post58) + (FT_LtoH_X_Post59 - FT_LtoL_X_Post59) + (FT_LtoH_X_Post60 - FT_LtoL_X_Post60))/3) ///
-            (((FT_LtoH_X_Post82 - FT_LtoL_X_Post82) + (FT_LtoH_X_Post83 - FT_LtoL_X_Post83) + (FT_LtoH_X_Post84 - FT_LtoL_X_Post84))/3) ///
-            , level(95) post
-
-        eststo `var'
-
-        coefplot  ///
-            (`var', keep(lc_1) rename(lc_1 = "12 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-            (`var', keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-            (`var', keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
-            , ciopts(lwidth(2 ..)) levels(95) vertical legend(off) ///
-            graphregion(margin(medium)) plotregion(margin(medium)) ///
-            msymbol(d) mcolor(white) ///
-            title("${title}", size(vlarge)) ///
-            yline(0, lpattern(dash)) ///
-            xlabel(, labsize(vlarge)) // ///
-            // ${yaxis_setup}
-
-        graph save "${Results}/WithoutControlWorkers_FT_Gains_ThreeQuarterEstimates_`var'.gph", replace
-    }     
-
     
 }
 
