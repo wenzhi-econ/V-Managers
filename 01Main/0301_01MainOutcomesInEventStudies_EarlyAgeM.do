@@ -14,7 +14,7 @@ Time: 2024-10-08
 */
 
 capture log close
-log using "${Results}/logfile_2024106_PromWL_WithoutControlWorkers_EarlyAgeM", replace text
+log using "${Results}/logfile_20241010_MainOutcomes_WithoutControlWorkers_EarlyAgeM", replace text
 
 use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear
 
