@@ -73,14 +73,10 @@ svmat  final_res, names(col)
 generate topic = _n if inrange(_n, 1, 3)
 
 twoway ///
-    (scatter coeff topic, lcolor(ebblue) mcolor(ebblue)) ///
-    (rcap lb ub topic, lcolor(ebblue)) ///
+    (rbar ub lb topic, bcolor(ebblue) barwidth(0.02) vertical) ///
+    (scatter coeff topic, lcolor(ebblue) mcolor(white) mfcolor(white) msymbol(D) msize(0.9)) ///
     , yline(0, lcolor(maroon)) ///
-    xlabel(1 "     Project skills" 2 "Strategy skills" 3 "Talent skills     ") ///
-    xtitle("Skills given by LDA", size(medium)) title("Mean difference between H and L-type managers", span pos(12)) ///
+    xlabel(1 "     Project skills" 2 "Strategy skills" 3 "Talent skills          ", labsize(medium)) ///
+    title("Mean difference between H and L-type managers", span pos(12)) xtitle("") ///
     legend(off)
 graph export "${Results}/SkillsAfterLDA_HvsL.pdf", replace as(pdf)
-
-
-
-
