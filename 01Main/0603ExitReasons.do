@@ -61,21 +61,21 @@ keep if ReasonAnotherOrg!=.
 
 eststo clear 
 foreach var in ReasonAnotherOrg4 ReasonAnotherOrg7 ReasonAnotherOrg2 ReasonAnotherOrg5 ReasonAnotherOrg1 ReasonAnotherOrg6 ReasonAnotherOrg3 {
-    reghdfe `var' EarlyAgeM if Post==1 & FT_Mngr_both_WL2==1, absorb(Year) cluster(IDlseMHR)
+    reghdfe `var' EarlyAgeM if Post==1 & FT_Mngr_both_WL2==1, absorb(Year ISOCode) cluster(IDlseMHR)
         eststo `var'
         summarize `var' if e(sample)==1 & EarlyAgeM==0
         estadd scalar cmean = r(mean)
 }
 
-esttab ReasonAnotherOrg4 ReasonAnotherOrg7 ReasonAnotherOrg2 ReasonAnotherOrg5 ReasonAnotherOrg1 ReasonAnotherOrg6 ReasonAnotherOrg3 using "${Results}/FTExitReasons.tex", ///
+esttab ReasonAnotherOrg4 ReasonAnotherOrg7 ReasonAnotherOrg2 ReasonAnotherOrg5 ReasonAnotherOrg1 ReasonAnotherOrg6 ReasonAnotherOrg3 using "${Results}/FTExitReasons_ISO.tex", ///
     replace style(tex) fragment nocons label nofloat nobaselevels se ///
     nomtitles collabels(,none) ///
     keep(EarlyAgeM) varlabels(EarlyAgeM "High-flyer manager ") ///
     stats(cmean N, labels("Mean, low-flyer" "N") fmt(%9.3f %9.0f)) ///
     prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lccccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Change of career} & \multicolumn{1}{c}{Line manager}  & \multicolumn{1}{c}{Cultural fit} & \multicolumn{1}{c}{Competitive pay} & \multicolumn{1}{c}{Career progression} & \multicolumn{1}{c}{Getting work done} & \multicolumn{1}{c}{Work-life balance}  \\") ///
     prefoot("\hline")  ///
-    postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker who left the firm and had the exit survey. Standard errors are clustered by manager. Controls include year FE. The outcome variable equals to one if the worker left the firm due to the corresponding reason. Only those workers in the event studies are considered." "\end{tablenotes}")
-
+    postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker who left the firm and had the exit survey. Standard errors are clustered by manager. Controls include year and country FE. The outcome variable equals to one if the worker left the firm due to the corresponding reason. Only those workers in the event studies are considered. The manager's quality is measured in the month of the worker's exit" "\end{tablenotes}")
+/* 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 3. run regressions considering the event managers 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -108,7 +108,7 @@ esttab ReasonAnotherOrg4_E ReasonAnotherOrg7_E ReasonAnotherOrg2_E ReasonAnother
     prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lccccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Change of career} & \multicolumn{1}{c}{Line manager}  & \multicolumn{1}{c}{Cultural fit} & \multicolumn{1}{c}{Competitive pay} & \multicolumn{1}{c}{Career progression} & \multicolumn{1}{c}{Getting work done} & \multicolumn{1}{c}{Work-life balance}  \\") ///
     prefoot("\hline")  ///
     postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker who left the firm and had the exit survey. Standard errors are clustered by manager. Controls include year FE. The outcome variable equals to one if the worker left the firm due to the corresponding reason. Only those workers in the event studies are considered." "\end{tablenotes}")
-
+ */
 
 
 

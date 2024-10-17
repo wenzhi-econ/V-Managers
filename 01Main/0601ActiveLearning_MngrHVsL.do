@@ -59,12 +59,14 @@ order IDlse YearMonth IDlseMHR ///
     Post NumSkillsB NumCompletedYTDB NumRecommendYTDB ActiveLearnerYTD
 
 eststo clear 
+/* //&? only year fixed effects 
 foreach var in NumSkillsB NumCompletedYTDB NumRecommendYTDB ActiveLearnerYTD {
     reghdfe `var' EarlyAgeM if Post==1, absorb(Year) cluster(IDlseMHR)
         eststo `var'
         summarize `var' if e(sample)==1 & EarlyAgeM==0 
         estadd scalar cmean = r(mean)
-}
+} 
+*/
 
 foreach var in NumSkillsB NumCompletedYTDB NumRecommendYTDB ActiveLearnerYTD {
     reghdfe `var' EarlyAgeM if Post==1, absorb(Year ISOCode) cluster(IDlseMHR)
@@ -73,7 +75,14 @@ foreach var in NumSkillsB NumCompletedYTDB NumRecommendYTDB ActiveLearnerYTD {
         estadd scalar cmean = r(mean)
 }
 
-esttab NumSkillsB NumCompletedYTDB NumRecommendYTDB ActiveLearnerYTD using "${Results}/FTActiveLearn_SelfConstructedData.tex", ///
+foreach var in NumSkillsB NumCompletedYTDB NumRecommendYTDB ActiveLearnerYTD {
+    reghdfe `var' EarlyAgeM if Post==1 & FT_Mngr_both_WL2==1, absorb(Year ISOCode) cluster(IDlseMHR)
+        eststo `var'_ISO_WL2
+        summarize `var' if e(sample)==1 & EarlyAgeM==0 
+        estadd scalar cmean = r(mean)
+}
+
+esttab NumSkillsB_ISO_WL2 NumCompletedYTDB_ISO_WL2 NumRecommendYTDB_ISO_WL2 ActiveLearnerYTD_ISO_WL2 using "${Results}/FTActiveLearn_SelfConstructedData_ISO_WL2.tex", ///
     replace style(tex) fragment nocons label nofloat nobaselevels se ///
     nomtitles collabels(,none) ///
     keep(EarlyAgeM) varlabels(EarlyAgeM "High-flyer manager ") ///
