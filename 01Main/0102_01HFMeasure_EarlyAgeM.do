@@ -22,6 +22,10 @@ sort  IDlse YearMonth
 bysort IDlse: generate occurrence = _n 
 order IDlse YearMonth occurrence IDlseMHR
 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-1. manager id imputations 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
 foreach var in IDlseMHR {
 	replace `var' = l1.`var' if IDlseMHR==. & l1.IDlseMHR!=. 
 	replace `var' = f1.`var' if IDlseMHR==. & f1.IDlseMHR!=. & l1.IDlseMHR==. 
@@ -64,7 +68,7 @@ replace  EarlyAge = 1 if MaxWL==2 & AgeMinMaxWL==1 & TenureMaxWL<=6
 replace  EarlyAge = 1 if MaxWL==3 & AgeMinMaxWL<=2 & TenureMinMaxWL<=10 
 replace  EarlyAge = 1 if MaxWL==4 & AgeMinMaxWL<=2 
 replace  EarlyAge = 1 if MaxWL>4  & AgeMinMaxWL<=3 
-label variable EarlyAge "Fast track  manager based on age when promoted (WL)"
+label variable EarlyAge "Fast track manager based on age when promoted (WL)"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-2-3. store only IDlseMHR YearMonth EarlyAge (for next do file merge)

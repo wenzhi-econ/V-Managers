@@ -29,10 +29,9 @@ sort  IDlse YearMonth
 bysort IDlse: generate occurrence = _n 
 order IDlse YearMonth occurrence IDlseMHR
 
-foreach var in IDlseMHR {
-	replace `var' = l1.`var' if IDlseMHR==. & l1.IDlseMHR!=. 
-	replace `var' = f1.`var' if IDlseMHR==. & f1.IDlseMHR!=. & l1.IDlseMHR==. 
-}
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-1. manager id imputations 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 foreach var in IDlseMHR {
 	replace `var' = l1.`var' if IDlseMHR==. & l1.IDlseMHR!=. 

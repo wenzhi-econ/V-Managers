@@ -17,18 +17,24 @@ Input:
     "${TempData}/01WorkersOutcomes.dta" <== constructed in 0101 do file 
     "${TempData}/03EventStudyDummies_EarlyAgeM.dta" <== constructed in 0103_01 do file 
     "${TempData}/05MngrWorkerRelations.dta" <== constructed in 0105 do file 
-
+    "${RawCntyData}/2.WEF ProblemFactor.dta" ==> taken as raw datasets 
+    "${TempData}/MType.dta" ==> Not self-constructed, taken as raw datasets for now
+    
 Output:
     "${TempData}/06MainOutcomesInEventStudies_Heterogeneity.dta"
 
 RA: WWZ 
-Time: 2024-10-14
+Time: 2024-10-21
 */
 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 1. create a simplest possible dataset
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-1. obtain relevant variables 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 use "${TempData}/01WorkersOutcomes.dta", clear 
 
@@ -44,20 +50,9 @@ order IDlse YearMonth ///
     IDlseMHR ChangeMR EarlyAgeM FT_Mngr_both_WL2 ///
     FT_Rel_Time FT_Mngr_both_WL2 FT_LtoL FT_LtoH FT_HtoH FT_HtoL FT_Never_ChangeM ///
     FT_Calend_Time_LtoL FT_Calend_Time_LtoH FT_Calend_Time_HtoH FT_Calend_Time_HtoL ///
-    TransferSJVC TransferFuncC LogPayBonus LogPay LogBonus ChangeSalaryGradeC ///
     TenureM SameOffice SameGender OfficeSize ///
+    TransferSJVC TransferFuncC LogPayBonus LogPay LogBonus ChangeSalaryGradeC ///
     StandardJob Func SalaryGrade Office SubFunc Org4 OfficeCode Pay Bonus Benefit Package
-
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-1. construct more event dummies 
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-*!! "event * post" (ind-month level) for four treatment groups
-generate FT_Post = (FT_Rel_Time >= 0) if FT_Rel_Time != .
-generate FT_LtoLXPost = FT_LtoL * FT_Post
-generate FT_LtoHXPost = FT_LtoH * FT_Post
-generate FT_HtoHXPost = FT_HtoH * FT_Post
-generate FT_HtoLXPost = FT_HtoL * FT_Post
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-2. generate heterogeneity indicators 
@@ -98,7 +93,7 @@ summarize JobNumOffice0 if Ind_tag==1, detail
 generate JobNum0 = (JobNumOffice0 > `r(p50)') if JobNumOffice0!=. 
 
 *!! LaborRegHigh0
-merge m:1 ISOCode Year using "${RawCntyData}/2.WEF ProblemFactor.dta", keepusing(LaborRegWEF LaborRegWEFB) // /2.WB EmployingWorkers.dta ; 2.ILO EPLex.dta (EPLex )
+merge m:1 ISOCode Year using "${RawCntyData}/2.WEF ProblemFactor.dta", keepusing(LaborRegWEF LaborRegWEFB)
     keep if _merge!=2
     drop _merge 
 bysort IDlse: egen LaborRegHigh0= mean(cond(FT_Rel_Time==0, LaborRegWEFB, .))
@@ -135,15 +130,5 @@ bysort IDlse: egen MPre    = mean(cond(FT_Rel_Time==0,  IDlseMHR, .))
 generate DiffM2y = (MPost2y!=MPre) if MPost2y!=. & MPre!=.
 rename DiffM2y DiffM2y0
 
-*!! "event * post * heterogeneity indicator" for four treatment groups 
-
-global Hetero_Vars TenureMHigh SameOffice Young TenureLow SameGender OfficeSizeHigh JobNum LaborRegHigh WPerf WPerf0p10p90 TeamPerfMBase DiffM2y
-
-foreach var in $Hetero_Vars {
-    generate FT_LtoLXPostX`var' = FT_LtoLXPost * `var'0
-    generate FT_LtoHXPostX`var' = FT_LtoHXPost * `var'0
-    generate FT_HtoHXPostX`var' = FT_HtoHXPost * `var'0
-    generate FT_HtoLXPostX`var' = FT_HtoLXPost * `var'0
-}
 
 save "${TempData}/06MainOutcomesInEventStudies_Heterogeneity.dta", replace 
