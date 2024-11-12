@@ -34,7 +34,7 @@ if  "`c(username)'" =="virginiaminni" {
     global user "/Users/virginiaminni/Library/CloudStorage/Dropbox/Managers"
 }
 
-if 	"`c(username)'" == "virginia_m"    	 		{		
+if 	"`c(username)'" == "virginia_m"   {		
     global user = "C:\Users\virginia_m\Dropbox\Managers"
 }
 
@@ -92,13 +92,29 @@ do "${DoFiles}/01Main/0104DataForMainOutcomesInEventStudies.do"
 do "${DoFiles}/01Main/0105MngrWorkerRelationshipVariables.do"
 do "${DoFiles}/01Main/0106DataForHeterogeneousEventStudies.do" */
 
+*-? decomposition
+/* do "${DoFiles}/0303DecompTransferSJC_OneQuarterEstimate.do" */
+
 *-? Programs Used in Event Studies
-/* do "${DoFiles}/01Main/0201CoefPrograms_LHminusLL.do" 
-do "${DoFiles}/01Main/0202CoefPrograms_HLminusHH.do"
-do "${DoFiles}/01Main/0203CoefPrograms_Dual_TestingforAsymmetries.do" */
-do "${DoFiles}/0204CoefPrograms_LHminusLL_OnlyPost.do" 
+/* do "${DoFiles}/0201CoefPrograms_LHminusLL.do" 
+do "${DoFiles}/0202CoefPrograms_HLminusHH.do"
+do "${DoFiles}/0203CoefPrograms_Dual_TestingforAsymmetries.do" */
+/* do "${DoFiles}/0204CoefPrograms_LHminusLL_OnlyPost.do" 
 do "${DoFiles}/0205CoefPrograms_HLminusHH_OnlyPost.do"
-do "${DoFiles}/0206CoefPrograms_Dual_TestingforAsymmetries_OnlyPost.do"
+do "${DoFiles}/0206CoefPrograms_Dual_TestingforAsymmetries_OnlyPost.do" */
+
+*-? Event Studies with two additional outcomes 
+/* do "${DoFiles}/0301_02AdditionalOutcomesInEventStudies_EarlyAgeM.do" */
+
+*-? Event Studies with additional manager exporsure constraint
+/* do "${DoFiles}/0704EventStudies_PostMngrExposureRestraint.do"
+do "${DoFiles}/0705EventStudies_PostMngrExposureRestraint_NonMovers.do" */
+
+*-? Event Studies using MFEBayesLogPay
+/* do "${DoFiles}/0808EventStudiesBasedOnMFEBayesLogPay_TransferOutcomes_Restrictions.do" */
+
+*-? PromWL
+/* do "${DoFiles}/0302PromWLInEventStudies.do" */
 
 *-? Event Studies with 3 Measures
 /* do "${DoFiles}/0301_01MainOutcomesInEventStudies_EarlyAgeM.do"
@@ -106,11 +122,9 @@ do "${DoFiles}/0301_02MainOutcomesEventStudies_HF2M.do"
 do "${DoFiles}/0301_03MainOutcomesEventStudies_HF2SM.do" */
 /* do "${DoFiles}/0303DecompTransferSJC_OneQuarterEstimate.do" */
 
-do "${DoFiles}/0302PromWLInEventStudies.do"
 /* do "${DoFiles}/0301MainOutcomesInEventStudies.do" */
 /* do "${DoFiles}/0301TransferOutcomes_AllQuarterEstimates.do"
 do "${DoFiles}/0302SalaryOutcomes_ThreeQuarterEstimates.do"
-
 
 *-? Event Studies with a Random Control Sample 
 do "${DoFiles}/050301EventStudies_RandomSample.do"
@@ -132,3 +146,11 @@ do "${DoFiles}/050202EventIndicatorsBasedonNewHFMeasure.do" */
 *-? Exit outcomes 
 /* do "${DoFiles}/01Main/0501_01ExitOutcomes_CrossSection.do
 do "${DoFiles}/01Main/0501_02ExitOutcomes_DiffTypes.do */
+
+*-? More suggestive evidence 
+/* do "${DoFiles}/01Main/0601ActiveLearning_MngrHVsL.do
+do "${DoFiles}/01Main/0602FlexibleProjects_MngrHVsL.do */
+/* do "${DoFiles}/01Main/0603ExitReasons.do */
+
+
+

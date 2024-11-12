@@ -13,7 +13,7 @@ Time: 2024-09-05
 */
 
 capture log close
-log using "${Results}/logfile_20241014_DecompTransferSJC", replace text
+log using "${Results}/logfile_20241111_DecompTransferSJC_AfterMngrRotation", replace text
 
 use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
 
@@ -174,7 +174,7 @@ display "${four_events_dummies}"
 *?? step 2. run regressions and create the coefplot
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-foreach var in TransferSJC TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC {
+/* foreach var in TransferSJC TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC {
     reghdfe `var' ${four_events_dummies} ///
         if ((FT_Mngr_both_WL2==1) & (FT_Never_ChangeM==0)) ///
         , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
@@ -196,6 +196,31 @@ coefplot ///
     graphregion(margin(medium)) plotregion(margin(medium)) ///
     title("Effects of gaining a high-flyer manager")
 
-graph save "${Results}/WithoutControlWorkers_FT_Gains_DecompTransferSJC_OneQuarterEstimate.gph", replace  
+graph save "${Results}/WithoutControlWorkers_FT_Gains_DecompTransferSJC_OneQuarterEstimate.gph", replace */
+
+foreach var in TransferSJC TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC {
+    reghdfe `var' ${four_events_dummies} ///
+        if ((FT_Mngr_both_WL2==1) & (FT_Never_ChangeM==0)) ///
+        , absorb(IDlse YearMonth)  vce(cluster IDlseMHR) 
+    
+    *&& Quarter 8th estimate = the average of Month 22, Month 23, and Month 24 estimates
+    xlincom (((FT_LtoH_X_Post82 - FT_LtoL_X_Post82) + (FT_LtoH_X_Post83 - FT_LtoL_X_Post83) + (FT_LtoH_X_Post84 - FT_LtoL_X_Post84))/3), level(95) post
+
+    eststo `var'
+}
+
+coefplot ///
+    (TransferSJC, keep(lc_1) rename(lc_1  = "All lateral moves")  noci recast(bar)) ///
+    (TransferSJSameMSameFuncC, keep(lc_1) rename(lc_1 = "Within team") noci recast(bar)) ///
+    (TransferSJDiffMSameFuncC, keep(lc_1) rename(lc_1 = "Different team, same function") noci recast(bar)) ///
+    (TransferFuncC, keep(lc_1) rename(lc_1 = "Different team, cross-functional") noci recast(bar) ) ///
+    , legend(off) xline(0, lpattern(dash)) ///
+    xscale(range(0 0.1)) xsize(5) ysize(2) ylabel(, labsize(large)) ///
+    scheme(tab2) /// // xlabel(0(0.1)1, labsize(vlarge)) rescale(12.822699)  ///
+    graphregion(margin(medium)) plotregion(margin(medium)) ///
+    title("Effects of gaining a high-flyer manager")
+
+graph save "${Results}/WithoutControlWorkers_FT_Gains_DecompTransferSJC_OneQuarterEstimate_AfterMngrRotation.gph", replace
+
 
 log close
