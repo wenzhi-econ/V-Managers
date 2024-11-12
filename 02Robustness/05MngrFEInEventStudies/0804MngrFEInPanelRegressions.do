@@ -1,0 +1,127 @@
+/* 
+This do file generates manager FE using AKM-style regression on workers' wage. 
+
+Input:
+    "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta" <== constructed in 0104 do file.
+
+Output:
+    "${TempData}/temp_MngrID_MFEBayesLogPay.dta"
+
+RA: WWZ 
+Time: 2024-11-05
+*/
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 0. split event workers into two samples 
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
+
+keep if FT_Rel_Time!=. 
+keep if FT_Mngr_both_WL2==1
+    //&? keep a worker panel that contains only the event workers 
+
+sort IDlse YearMonth 
+bysort IDlse: generate occurrence = _n 
+
+set seed 1234 
+generate subsample = runiform() if occurrence==1
+replace  subsample = 0 if inrange(subsample, 0, 0.5)
+replace  subsample = 1 if inrange(subsample, 0.5, 1)
+    //&? a worker level (instead of worker-month level) randomization
+
+sort IDlse YearMonth 
+bysort IDlse: egen sample = mean(subsample)
+drop subsample 
+rename sample subsample 
+order subsample, before(IDlse)
+
+preserve 
+
+    keep IDlse subsample
+    duplicates drop 
+
+    save "${TempData}/temp_workersubsample_MFEBayesLogPay.dta", replace 
+
+restore 
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 1. generate manager FE 
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-1. manager FE and se 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+*!! First, residualize by individual FE and time FE 
+areg LogPayBonus i.YearMonth if subsample==0, absorb(IDlse)
+    predict resLogPayBonus, res
+
+*!! Then, compute manager FE and se of manager FE 
+areg resLogPayBonus if subsample==0, absorb(IDlseMHR)
+    *&? manager FE 
+    predict LogPayBonusMFEb, d
+    replace LogPayBonusMFEb = LogPayBonusMFEb + _b[_cons]
+
+    *&? se of manager FE 
+    predict residLogPayBonus, r
+    generate sqresLogPayBonus=residLogPayBonus^2
+    egen NLogPayBonus=count(sqresLogPayBonus), by(IDlseMHR)
+    summarize sqresLogPayBonus, meanonly
+    generate LogPayBonusMFEse=sqrt(r(mean)*e(N)/e(df_r)/NLogPayBonus)
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-2. Bayes shrinkage 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+do "${DoFiles}/02Robustness/05MngrFEInEventStudies/ebayes.ado" 
+
+ebayes LogPayBonusMFEb LogPayBonusMFEse if subsample==0, ///
+    gen(LogPayBonusBayes) var(LogPayBonusBayesvar) rawvar(LogPayBonusBayesrawvar) ///
+    uvar(LogPayBonusBayesuvar) theta(LogPayBonusBayestheta) bee(LogPayBonusBayesbee) 
+
+rename LogPayBonusBayes MFEBayesLogPay
+    //&? MFEBayesLogPay is the final variable of interest 
+
+order IDlse YearMonth IDlseMHR LogPayBonus MFEBayesLogPay
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-3. Comparison with original codes 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+/* 
+
+Initial restrictions:
+    (1) I include all managers, while the original codes consider only those managers who are in the sample as managers for at least 2 years.
+    (2) I include all managers, while the original codes consider only those managers whose number of subordinate workers is > 9.
+    (3) I do a sample splitting in the beginning, while the original codes consider all managers who satisfy the above two conditions.
+
+Regression:
+    (1) I include individual and time fixed effects, while the original codes do not have individual fixed effects.
+        areg LogPayBonus c.Tenure##c.Tenure##i.Female i.Func i.AgeBand i.Year, a(ISOCode) 
+    
+Post-shrinkage procedures:
+    (1) I use all estimated manager FE, while the original codes conduct trimming.
+        winsor2 LogPayBonusBayes , trim cuts(0 99) suffix(T) 
+    
+All codes above are copied and adapted from "3.7.MFEPay.do". 
+
+*/
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 2.  
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+keep IDlseMHR MFEBayesLogPay 
+drop if MFEBayesLogPay==.
+duplicates drop     
+    //&? 14,791 observations 
+
+summarize MFEBayesLogPay, detail 
+global median_MFEBayesLogPay = r(p50)
+global p75_MFEBayesLogPay    = r(p75)
+
+generate MFEBayesLogPay_Med = (MFEBayesLogPay >= ${median_MFEBayesLogPay})
+generate MFEBayesLogPay_p75 = (MFEBayesLogPay >= ${p75_MFEBayesLogPay})
+
+save "${TempData}/temp_MngrID_MFEBayesLogPay.dta", replace 
