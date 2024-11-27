@@ -1,34 +1,45 @@
 /* 
-This do file conducts event studies on the main outcomes of interest. 
-In all regressions, all four treatment groups are included (though Lto and Hto groups do not have same time window), while never-treated workers are not. 
-It takes a very long time to produce the results. Therefore, for later convenience, all results (quarterly aggregated coefficients and p-values) will be stored in a do file. 
+This do file runs event study regressions on the count of work-level promotions (after the event): PromWLC.
 
-The outcome variable can only be defined for post-event periods, so the coef programs should be stored in 2024, 0205, and 0206 do files.
+Notice that this variable is only defined after the event, so there cannot be any pre-event values.
+
+Notes on the event study regressions:
+    (1) All four treatment groups are included (though Lto and Hto groups do not have same time window), while never-treated workers are not. 
+    (2) The omitted group in the regressions are month 0 for all four treatment groups.
+    (3) For LtoL and LtoH groups, the relative time period is [0, +84], while for HtoH and HtoL groups, the relative time period is [0, +60].
+
+Some key results (quarterly aggregated coefficients with their p-values, and other key summary statistics) are stored in the output file. 
 
 Input: 
-    "${TempData}/03MainOutcomesInEventStudies_EarlyAgeM.dta" <== constructed in 0104 do file
+    "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file
 
 Output:
-    "${Results}/WithoutControlWorkers_FT_PromWL.dta"
+    "${Results}/logfile_20241127_WLPromotionsInEventStudies.txt"
+    "${Results}/FT_WLPromotions.dta"
 
 RA: WWZ 
-Time: 2024-10-16
+Time: 2024-11-27
 */
 
 capture log close
-log using "${Results}/logfile_2024106_PromWL_WithoutControlWorkers_EarlyAgeM", replace text
+log using "${Results}/logfile_20241127_WLPromotionsInEventStudies", replace text
 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear
 
 /* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
-    // commented out when offically producing the results
+    // commented out when officially producing the results
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 0. construct global macros used in regressions 
+*?? step 0. construct variables and macros used in reghdfe command 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*&& Months -1, -2, and -3 are omitted as the reference group, so in Lines 30 and 42, iteration ends with 4.
-*&& <-36, -36, -35, ..., -5, -4, 0, 1, 2, ...,  +83, +84, and >+84
+*&& Month 0 is omitted as the reference group.
+*impt: The variable name of the "event * relative period" dummies matter!
+*impt: Programs stored in the 02*.do files are specifically designed for the following names.
+/* Naming patterns:
+For normal "event * relative period" dummies, e.g. FT_LtoL_X_Post1 FT_LtoH_X_Post1 FT_HtoH_X_Post12
+For binned dummies, e.g. FT_LtoH_X_Post_After84 FT_HtoH_X_Post_After60
+*/
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-0-1. event * period dummies 
@@ -70,6 +81,8 @@ generate byte FT_HtoL_X_Post_After`Hto_max_post_period' = FT_HtoL * (FT_Rel_Time
 local Lto_max_post_period = 84
 local Hto_max_post_period = 60
 
+macro drop FT_LtoL_X_Post FT_LtoH_X_Post FT_HtoH_X_Post FT_HtoL_X_Post
+
 foreach event in FT_LtoL FT_LtoH {
     forvalues time = 1/`Lto_max_post_period' {
         global `event'_X_Post ${`event'_X_Post} `event'_X_Post`time'
@@ -99,7 +112,7 @@ display "${four_events_dummies}"
 generate FT_Post = (FT_Rel_Time>=0) if FT_Rel_Time!=.
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 1. Transfer Outcomes 
+*?? step 1. regressions on PromWLC
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 foreach var in PromWLC {
@@ -113,9 +126,6 @@ foreach var in PromWLC {
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
     reghdfe `var' ${four_events_dummies} if (FT_Mngr_both_WL2==1 & FT_Post==1), absorb(IDlse YearMonth) vce(cluster IDlseMHR) 
-
-        //&? Exclude all control workers.
-        //&? No need to add FT_Never_ChangeM==0 restriction as FT_Post is only defined for this group.
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 2. LtoH versus LtoL
@@ -127,10 +137,11 @@ foreach var in PromWLC {
         (scatter coeff_`var'_gains quarter_`var'_gains, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(0, lcolor(maroon)) ///
-        xlabel(0(2)28) ///
-        xtitle(Quarters since manager change) title("${title}", span pos(12)) ///
+        xlabel(0(2)28, grid gstyle(dot) labsize(medsmall)) /// 
+        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
+        xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off)
-    graph save "${Results}/WithoutControlWorkers_FT_Gains_AllEstimates_`var'.gph", replace
+    graph save "${Results}/FT_Gains_AllEstimates_`var'.gph", replace
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 3. HtoL versus HtoH
@@ -142,10 +153,11 @@ foreach var in PromWLC {
         (scatter coeff_`var'_loss quarter_`var'_loss, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_loss ub_`var'_loss quarter_`var'_loss, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(0, lcolor(maroon)) ///
-        xlabel(0(2)20) ///
-        xtitle(Quarters since manager change) title("${title}", span pos(12)) ///
+        xlabel(0(2)20, grid gstyle(dot) labsize(medsmall)) /// 
+        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
+        xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off)
-    graph save "${Results}/WithoutControlWorkers_FT_Loss_AllEstimates_`var'.gph", replace   
+    graph save "${Results}/FT_Loss_AllEstimates_`var'.gph", replace   
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 4. Testing for asymmetries
@@ -155,7 +167,7 @@ foreach var in PromWLC {
     postevent_Double_Diff_OnlyPost, event_prefix(FT) post_window_len(60)
         global postevent_`var' = r(postevent)
         global postevent_`var' = string(${postevent_`var'}, "%4.3f")
-        generate postevent_`var' = ${postevent_`var'}
+        generate postevent_`var' = ${postevent_`var'} if inrange(_n, 1, 28)
 
     *!! quarterly estimates
     Double_Diff_OnlyPost, event_prefix(FT) post_window_len(60) outcome(`var')
@@ -163,15 +175,22 @@ foreach var in PromWLC {
         (scatter coeff_`var'_ddiff quarter_`var'_ddiff, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_ddiff ub_`var'_ddiff quarter_`var'_ddiff, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(0, lcolor(maroon)) ///
-        xlabel(0(2)20) ///
-        xtitle(Quarters since manager change) title("${title}", span pos(12)) ///
+        xlabel(0(2)20, grid gstyle(dot) labsize(medsmall)) /// 
+        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
+        xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note("Post coeffs. joint p-value = ${postevent_`var'}")
-    graph save "${Results}/WithoutControlWorkers_FT_GainsMinusLoss_AllEstimates_`var'.gph", replace
+    graph save "${Results}/FT_GainsMinusLoss_AllEstimates_`var'.gph", replace
     
 }
 
-keep coeff_* quarter_* lb_* ub_* PTLoss_* PTDiff_* postevent_* 
+keep ///
+    coeff_* quarter_* lb_* ub_* postevent_* ///
+    LtoL_* LtoH_* HtoH_* HtoL_* ///
+    coef1_* coefp1_* coef2_* coefp2_* coef3_* coefp3_* coef4_* coefp4_* coef5_* coefp5_* coef6_* coefp6_* ///
+    RI1_* rip1_* RI2_* rip2_* RI3_* rip3_*
 
-save "${Results}/WithoutControlWorkers_FT_PromWL.dta", replace 
+keep if inrange(_n, 1, 41)
+
+save "${Results}/FT_WLPromotions.dta", replace 
 
 log close
