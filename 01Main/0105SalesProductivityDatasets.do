@@ -2,16 +2,21 @@
 This do file creates a dataset with sales productivity variables.
 
 Input:
-    "${RawMNEData}/AllSnapshotWC.dta" <== raw data
-    "${RawMNEData}/CDProductivityMonth.dta" <== raw data 
+    "${RawMNEData}/AllSnapshotWC.dta"         <== raw data
+    "${RawMNEData}/CDProductivityMonth.dta"   <== raw data 
     "${RawMNEData}/CDProductivityQuarter.dta" <== raw data 
-    "${RawMNEData}/CDProductivityYear.dta" <== raw data 
+    "${RawMNEData}/CDProductivityYear.dta"    <== raw data 
 
 Output:
-    "${TempData}/08SalesProdOutcomes.dta"
+    "${TempData}/05SalesProdOutcomes.dta"
+
+Description of the Output Dataset:
+    A panel of worker sample with the following variables:
+        IDlse YearMonth Productivity ProductivityStd ChannelFE 
+    In particular, the normalized measure "ProductivityStd" is used in some analysis based on this objective sales productivity dataset.
 
 RA: WWZ 
-Time: 2024-11-08
+Time: 2024-11-19
 */
 
 use "${RawMNEData}/AllSnapshotWC.dta", clear
@@ -69,4 +74,4 @@ label define ChannelFE 0 "Not specified", modify
 keep  IDlse YearMonth Productivity ProductivityStd ChannelFE 
 order IDlse YearMonth Productivity ProductivityStd ChannelFE 
 
-save "${TempData}/08SalesProdOutcomes.dta", replace 
+save "${TempData}/05SalesProdOutcomes.dta", replace 

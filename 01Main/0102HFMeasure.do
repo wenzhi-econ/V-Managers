@@ -7,8 +7,14 @@ Input:
 Output:
     "${TempData}/02Mngr_EarlyAgeM.dta"
 
+Description of the Output Dataset:
+    The dataset contains only three variables: IDlseMHR YearMonth EarlyAgeM, which describe the employee's high-flyer status.
+    Note: 
+        ID information is recorded in variable "IDlseMHR" for the convenience of merge. 
+        If we want to get employee's high-flyer status, recall to "rename IDlse IDlseMHR" in the main dataset.
+
 RA: WWZ 
-Time: 2024-10-07
+Time: 2024-11-19
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??

@@ -1,20 +1,25 @@
 /* 
-This do file identifies the first eligible manager change a worker experiences, and constructs a set of dummies for the four treatment groups based on EarlyAgeM measure.
-In particular, 
-    if the pre- and post-event managers are both of WL2,
-    relative time to the event and calendar time of the event,
-    which event (LtoL LtoH HtoH HtoL) does a worker belong to.
+This do file 
+    (1) identifies the first eligible manager change a worker experiences; and
+    (2) constructs a set of dummies for the four treatment groups based on EarlyAgeM measure.
 
 Input:
-    "${RawMNEData}/AllSnapshotWC.dta"
-    "${TempData}/02Mngr_EarlyAgeM.dta" <== constructed in 0102_01 do file 
+    "${TempData}/01WorkersOutcomes.dta" <== created in 0101 do file
+    "${TempData}/02Mngr_EarlyAgeM.dta"  <== created in 0102 do file 
 
 Output:
-    "${TempData}/03EventStudyDummies_EarlyAgeM.dta"
-    "${TempData}/temp_Mngr_WL.dta
+    "${TempData}/temp_Mngr_WL.dta         <== auxiliary dataset 
+    "${TempData}/03EventStudyDummies.dta" <== output dataset
+
+Description of the Output Dataset:
+    It adds more variables to the "${TempData}/01WorkersOutcomes.dta" dataset.
+    In particular, a set of event-related variables:
+        EarlyAgeM ChangeMR ///
+        FT_Mngr_both_WL2 FT_Never_ChangeM ///
+        FT_Rel_Time FT_LtoL FT_LtoH FT_HtoH FT_HtoL FT_Event_Time FT_Calend_Time_*
 
 RA: WWZ 
-Time: 2024-10-10
+Time: 2024-11-19
 */
 
 
@@ -22,12 +27,9 @@ Time: 2024-10-10
 *?? step 1. impute missing manager ids 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${RawMNEData}/AllSnapshotWC.dta", clear 
+use "${TempData}/01WorkersOutcomes.dta", clear 
 xtset IDlse YearMonth 
 sort  IDlse YearMonth
-
-bysort IDlse: generate occurrence = _n 
-order IDlse YearMonth occurrence IDlseMHR
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-1. manager id imputations 
@@ -38,18 +40,22 @@ foreach var in IDlseMHR {
 	replace `var' = f1.`var' if IDlseMHR==. & f1.IDlseMHR!=. & l1.IDlseMHR==. 
 }
 
+label variable IDlseMHR "Manager ID"
+
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2. get managers' H-type information - EarlyAgeM
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 merge m:1 IDlseMHR YearMonth using "${TempData}/02Mngr_EarlyAgeM.dta", keep(match master) nogenerate 
 
+label variable EarlyAgeM "=1, if the manager is a high-flyer (determined by age at promotion)"
+
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 3. manager change event 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-3-1. variable ChangeM: all manager changes
+*-? s-3-1. create ChangeM: all manager changes
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 sort IDlse YearMonth
@@ -63,35 +69,28 @@ replace  ChangeM = . if IDlseMHR==.
 drop temp_first_month 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-3-2. variable ChangeMR: pure manager changes
+*-? s-3-2. modify ChangeMR: pure manager changes
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-sort IDlse YearMonth
-generate TransferInternal = 0 & Office!=. & SubFunc!=. & Org4!=. 
-replace  TransferInternal = 1 if IDlse==IDlse[_n-1] & ((OfficeCode!=OfficeCode[_n-1] & OfficeCode!=.) | (SubFunc!=SubFunc[_n-1] & SubFunc!=.) | (Org4!=Org4[_n-1] & Org4!=.))
-label variable  TransferInternal "= 1 in the month when either subfunc or Office or org4 is diff. than preceding"
-
-sort IDlse YearMonth
-generate TransferSJ = 0 if StandardJob!="" 
-replace  TransferSJ = 1 if (IDlse==IDlse[_n-1] & StandardJob!=StandardJob[_n-1] & StandardJob!="")
-
-*&& Changing manager for employee but employee does not change team at the same time 
 generate ChangeMR = 0 
 replace  ChangeMR = 1 if ChangeM==1 
 replace  ChangeMR = 0 if TransferInternal==1 | TransferSJ==1 
+    // impt: we only consider those manager changes without simultaneous internal or lateral transfers
 replace  ChangeMR = . if ChangeM==.
 replace  ChangeMR = . if IDlseMHR==. 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-3-3. variable ChangeMR: first pure manager changes
+*-? s-3-3. modify ChangeMR: first pure manager changes
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 bysort IDlse: egen temp_Date_FirstMngrChange = min(cond(ChangeM==1, YearMonth ,.))
 bysort IDlse: egen Date_FirstMngrChange      = mean(cond(ChangeMR==1 & YearMonth==temp_Date_FirstMngrChange, temp_Date_FirstMngrChange, .))
 replace ChangeMR = 0 if YearMonth>Date_FirstMngrChange & ChangeMR==1
-    //&? IMPORTANT: we only consider first manager change
+    // impt: we only consider first manager change
 replace ChangeMR = 0 if ChangeMR==. 
 format  Date_FirstMngrChange %tm 
+
+label variable ChangeMR "=1, at the month when the worker experiences his first pure manager change event"
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 4. four set of treatment groups
@@ -129,7 +128,7 @@ replace  FTHighLow = 0 if ChangeMR==0 & FTHighLow!=.
 *-? s-4-2. event dates of the four types of manager change 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-*!! four event dates
+*!! event time of the four events 
 bys IDlse: egen FT_Calend_Time_LtoL = mean(cond(FTLowLow   == 1, Date_FirstMngrChange, .)) 
 bys IDlse: egen FT_Calend_Time_LtoH = mean(cond(FTLowHigh  == 1, Date_FirstMngrChange, .)) 
 bys IDlse: egen FT_Calend_Time_HtoH = mean(cond(FTHighHigh == 1, Date_FirstMngrChange, .)) 
@@ -138,6 +137,23 @@ format FT_Calend_Time_LtoL %tm
 format FT_Calend_Time_LtoH %tm
 format FT_Calend_Time_HtoH %tm
 format FT_Calend_Time_HtoL %tm
+
+*!! calendar time of the event 
+generate FT_Event_Time = . 
+replace  FT_Event_Time = FT_Calend_Time_LtoL if FT_Calend_Time_LtoL!=. & FT_Event_Time==.
+replace  FT_Event_Time = FT_Calend_Time_LtoH if FT_Calend_Time_LtoH!=. & FT_Event_Time==.
+replace  FT_Event_Time = FT_Calend_Time_HtoL if FT_Calend_Time_HtoL!=. & FT_Event_Time==.
+replace  FT_Event_Time = FT_Calend_Time_HtoH if FT_Calend_Time_HtoH!=. & FT_Event_Time==.
+format   FT_Event_Time %tm
+
+label variable FT_Calend_Time_LtoL "year-month when the LtoL event takes place, non-missing only for LtoL workers"
+label variable FT_Calend_Time_LtoH "year-month when the LtoH event takes place, non-missing only for LtoH workers"
+label variable FT_Calend_Time_HtoH "year-month when the HtoH event takes place, non-missing only for HtoH workers"
+label variable FT_Calend_Time_HtoL "year-month when the HtoL event takes place, non-missing only for HtoL workers"
+label variable FT_Event_Time       "year-month when the event take place, non-missing only when FT_Never_ChangeM==0"
+
+drop FTLowLow FTLowHigh FTHighHigh FTHighLow
+    //&? Drop these auxiliary variables, which are only defined at the event time.
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-4-3. five event dummies: 4 types of treatment + 1 never-treated
@@ -158,6 +174,7 @@ replace  FT_HtoL = 1 if FT_Calend_Time_HtoL != .
 generate FT_Never_ChangeM = . 
 replace  FT_Never_ChangeM = 1 if FT_LtoH==0 & FT_HtoL==0 & FT_HtoH==0 & FT_LtoL==0
 replace  FT_Never_ChangeM = 0 if FT_LtoH==1 | FT_HtoL==1 | FT_HtoH==1 | FT_LtoL==1
+    //&? FT_Never_ChangeM is also equal to one in the case where the event is involved with the un-identified manager(s).
 
 label variable FT_LtoL "=1, if the worker experiences a low- to low-type manager change"
 label variable FT_LtoH "=1, if the worker experiences a low- to high-type manager change"
@@ -184,6 +201,7 @@ label variable FT_Rel_Time "relative date to event, . if no manager change or wi
 
 *-? get managers' work level information for each month 
 preserve 
+
     keep   IDlse YearMonth WL 
     rename IDlse IDlseMHR 
     rename WL    WLM 
@@ -208,20 +226,13 @@ label variable FT_Mngr_both_WL2 "=1, if involving managers in the event are both
 *?? step 6. save the dataset
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-keep IDlse YearMonth ///
-    IDlseMHR EarlyAgeM FT_Mngr_both_WL2 ///
-    ChangeMR FT_Rel_Time ///
-    FT_Never_ChangeM FT_LtoL FT_LtoH FT_HtoH FT_HtoL ///
-    FT_Calend_Time_LtoL FT_Calend_Time_LtoH FT_Calend_Time_HtoH FT_Calend_Time_HtoL
-
 order IDlse YearMonth ///
-    IDlseMHR EarlyAgeM FT_Mngr_both_WL2 ///
-    ChangeMR FT_Rel_Time ///
-    FT_Never_ChangeM FT_LtoL FT_LtoH FT_HtoH FT_HtoL ///
-    FT_Calend_Time_LtoL FT_Calend_Time_LtoH FT_Calend_Time_HtoH FT_Calend_Time_HtoL
+    IDlseMHR EarlyAgeM ChangeMR ///
+    FT_Mngr_both_WL2 FT_Never_ChangeM ///
+    FT_Rel_Time FT_LtoL FT_LtoH FT_HtoH FT_HtoL FT_Event_Time FT_Calend_Time_*
 
 label drop _all
 
 compress
-save "${TempData}/03EventStudyDummies_EarlyAgeM.dta", replace
+save "${TempData}/03EventStudyDummies.dta", replace
 

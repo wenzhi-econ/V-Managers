@@ -1,8 +1,5 @@
 /* 
 This do file generates relevant outcome variables used in the paper.
-In particular, there are two set of variables:
-    lateral and vertical transfers variables 
-    wage-related variables    
 
 Input:
     "${RawMNEData}/AllSnapshotWC.dta"
@@ -10,8 +7,16 @@ Input:
 Output:
     "${TempData}/01WorkersOutcomes.dta"
 
+Description of the Output Dataset:
+    Full employee panel, with additional outcomes relevant to the event studies.
+    In particular, the dataset contains the following outcome variables:
+        variables related to vertical promotion  
+        variables related to lateral moves 
+        variables related to pay 
+        variables related to ONET task-distance    
+
 RA: WWZ 
-Time: 2024-10-07
+Time: 2024-11-19
 */
 use "${RawMNEData}/AllSnapshotWC.dta", clear
 xtset IDlse YearMonth 
@@ -120,7 +125,7 @@ generate TransferSubFuncC = temp
 drop temp 
 
 label var  TransferSubFunc "= 1 in the month when SubFunc is diff. than the preceding"
-label var  TransferSubFuncC "Ccumulative count of SubFunc transfers for an individual"
+label var  TransferSubFuncC "cumulative count of SubFunc transfers for an individual"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-2-5. internal transfers
@@ -145,7 +150,7 @@ label variable TransferInternal  "= 1 in the month when either SubFunc or Office
 label variable TransferInternalC "cumulative count of internal transfer for an individual"
 
 *!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
-*!! s-2-5-2. measure 2: either office, standardJob, or org4
+*!! s-2-5-2. measure 2: either office, StandardJob, or org4
 *!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
 
 sort IDlse YearMonth
@@ -179,17 +184,104 @@ label variable LogPay      "Pay (logs)"
 label variable LogBonus    "Bonus (logs)"
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 4. outcome variables: task-distance changes (ONET)
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-4-1. match firm's job names to ONET job names
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+decode SubFunc, gen(SubFuncS)
+decode Func, gen(FuncS)
+
+xtset IDlse YearMonth 
+encode StandardJob, gen(StandardJobE)
+generate StandardJobEBefore = l.StandardJobE
+label value StandardJobEBefore StandardJobE
+decode StandardJobEBefore, gen(StandardJobBefore)
+
+generate StandardJobCodeBefore = l.StandardJobCode
+
+generate SubFuncBefore = l.SubFunc
+label value SubFuncBefore SubFunc
+decode SubFuncBefore, gen(SubFuncSBefore)
+
+generate FuncBefore = l.Func
+label value FuncBefore Func
+decode FuncBefore, gen(FuncSBefore)
+
+merge m:1 FuncS SubFuncS StandardJob StandardJobCode ///
+    using  "${RawONETData}/SJ Crosswalk.dta", keepusing(ONETCode ONETName)
+        drop if _merge==2
+        drop _merge 
+
+merge m:1 FuncSBefore SubFuncSBefore StandardJobBefore StandardJobCodeBefore ///
+    using  "${RawONETData}/SJ Crosswalk.dta", keepusing(ONETCodeBefore ONETNameBefore)
+        drop if _merge==2
+        drop _merge 
+
+merge m:1 ONETCode ONETCodeBefore using  "${RawONETData}/Distance.dta", ///
+    keepusing(ONETAbilitiesDistance ONETActivitiesDistance ONETContextDistance ONETSkillsDistance)
+        drop if _merge==2
+        drop _merge  
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-4-2. generate cumulative sum of task measures difference
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+foreach var in ONETAbilitiesDistance ONETActivitiesDistance ONETContextDistance ONETSkillsDistance{
+    replace `var' = 0 if (ONETCode==ONETCodeBefore & ONETCodeBefore!="" & ONETCode!="")
+    replace `var' = 0 if TransferSJC==0 
+    generate z =  `var'
+    by IDlse (YearMonth), sort: replace z = z[_n-1] if _n>1 & StandardJob[_n]==StandardJob[_n-1]
+    replace z = 0 if z ==. & ONETCode==ONETCodeBefore & ONETCodeBefore!="" & ONETCode!=""
+    generate `var'C = z 
+    replace `var'C = 0 if TransferSJC==0
+    drop z 
+}
+
+egen ONETDistance = rowmean(ONETContextDistance ONETActivitiesDistance ONETAbilitiesDistance ONETSkillsDistance) 
+egen ONETDistanceC = rowmean(ONETContextDistanceC ONETActivitiesDistanceC ONETAbilitiesDistanceC ONETSkillsDistanceC) 
+
+label variable ONETDistance "ONET task-distance measure between current StandardJob and previous month's"
+label variable ONETDistanceC "cumulative sum of ONET task-distance moves"
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-4-3. generate cumulative count of task-distance change
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+generate ONETB = (ONETDistance>0) if ONETDistance!=.
+
+capture drop ONETBC
+generate temp = ONETB
+by IDlse (YearMonth), sort: replace temp = temp[_n] + temp[_n-1] if _n>1 
+replace temp = 0 if temp==. & ONETDistance!=.
+generate ONETBC = temp 
+drop temp 
+
+label variable ONETB "=1, if current StandardJob's ONET task measure is different from last month's"
+label variable ONETBC "cumulative count of lateral moves involved with ONET task-distance moves"
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 5. manager id imputations  
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+foreach var in IDlseMHR {
+	replace `var' = l1.`var' if IDlseMHR==. & l1.IDlseMHR!=. 
+	replace `var' = f1.`var' if IDlseMHR==. & f1.IDlseMHR!=. & l1.IDlseMHR==. 
+}
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? final step. save these worker outcomes  
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-drop IDlseMHR 
-    //&? Manager's id will be updated in the 0102 do file. 
-
-order IDlse YearMonth ///
+order IDlse YearMonth IDlseMHR ///
     TransferSJV TransferSJVC TransferFunc TransferFuncC TransferSubFunc TransferSubFuncC ///
     ChangeSalaryGrade ChangeSalaryGradeC PromWL PromWLC ///
+    Func SubFunc Office ISOCode ///
     LogPayBonus LogPay LogBonus ///
-    StandardJob Func SalaryGrade Office SubFunc Org4 OfficeCode Pay Bonus Benefit Package ///
+    StandardJob ONETName ONETDistance ONETDistanceC ONET* ///
+    SalaryGrade Org4 OfficeCode Pay Bonus Benefit Package
 
 compress 
 save "${TempData}/01WorkersOutcomes.dta", replace 
