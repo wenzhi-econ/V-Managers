@@ -36,7 +36,7 @@ generate FT_HtoH_X_Post = FT_HtoH * FT_Post
 generate FT_HtoL_X_Post = FT_HtoL * FT_Post
 
 *!! Movers within 2 years after the event 
-bysort IDlse: egen Movers_2yrs = max(cond(inrange(FT_Rel_Time, 0, 24),  TransferSJ, .))
+bysort IDlse: egen Movers_2yrs = max(cond(inrange(FT_Rel_Time, 0, 24), TransferSJ, .))
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-2. DiD regressions 
