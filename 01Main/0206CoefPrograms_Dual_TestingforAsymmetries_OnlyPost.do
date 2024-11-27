@@ -2,7 +2,7 @@
 *?? program 1. calculate the quarter estimates from the monthly regression
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*?
 /*  
-*&& Program 1 evaluates the effects of gaining a FT mnager.
+*&& Program 1 evaluates the effects of gaining a FT manager.
 *&& First, I will calculates (\beta_{LtoH,s} - \beta_{LtoL,s}) - (\beta_{HtoL,s} - \beta_{HtoH,s}), and then aggregates the monthly coefficients to the quarter level. 
 *&& This program is suitable for those variables that can only be defined after the manager change event.
 *!! Month 0 is omitted in the regression, and Quarter 0 estimate is month 0 estimate, which is zero mechanically.
@@ -15,7 +15,7 @@ syntax, event_prefix(string) [POST_window_len(integer 84) outcome(varname numeri
 /*
 This program has one mandatory option, and two optional options.
 The required option specifies the variable name used to measure "High-flyer" managers.
-The second option sepcifies the post-event window length, with default value 84.
+The second option specifies the post-event window length, with default value 84.
 The last option specify the outcome variable, which will be used in generation of new variables to store the results.
 */
 local test_post_window_len = mod(`post_window_len', 3)
@@ -81,14 +81,11 @@ forvalues right_month_index = 3(3)`post_window_len' {
 }
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? step 5. store other summary statistics (unnecessary for now) 
+*-? step 5. store other summary statistics 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-/* if "`outcome'" != "" {
-    quietly summarize `outcome' if inrange(Month_to_First_ChangeM, -3, -1) & (`event_prefix'_LtoL==1 | `event_prefix'_LtoH==1)
-    local outcome_base_mean = r(mean)
-    local `outcome_base_mean' = string(outcome_base_mean, "%9.3f")
-    return local base_mean `outcome_base_mean'
-} */
+/* 
+Unnecessary for this program.
+*/
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? step 6. save the results 
@@ -105,10 +102,10 @@ return matrix coefmatrix = `final_results'
 end 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? program 2. calcualte p-values for the post-event estimates
+*?? program 2. calculate p-values for the post-event estimates
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 /* 
-*&& This program calcualtes the p-value for the following estimator: \sum_{s>0} {\beta_{LtoH,s} - \beta_{LtoL,s} - \beta_{HtoL,s} + \beta_{HtoH,s}}
+*&& This program calculates the p-value for the following estimator: \sum_{s>0} {\beta_{LtoH,s} - \beta_{LtoL,s} - \beta_{HtoL,s} + \beta_{HtoH,s}}
 *!! In this way, the returned scalar is the p-value for joint post-event dummies. 
 */
 

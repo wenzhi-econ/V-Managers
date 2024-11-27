@@ -2,7 +2,7 @@
 *?? program 1. calculate the quarter estimates from the monthly regression
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*?
 /*  
-*&& Program 1 evaluates the effects of gaining a FT mnager.
+*&& Program 1 evaluates the effects of gaining a FT manager.
 *&& First, I will calculates \beta_{LtoH,s} - \beta_{LtoL,s}, and then aggregates the monthly coefficients to the quarter level. 
 *&& This program is suitable for those variables that can only be defined after the manager change event.
 *!! Month 0 is omitted in the regression, and Quarter 0 estimate is month 0 estimate, which is zero mechanically.
@@ -15,7 +15,7 @@ syntax, event_prefix(string) [POST_window_len(integer 84) outcome(varname numeri
 /*
 This program has one mandatory option, and two optional options.
 The required option specifies the variable name used to measure "High-flyer" managers.
-The second option sepcifies the post-event window length, with default value 84.
+The second option specifies the post-event window length, with default value 84.
 The last option specify the outcome variable, which will be used in generation of new variables to store the results.
 */
 
@@ -81,14 +81,74 @@ forvalues right_month_index = 3(3)`post_window_len' {
 }
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? step 4. store other summary statistics (unnecessary for now) 
+*-? step 4. store other summary statistics
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-/* if "`outcome'" != "" {
-    quietly summarize `outcome' if inrange(Month_to_First_ChangeM, -3, -1) & (`event_prefix'_LtoL==1 | `event_prefix'_LtoH==1)
-    local outcome_base_mean = r(mean)
-    local `outcome_base_mean' = string(outcome_base_mean, "%9.3f")
-    return local base_mean `outcome_base_mean'
-} */
+
+*!! s-4-1. baseline means
+summarize `outcome' if e(sample)==1 & FT_Rel_Time==0 & (`event_prefix'_LtoL==1)
+    local LtoL_base_mean = r(mean)
+    generate LtoL_`outcome' = `LtoL_base_mean' if inrange(_n, 1, `total_quarters')
+
+summarize `outcome' if e(sample)==1 & FT_Rel_Time==0 & (`event_prefix'_LtoH==1)
+    local LtoH_base_mean = r(mean)
+    generate LtoH_`outcome' = `LtoH_base_mean' if inrange(_n, 1, `total_quarters')
+
+*!! s-4-2. coefficients on the "LtoL * relative period" dummies
+lincom `event_prefix'_LtoL_X_Post24
+    local coef = r(estimate)
+    local p    = r(p)
+    generate coef1_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+    generate coefp1_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+
+lincom `event_prefix'_LtoL_X_Post60
+    local coef = r(estimate)
+    local p    = r(p)
+    generate coef2_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+    generate coefp2_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+
+lincom `event_prefix'_LtoL_X_Post84
+    local coef = r(estimate)
+    local p    = r(p)
+    generate coef3_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+    generate coefp3_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+
+*!! s-4-3. coefficients on the "LtoH * relative period" dummies
+lincom `event_prefix'_LtoH_X_Post24
+    local coef = r(estimate)
+    local p    = r(p)
+    generate coef4_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+    generate coefp4_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+
+lincom `event_prefix'_LtoH_X_Post60
+    local coef = r(estimate)
+    local p    = r(p)
+    generate coef5_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+    generate coefp5_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+
+lincom `event_prefix'_LtoH_X_Post84
+    local coef = r(estimate)
+    local p    = r(p)
+    generate coef6_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+    generate coefp6_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+
+*!! s-4-4. relative increase 
+nlcom (_b[`event_prefix'_LtoH_X_Post24] - _b[`event_prefix'_LtoL_X_Post24]) / _b[`event_prefix'_LtoL_X_Post24]
+    local coef = r(table)["b", 1]
+    local p    = r(table)["pvalue", 1]
+    generate RI1_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+    generate rip1_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+
+nlcom (_b[`event_prefix'_LtoH_X_Post60] - _b[`event_prefix'_LtoL_X_Post60]) / _b[`event_prefix'_LtoL_X_Post60]
+    local coef = r(table)["b", 1]
+    local p    = r(table)["pvalue", 1]
+    generate RI2_`outcome'   = `coef' if inrange(_n, 1, `total_quarters')
+    generate rip2_`outcome'  = `p'    if inrange(_n, 1, `total_quarters')
+
+nlcom (_b[`event_prefix'_LtoH_X_Post84] - _b[`event_prefix'_LtoL_X_Post84]) / _b[`event_prefix'_LtoL_X_Post84]
+    local coef = r(table)["b", 1]
+    local p    = r(table)["pvalue", 1]
+    generate RI3_`outcome'   = `coef' if inrange(_n, 1, `total_quarters')
+    generate rip3_`outcome'  = `p'    if inrange(_n, 1, `total_quarters')
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? step 5. save the results 

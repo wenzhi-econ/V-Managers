@@ -2,7 +2,7 @@
 *?? program 1. calculate the quarter estimates from the monthly regression
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*?
 /*  
-*&& Program 1 evaluates the effects of gaining a FT mnager.
+*&& Program 1 evaluates the effects of gaining a FT manager.
 *&& First, I will calculates (\beta_{LtoH,s} - \beta_{LtoL,s}) - (\beta_{HtoL,s} - \beta_{HtoH,s}), and then aggregates the monthly coefficients to the quarter level. 
 *&& The aggregation method follows Zoë Cullen and Ricardo Perez-Truglia, "The Old Boys' Club: Schmoozing and the Gender Gap," American Economic Review 113, no. 7 (2023): 1703–40, https://doi.org/10.1257/aer.20210863.
 *!! Months -3, -2, -1 are omitted in the regression, so that quarter -1 estimate is guaranteed to be zero. 
@@ -16,7 +16,7 @@ syntax, event_prefix(string) [PRE_window_len(integer 36) POST_window_len(integer
 /*
 This program has one mandatory option, and three optional options.
 The required option specifies the variable name used to measure "High-flyer" managers.
-The second two options sepcify the pre- and post-event window length, with default values 36 and 84, respectively.
+The second two options specify the pre- and post-event window length, with default values 36 and 84, respectively.
 The last option specify the outcome variable, which will be used in generation of new variables to store the results.
 */
 local test_pre_window_len  = mod(`pre_window_len', 3)
@@ -111,14 +111,11 @@ forvalues right_month_index = 3(3)`post_window_len' {
 }
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? step 5. store other summary statistics (unnecessary for now) 
+*-? step 5. store other summary statistics 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-/* if "`outcome'" != "" {
-    quietly summarize `outcome' if inrange(Month_to_First_ChangeM, -3, -1) & (`event_prefix'_LtoL==1 | `event_prefix'_LtoH==1)
-    local outcome_base_mean = r(mean)
-    local `outcome_base_mean' = string(outcome_base_mean, "%9.3f")
-    return local base_mean `outcome_base_mean'
-} */
+/* 
+Unnecessary for this program.
+*/
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? step 6. save the results 
@@ -136,10 +133,10 @@ end
 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? program 2. calcualte p-values for the pre-trend
+*?? program 2. calculate p-values for the pre-trend
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 /* 
-*&& This program calcualtes the p-value for the following estimator: \sum_{s<0} {\beta_{LtoH,s} - \beta_{LtoL,s} - \beta_{HtoL,s} + \beta_{HtoH,s}}
+*&& This program calculates the p-value for the following estimator: \sum_{s<0} {\beta_{LtoH,s} - \beta_{LtoL,s} - \beta_{HtoL,s} + \beta_{HtoH,s}}
 *!! In this way, the returned scalar is the p-value for joint pre-event dummies. 
 */
 
@@ -161,10 +158,10 @@ return scalar pretrend = r(p)
 end 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? program 3. calcualte p-values for the post-event estimates
+*?? program 3. calculate p-values for the post-event estimates
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 /* 
-*&& This program calcualtes the p-value for the following estimator: \sum_{s>0} {\beta_{LtoH,s} - \beta_{LtoL,s} - \beta_{HtoL,s} + \beta_{HtoH,s}}
+*&& This program calculates the p-value for the following estimator: \sum_{s>0} {\beta_{LtoH,s} - \beta_{LtoL,s} - \beta_{HtoL,s} + \beta_{HtoH,s}}
 *!! In this way, the returned scalar is the p-value for joint post-event dummies. 
 */
 
