@@ -2,16 +2,21 @@
 This do file compares key variables between H- and L-type managers in the sample of WL2 managers.
 
 Input files:
-    "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta" <== constructed in 0104 do file
-    "${RawMNEData}/Univoice.dta" <== raw data 
-    "${RawMNEData}/EducationMax.dta" <== raw data 
-    "${TempData}/temp_MngrID_MFEBayesLogPay.dta" <== constructed in 0804 do file
+    "${TempData}/04MainOutcomesInEventStudies.dta" <== constructed in 0104 do file
+    "${RawMNEData}/Univoice.dta"                   <== raw data 
+    "${RawMNEData}/EducationMax.dta"               <== raw data 
+    "${RawCntyData}/6.WB IncomeGroup.dta"          <== raw data
+
+Intermediary files:
+    "${TempData}/temp_EverWL2WorkerPanel.dta"
+    "${TempData}/temp_MngrEffectiveness_Survey.dta"
 
 Output files:
-    "${TempData}/temp_EventMngrStatisticsHFVsNHF_withMngrFE.dta"
+    "${TempData}/temp_EventMngrStatisticsHFVsNHF.dta"
+    "${Results}/logfile_20241127_EventMngrHFvsNHFStatistics.txt"
 
 Results:
-    "${Results}/MngrHFvsNHFStatistics_withMngrFE.tex"
+    "${Results}/MngrHFvsNHFStatistics.tex"
 
 RA: WWZ 
 Time: 2024-11-05
@@ -19,7 +24,7 @@ Time: 2024-11-05
 
 capture log close 
 
-log using "${Results}/logfile_20241107_EventMngrHFvsNHFStatistics", replace text
+log using "${Results}/logfile_20241127_EventMngrHFvsNHFStatistics", replace text
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 1. obtain the final dataset consisting of event managers
@@ -29,7 +34,7 @@ log using "${Results}/logfile_20241107_EventMngrHFvsNHFStatistics", replace text
 *-? s-1-1. generate a list of managers who have been WL2 in the data
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear
 
 *!! get any employee who is of WL2 at any point in the data 
 generate WL2 = (WL==2) if WL!=.
@@ -51,7 +56,7 @@ save "${TempData}/temp_EverWL2WorkerPanel.dta", replace
 *-? s-1-2. process survey variable:  LineManagerMean
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
 
 merge 1:1 IDlse YearMonth using "${RawMNEData}/Univoice.dta", keepusing(LineManager)
     keep if _merge==3
@@ -68,10 +73,10 @@ duplicates drop
 save "${TempData}/temp_MngrEffectiveness_Survey.dta", replace 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-3. have a panle of event managers with key variables 
+*-? s-1-3. have a panel of event managers with key variables 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
 
 merge 1:1 IDlse YearMonth using "${TempData}/temp_EverWL2WorkerPanel.dta", keep(match) nogenerate 
     //&? keep only those matched workers 
@@ -81,7 +86,7 @@ drop IDlseMHR EarlyAgeM ///
     FT_Mngr_both_WL2 FT_Never_ChangeM FT_Rel_Time ///
     FT_LtoL FT_LtoH FT_HtoH FT_HtoL ///
     FT_Calend_Time_LtoL FT_Calend_Time_LtoH FT_Calend_Time_HtoH FT_Calend_Time_HtoL ///
-    _merge_outcome_EarlyAgeM ChangeMR
+    ChangeMR
         //&? To avoid confusion, this dataset consists of managers in the event studies. 
         //&? They are not analysis units in event studies, so these variables are useless.
 
@@ -116,17 +121,20 @@ merge m:1 IDlse using "${TempData}/temp_MngrEffectiveness_Survey.dta", keepusing
     drop _merge 
 
 *!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
-*!! s-1-2-4. Manager FE  
+*!! s-1-2-4. productivity (sales bonus)
 *!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
 
-rename IDlse IDlseMHR
-    //&? temporary step: for the purpose of merge
-
-merge m:1 IDlseMHR using "${TempData}/temp_MngrID_MFEBayesLogPay.dta" , keepusing(MFEBayesLogPay MFEBayesLogPay_Med MFEBayesLogPay_p75)
+merge 1:1 IDlse YearMonth using "${TempData}/05SalesProdOutcomes.dta" , keepusing(ProductivityStd)
     drop if _merge==2 
     drop _merge 
 
-rename IDlseMHR IDlse
+*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
+*!! s-1-2-5. VPA 
+*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
+
+merge 1:1 IDlse YearMonth using "${RawMNEData}/AllSnapshotWC.dta" , keepusing(VPA)
+    drop if _merge==2 
+    drop _merge 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2: generate relevant variables 
@@ -226,22 +234,8 @@ label variable func_rd "Research/Development function"
 label variable func_fi "Finance function"
 label variable func_o  "Other functions"
 
-/* *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-2-10: Local nationality
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-generate samecountry = (HomeCountryISOCode==ISOCode) if (!missing(ISOCode) & !missing(HomeCountryISOCode))
-
-label variable samecountry "Working in the home country" */
-
-/* *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-2-11: Developed country
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-generate developed = (Market==1) if inrange(Market, 1, 2)
-
-label variable developed "Working in a developed country */
-
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-2-12: Income group 
+*-? s-2-10: Income group 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 merge m:1 ISOCode using "${RawCntyData}/6.WB IncomeGroup.dta", keep(match master)
@@ -272,13 +266,13 @@ order IDlse YearMonth EarlyAge ///
     func_cd func_m func_sc func_o func_rd func_fi ///
     LowIncome UpperMidIncome
 
-save "${TempData}/temp_EventMngrStatisticsHFVsNHF_FullMngrSample.dta", replace 
+save "${TempData}/temp_EventMngrStatisticsHFVsNHF_SalesBonus_FullMngrSample.dta", replace 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 3: produce the summary table 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${TempData}/temp_EventMngrStatisticsHFVsNHF_FullMngrSample.dta", clear 
+use "${TempData}/temp_EventMngrStatisticsHFVsNHF_SalesBonus_FullMngrSample.dta", clear 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-3-1: demographics variables  
@@ -315,7 +309,6 @@ balancetable EarlyAge func_cd MidCareerHire LowIncome UpperMidIncome if occurren
     posthead("\hline \\ \multicolumn{4}{c}{\textit{Panel (b): work-related variables}} \\\\[-1ex]") ///
     prefoot("\hline") ///
     postfoot("")
-
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-3-3: performance-related variables  
