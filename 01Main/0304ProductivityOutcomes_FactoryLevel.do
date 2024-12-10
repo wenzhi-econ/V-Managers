@@ -2,10 +2,10 @@
 This do file conducts factory level analysis on the effects of high-flyer managers.
 
 Input: 
-    "${FinalData}/04MainOutcomesInEventStudies_EarlyAgeM.dta" <== constructed in 0104 do file
-    "${FinalData}/OfficeSize.dta"
-    "${FinalData}/TonsperFTEconservative.dta"
-    "${FinalData}/CPTwideOld.dta"
+    "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file
+    "${RawMNEData}/OfficeSize.dta"
+    "${RawMNEData}/TonsperFTEconservative.dta"       <== raw data
+    "${RawMNEData}/CPTwideOld.dta"                   <== raw data
 
 Output:
     "${TempData}/temp_FactoryLevelAnalysis.dta"
@@ -20,10 +20,12 @@ Time: 2024-10-14
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-1. personnal dataset 
+*-? s-1-1. personnel dataset 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
+
+generate Year = year(dofm(YearMonth))
 
 keep ///
     IDlse YearMonth Year OfficeCode ISOCode WL ///
@@ -41,7 +43,7 @@ order ///
 *!! s-1-1-1. office size 
 *!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
 
-merge m:1 OfficeCode YearMonth using "${FinalData}/OfficeSize.dta", keepusing(TotWorkersBC TotWorkersWC)
+merge m:1 OfficeCode YearMonth using "${RawMNEData}/OfficeSize.dta", keepusing(TotWorkersBC TotWorkersWC)
 keep if _merge ==3 
 drop _merge 
 
@@ -76,15 +78,14 @@ generate Mngr = (WL>=2) if WL!=.
 *-? s-1-2. productivity dataset 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-merge m:1 OfficeCode Year using "${FinalData}/TonsperFTEconservative.dta", keepusing(TotBigC TonsperFTEMean)
+merge m:1 OfficeCode Year using "${RawMNEData}/TonsperFTEconservative.dta", keepusing(TotBigC TonsperFTEMean)
 rename _merge merge_Output
-
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-3. cost dataset 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-merge m:1 OfficeCode Year using "${FinalData}/CPTwideOld.dta", keepusing(CPTFR CPTHC CPTPC)
+merge m:1 OfficeCode Year using "${RawMNEData}/CPTwideOld.dta", keepusing(CPTFR CPTHC CPTPC)
 rename _merge merge_Cost
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -146,7 +147,7 @@ reghdfe lp shareHF TotWorkersWC TotWorkersBC MShare, absorb(Year ISOCode TotBigC
 
 binscatter lp shareHF, ///
     absorb(ISOCode) controls(i.Year TotWorkersWC TotWorkersBC MShare i.TotBigC) ///
-    mcolor(ebblue) lcolor(orange) ///
+    mcolors(ebblue) lcolors(red) ///
     text(5.35 0.3 "beta = ${b_prod_HF}", size(medium)) ///
     text(5.3 0.3 "s.e. = ${se_prod_HF}", size(medium)) ///
     text(5.25 0.3 "N = ${N_prod_HF}", size(medium)) ///
@@ -165,7 +166,7 @@ reghdfe lcfr shareHF TotWorkersWC TotWorkersBC MShare, absorb(Year ISOCode) clus
 
 binscatter lcfr shareHF, ///
     absorb(ISOCode) controls(i.Year TotWorkersWC TotWorkersBC MShare) ///
-    mcolor(ebblue) lcolor(orange) ///
+    mcolor(ebblue) lcolor(red) ///
     text(6.3 0.3 "beta = ${b_cost_HF}", size(medium)) ///
     text(6.25 0.3 "s.e. = ${se_cost_HF}", size(medium)) ///
     text(6.20 0.3 "N = ${N_cost_HF}", size(medium)) ///
