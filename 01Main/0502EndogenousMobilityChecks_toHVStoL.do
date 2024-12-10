@@ -8,7 +8,7 @@ Notes on the regressions:
     (3) The worker does not have a simultaneous internal or lateral move.
 
 Input: 
-    "${TempData}/06_01SwitcherTeams_WorkerRestrictions.dta" <== created in 0106_01 do file
+    "${TempData}/06SwitcherTeams.dta" <== created in 0106 do file
 
 Output:
     "${Results}/logfile_20241123_EndogenousMobilityChecks_FullTransition.txt"
@@ -21,7 +21,7 @@ Time: 2024-11-23
 *?? step 1. preparations for regressions 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${TempData}/06_01SwitcherTeams_WorkerRestrictions.dta", clear 
+use "${TempData}/06SwitcherTeams.dta", clear 
 
 
 generate lAvPay = log(AvPay)

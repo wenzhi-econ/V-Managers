@@ -2,10 +2,10 @@
 This do file replicates Table B4 in the paper.
 
 Input:
-    "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta" <== created in 0104 do file 
-    "${TempData}/08SalesProdOutcomes.dta" <== created in 0108 do file 
-    "${RawMNEData}/ListWbecM.dta" <== raw data 
-    "${RawMNEData}/Univoice.dta" <== raw data 
+    "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file 
+    "${TempData}/05SalesProdOutcomes.dta"          <== created in 0105 do file 
+    "${RawMNEData}/ListWbecM.dta"                  <== raw data 
+    "${RawMNEData}/Univoice.dta"                   <== raw data 
 
 Results:
     "${Results}/ResultsConditionalOnLateralAndVerticalMoves.tex"
@@ -23,8 +23,8 @@ Time: 2024-11-10
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 *!! Productivity outcomes 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
-merge 1:1 IDlse YearMonth using "${TempData}/08SalesProdOutcomes.dta", keepusing(ProductivityStd Productivity ChannelFE)
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
+merge 1:1 IDlse YearMonth using "${TempData}/05SalesProdOutcomes.dta", keepusing(ProductivityStd Productivity ChannelFE)
     drop if _merge==2
     drop _merge
 
@@ -81,6 +81,8 @@ reghdfe LogPayBonus FT_LtoH ${control_vars} if WL==2 & FT_Mngr_both_WL2==1 & (FT
 merge m:1 IDlseMHR YearMonth using "${RawMNEData}/ListWbecM.dta"
     keep if _merge==3
     drop _merge
+
+generate Year = year(dofm(YearMonth))
 
 merge m:1 IDlse Year using "${RawMNEData}/Univoice.dta", keep(match master) nogenerate keepusing(LineManager)
 
