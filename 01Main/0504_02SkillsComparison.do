@@ -37,99 +37,13 @@ rename Topic2_3 Skills_Strategy
 rename Topic3_3 Skills_Talent 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 2. compare results
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-/* 
-balancetable (mean if EarlyAgeM == 0) (mean if EarlyAgeM == 1) (diff EarlyAgeM if EarlyAgeM != .) Topic1_3 Topic2_3 Topic3_3 using "${Results}/SkillsAfterLDA_HvsL.tex", ///
-    replace nonumbers nohead varlabels vce(robust) ///
-    prehead("\begin{tabular}{l*{3}c}" "\hline\hline \\ [-1.5ex]" "\hline" "& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} \\" "& \multicolumn{1}{c}{L-type} & \multicolumn{1}{c}{H-type} & \multicolumn{1}{c}{Difference} \\""\hline" ) ///
-    posthead("") ///
-    postfoot("\hline\hline \end{tabular}") */
-
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 3. naive simple regressions 
+*?? step 2. seemingly unrelated regressions
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-generate topic = _n if inrange(_n, 1, 3)
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-2-1. run regressions
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-matrix coeff_mat = J(3, 1, .)
-matrix lb_mat    = J(3, 1, .)
-matrix ub_mat    = J(3, 1, .)
-
-regress Skills_Project EarlyAgeM
-    lincom EarlyAgeM
-    matrix coeff_mat[1,1] = r(estimate)
-    matrix lb_mat[1,1] = r(lb)
-    matrix ub_mat[1,1] = r(ub)
-
-regress Skills_Strategy EarlyAgeM
-    lincom EarlyAgeM
-    matrix coeff_mat[2,1] = r(estimate)
-    matrix lb_mat[2,1] = r(lb)
-    matrix ub_mat[2,1] = r(ub)
-
-regress Skills_Talent EarlyAgeM
-    lincom EarlyAgeM
-    matrix coeff_mat[3,1] = r(estimate)
-    matrix lb_mat[3,1] = r(lb)
-    matrix ub_mat[3,1] = r(ub)
-
-matrix final_res = coeff_mat, lb_mat, ub_mat
-matrix colnames final_res = coeff lb ub
-svmat  final_res, names(col)
-
-twoway ///
-    (rbar ub lb topic, bcolor(ebblue) barwidth(0.03) vertical) ///
-    (scatter coeff topic, lcolor(ebblue) mcolor(white) mfcolor(white) msymbol(D) msize(0.9)) ///
-    , yline(0, lcolor(maroon)) ///
-    xlabel(1 "Project skills" 2 "Strategy skills" 3 "Talent skills", labsize(large)) xscale(range(0.5 3.5)) ///
-    title("Mean difference between H and L-type managers", span pos(12)) xtitle("") ///
-    legend(off)
-graph export "${Results}/SkillsAfterLDA_HvsL.pdf", replace as(pdf)
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 4. regressions using robust standard errors 
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-
-matrix coeff_mat = J(3, 1, .)
-matrix lb_mat    = J(3, 1, .)
-matrix ub_mat    = J(3, 1, .)
-
-regress Skills_Project EarlyAgeM, robust
-    lincom EarlyAgeM
-    matrix coeff_mat[1,1] = r(estimate)
-    matrix lb_mat[1,1] = r(lb)
-    matrix ub_mat[1,1] = r(ub)
-
-regress Skills_Strategy EarlyAgeM, robust
-    lincom EarlyAgeM
-    matrix coeff_mat[2,1] = r(estimate)
-    matrix lb_mat[2,1] = r(lb)
-    matrix ub_mat[2,1] = r(ub)
-
-regress Skills_Talent EarlyAgeM, robust
-    lincom EarlyAgeM
-    matrix coeff_mat[3,1] = r(estimate)
-    matrix lb_mat[3,1] = r(lb)
-    matrix ub_mat[3,1] = r(ub)
-
-matrix final_res = coeff_mat, lb_mat, ub_mat
-matrix colnames final_res = coeff_Robust lb_Robust ub_Robust
-svmat  final_res, names(col)
-
-twoway ///
-    (rbar ub_Robust lb_Robust topic, bcolor(ebblue) barwidth(0.03) vertical) ///
-    (scatter coeff_Robust topic, lcolor(ebblue) mcolor(white) mfcolor(white) msymbol(D) msize(0.9)) ///
-    , yline(0, lcolor(maroon)) ///
-    xlabel(1 "Project skills" 2 "Strategy skills" 3 "Talent skills", labsize(large)) xscale(range(0.5 3.5)) ///
-    title("Mean difference between H and L-type managers", span pos(12)) xtitle("") ///
-    legend(off)
-graph export "${Results}/SkillsAfterLDA_HvsL_Robust.pdf", replace as(pdf)
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 5.  
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 capture noisily {
     sureg (Skills_Project = EarlyAgeM) (Skills_Strategy = EarlyAgeM) (Skills_Talent = EarlyAgeM)
 }
@@ -137,27 +51,31 @@ capture noisily {
 
 sureg (Skills_Strategy = EarlyAgeM) (Skills_Talent = EarlyAgeM)
 
-di _b["Skills_Strategy:EarlyAgeM"] - 1.96 * _se["Skills_Strategy:EarlyAgeM"]
-di _b["Skills_Strategy:EarlyAgeM"] + 1.96 * _se["Skills_Strategy:EarlyAgeM"]
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-2-2. store the results
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-di _b["Skills_Talent:EarlyAgeM"] - 1.96 * _se["Skills_Talent:EarlyAgeM"]
-di _b["Skills_Talent:EarlyAgeM"] + 1.96 * _se["Skills_Talent:EarlyAgeM"]
+*!! topic index 
+generate topic = _n if inrange(_n, 1, 3)
 
+*!! coefficients
 generate coeff_SUR = _b["Skills_Strategy:EarlyAgeM"] if _n ==2 
 replace  coeff_SUR = _b["Skills_Talent:EarlyAgeM"]   if _n ==3
 
+*!! lower bound 
 generate lb_SUR = _b["Skills_Strategy:EarlyAgeM"] - 1.96 * _se["Skills_Strategy:EarlyAgeM"] if _n ==2 
 replace  lb_SUR = _b["Skills_Talent:EarlyAgeM"]   - 1.96 * _se["Skills_Talent:EarlyAgeM"]   if _n ==3
 
+*!! upper bound 
 generate ub_SUR = _b["Skills_Strategy:EarlyAgeM"] + 1.96 * _se["Skills_Strategy:EarlyAgeM"] if _n ==2 
 replace  ub_SUR = _b["Skills_Talent:EarlyAgeM"]   + 1.96 * _se["Skills_Talent:EarlyAgeM"]   if _n ==3
 
-twoway ///
-    (rbar ub_SUR lb_SUR topic if inrange(topic, 2, 3), bcolor(ebblue) barwidth(0.03) vertical) ///
-    (scatter coeff_SUR topic if inrange(topic, 2, 3), lcolor(ebblue) mcolor(white) mfcolor(white) msymbol(D) msize(0.9)) ///
-    , yline(0, lcolor(maroon)) /// 
+graph twoway ///
+    (bar coeff_SUR topic if inrange(topic, 2, 3), bfcolor(ebblue) barw(0.4)) ///
+    (rcap ub_SUR lb_SUR topic if inrange(topic, 2, 3), lcolor(red) lwidth(medthick)) ///
+    , legend(off) /// 
     xlabel(2 "Strategy skills" 3 "Talent skills", labsize(large)) ///
-    xscale(range(1.5 3.5)) ///
-    title("Mean difference between H and L-type managers", span pos(12)) xtitle("") ///
-    legend(off)
+    xscale(range(1.5 3.5)) ylabel(, grid gstyle(dot)) ///
+    title("Mean difference between H and L-type managers", span pos(12)) xtitle("")
+
 graph export "${Results}/SkillsAfterLDA_HvsL_SUR.pdf", replace as(pdf)
