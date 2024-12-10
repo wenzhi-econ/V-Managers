@@ -192,8 +192,8 @@ svmat  Hto_final_res, names(col)
 twoway ///
     (scatter coeff_gains_Inv year if inrange(year, 1, 5), lcolor(ebblue) mcolor(ebblue)) ///
     (rcap lb_gains_Inv ub_gains_Inv year if inrange(year, 1, 5), lcolor(ebblue)) ///
-    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06) ///
-    xlabel(1(1)5) ///
+    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06, grid gstyle(dot) labsize(medsmall)) ///
+    xlabel(1(1)5, labsize(medsmall)) ///
     xtitle(Years since manager change) title("Exit within given years after the event", span pos(12)) ///
     legend(off)
 graph export "${Results}/FT_Gains_ExitInv.pdf", as(pdf) replace 
@@ -201,8 +201,8 @@ graph export "${Results}/FT_Gains_ExitInv.pdf", as(pdf) replace
 twoway ///
     (scatter coeff_loss_Inv year if inrange(year, 1, 5), lcolor(ebblue) mcolor(ebblue)) ///
     (rcap lb_loss_Inv ub_loss_Inv year if inrange(year, 1, 5), lcolor(ebblue)) ///
-    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06) ///
-    xlabel(1(1)5) ///
+    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06, grid gstyle(dot) labsize(medsmall)) ///
+    xlabel(1(1)5, labsize(medsmall)) ///
     xtitle(Years since manager change) title("Exit within given years after the event", span pos(12)) ///
     legend(off)
 graph export "${Results}/FT_Loss_ExitInv.pdf", as(pdf) replace 
@@ -214,7 +214,7 @@ foreach var in $exit_outcomes {
 
     global LastPossibleEventTime = ${LastMonth} - 12 * `i'
 
-    reghdfe `var' FT_LtoH FT_HtoH FT_HtoL if FT_Event_Time<=${LastPossibleEventTime} & FT_Never_ChangeM==0, vce(cluster IDlseMHR) absorb(Office##Func AgeBand##Female)
+    reghdfe `var' FT_LtoH FT_HtoH FT_HtoL if FT_Event_Time<=${LastPossibleEventTime} & FT_Never_ChangeM==0, vce(cluster IDlseMHR) absorb(Office##Func AgeBand##Female FT_Event_Time)
         eststo `var'
         test FT_HtoH = FT_HtoL
             local p_Hto = r(p)
@@ -286,8 +286,8 @@ svmat  Hto_final_res, names(col)
 twoway ///
     (scatter coeff_gains_Vol year if inrange(year, 1, 5), lcolor(ebblue) mcolor(ebblue)) ///
     (rcap lb_gains_Vol ub_gains_Vol year if inrange(year, 1, 5), lcolor(ebblue)) ///
-    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06) ///
-    xlabel(1(1)5) ///
+    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06, grid gstyle(dot) labsize(medsmall)) ///
+    xlabel(1(1)5, labsize(medsmall)) ///
     xtitle(Years since manager change) title("Exit within given years after the event", span pos(12)) ///
     legend(off)
 graph export "${Results}/FT_Gains_ExitVol.pdf", as(pdf) replace 
@@ -295,8 +295,8 @@ graph export "${Results}/FT_Gains_ExitVol.pdf", as(pdf) replace
 twoway ///
     (scatter coeff_loss_Vol year if inrange(year, 1, 5), lcolor(ebblue) mcolor(ebblue)) ///
     (rcap lb_loss_Vol ub_loss_Vol year if inrange(year, 1, 5), lcolor(ebblue)) ///
-    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06) ///
-    xlabel(1(1)5) ///
+    , yline(0, lcolor(maroon)) yscale(range(-0.06 0.06)) ylabel(-0.06(0.02)0.06, grid gstyle(dot) labsize(medsmall)) ///
+    xlabel(1(1)5, labsize(medsmall)) ///
     xtitle(Years since manager change) title("Exit within given years after the event", span pos(12)) ///
     legend(off)
 graph export "${Results}/FT_Loss_ExitVol.pdf", as(pdf) replace 
@@ -307,7 +307,7 @@ foreach var in $exit_outcomes {
 
     global LastPossibleEventTime = ${LastMonth} - 12 * `i'
 
-    reghdfe `var' FT_LtoH FT_HtoH FT_HtoL if FT_Event_Time<=${LastPossibleEventTime} & FT_Never_ChangeM==0, vce(cluster IDlseMHR) absorb(Office##Func AgeBand##Female)
+    reghdfe `var' FT_LtoH FT_HtoH FT_HtoL if FT_Event_Time<=${LastPossibleEventTime} & FT_Never_ChangeM==0, vce(cluster IDlseMHR) absorb(Office##Func AgeBand##Female FT_Event_Time)
         eststo `var'
         test FT_HtoH = FT_HtoL
             local p_Hto = r(p)
