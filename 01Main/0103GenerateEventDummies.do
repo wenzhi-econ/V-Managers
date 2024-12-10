@@ -231,8 +231,6 @@ order IDlse YearMonth ///
     FT_Mngr_both_WL2 FT_Never_ChangeM ///
     FT_Rel_Time FT_LtoL FT_LtoH FT_HtoH FT_HtoL FT_Event_Time FT_Calend_Time_*
 
-label drop _all
-
 compress
 save "${TempData}/03EventStudyDummies.dta", replace
 
