@@ -115,11 +115,11 @@ forvalues right_month_index = 3(3)`post_window_len' {
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 *!! s-5-1. baseline means
-summarize `outcome' if e(sample)==1 & inrange(FT_Rel_Time, -3, -1) & (`event_prefix'_LtoL==1)
+summarize `outcome' if e(sample)==1 & inrange(`event_prefix'_Rel_Time, -3, -1) & (`event_prefix'_LtoL==1)
     local LtoL_base_mean = r(mean)
     generate LtoL_`outcome' = `LtoL_base_mean' if inrange(_n, 1, `total_quarters')
 
-summarize `outcome' if e(sample)==1 & inrange(FT_Rel_Time, -3, -1) & (`event_prefix'_LtoH==1)
+summarize `outcome' if e(sample)==1 & inrange(`event_prefix'_Rel_Time, -3, -1) & (`event_prefix'_LtoH==1)
     local LtoH_base_mean = r(mean)
     generate LtoH_`outcome' = `LtoH_base_mean' if inrange(_n, 1, `total_quarters')
 
