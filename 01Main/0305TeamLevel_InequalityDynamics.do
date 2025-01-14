@@ -13,11 +13,11 @@ Output:
     "${Results}/logfile_20241206TeamLevelInequality.txt"
 
 RA: WWZ 
-Time: 2024-12-06
+Time: 2025-01-14
 */
 
 capture log close
-log using "${Results}/logfile_20241206TeamLevelInequality", replace text
+log using "${Results}/logfile_20250114TeamLevelInequality", replace text
 
 use "${TempData}/06SwitcherTeams.dta", clear
 
@@ -153,6 +153,9 @@ foreach var in CVPay {
     *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
     *&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
     *&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
+
+    lincom ((FT_LtoH_X_Post82 + FT_LtoH_X_Post83 + FT_LtoH_X_Post84)/3)
+    lincom ((FT_LtoL_X_Post82 + FT_LtoL_X_Post83 + FT_LtoL_X_Post84)/3)   
 
     xlincom ///
         (((FT_LtoH_X_Post34 - FT_LtoL_X_Post34) + (FT_LtoH_X_Post35 - FT_LtoL_X_Post35) + (FT_LtoH_X_Post36 - FT_LtoL_X_Post36))/3) ///

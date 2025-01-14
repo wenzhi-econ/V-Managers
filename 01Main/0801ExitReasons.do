@@ -1,15 +1,15 @@
 /* 
-This do file compares H- and L-type managers in flexible project engagement.
+This do file compares firm leavers' exit reasons between those supervised by high-flyer managers and those who are supervised by low-flyer managers.
 
 Input:
-    "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta" <== constructed in 0104 do file 
-    "${RawMNEData}/ExitSurvey.dta"
+    "${TempData}/04MainOutcomesInEventStudies.dta" <== constructed in 0104 do file 
+    "${RawMNEData}/ExitSurvey.dta"                 <== raw data 
 
 Results:
-    "${Results}/FTFlexibleProjects_SelfConstructedData.tex"
+    "${Results}/FTExitReasons.tex"
 
 RA: WWZ 
-Time: 2024-10-15
+Time: 2025-01-13
 */
 
 
@@ -17,7 +17,7 @@ Time: 2024-10-15
 *?? step 1. obtain exit reasons variables 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
 merge 1:1 IDlse YearMonth using "${RawMNEData}/ExitSurvey.dta", keepusing(ReasonAnotherOrg) keep(match)
 
 keep  IDlse YearMonth IDlseMHR EarlyAgeM Office ISOCode Func ReasonAnotherOrg
@@ -58,4 +58,4 @@ esttab ReasonAnotherOrg4 ReasonAnotherOrg7 ReasonAnotherOrg2 ReasonAnotherOrg5 R
     stats(cmean N, labels("Mean, low-flyer" "N") fmt(%9.3f %9.0f)) ///
     prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lccccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Change of career} & \multicolumn{1}{c}{Line manager}  & \multicolumn{1}{c}{Cultural fit} & \multicolumn{1}{c}{Competitive pay} & \multicolumn{1}{c}{Career progression} & \multicolumn{1}{c}{Getting work done} & \multicolumn{1}{c}{Work-life balance}  \\") ///
     prefoot("\hline")  ///
-    postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker who left the firm and had the exit survey. Standard errors are clustered by manager. Controls include year-month, country, office, and function FE. The outcome variable equals to one if the worker left the firm due to the corresponding reason. The manager's quality is measured in the month of the worker's exit" "\end{tablenotes}")
+    postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker who left the firm and had the exit survey. Standard errors are clustered by manager. Controls include year-month, country, office, and function FE. The outcome variable equals to one if the worker left the firm due to the corresponding reason. The manager's quality is measured in the month of the worker's exit." "\end{tablenotes}")

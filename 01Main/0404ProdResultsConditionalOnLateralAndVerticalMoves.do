@@ -41,6 +41,13 @@ bysort IDlse: egen Movers_2yrs = max(cond(inrange(FT_Rel_Time, 0, 24), TransferS
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-2. DiD regressions 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+/* 
+impt: 
+Notice that the following two regressions are econmetrically equivalent:
+    reghdfe ProductivityStd FT_LtoL_X_Post FT_LtoH_X_Post if (FT_LtoL==1 | FT_LtoH==1) & LogPayBonus!=., absorb(IDlse YearMonth) cluster(IDlseMHR)
+        lincom FT_LtoH_X_Post - FT_LtoL_X_Post
+    reghdfe ProductivityStd FT_Post FT_LtoH_X_Post if (FT_LtoL==1 | FT_LtoH==1) & LogPayBonus!=., absorb(IDlse YearMonth) cluster(IDlseMHR)
+*/
 
 reghdfe ProductivityStd FT_Post FT_LtoH_X_Post if (FT_LtoL==1 | FT_LtoH==1) & LogPayBonus!=., absorb(IDlse YearMonth) cluster(IDlseMHR)
     eststo Prod

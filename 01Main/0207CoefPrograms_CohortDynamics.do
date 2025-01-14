@@ -61,25 +61,23 @@ matrix `Hto_quarter_index_mat' = J(`total_quarters', 1, .)
 local total_month = `pre_window_len' + `post_window_len' + 1 // 121
 
 *&& cs stands for cohort share 
-tempname cs_LtoL_2011 cs_LtoH_2011 cs_HtoH_2011 cs_HtoL_2011
-tempname cs_LtoL_2012 cs_LtoH_2012 cs_HtoH_2012 cs_HtoL_2012
-tempname cs_LtoL_2013 cs_LtoH_2013 cs_HtoH_2013 cs_HtoL_2013
-tempname cs_LtoL_2014 cs_LtoH_2014 cs_HtoH_2014 cs_HtoL_2014
-tempname cs_LtoL_2015 cs_LtoH_2015 cs_HtoH_2015 cs_HtoL_2015
-tempname cs_LtoL_2016 cs_LtoH_2016 cs_HtoH_2016 cs_HtoL_2016
-tempname cs_LtoL_2017 cs_LtoH_2017 cs_HtoH_2017 cs_HtoL_2017
-tempname cs_LtoL_2018 cs_LtoH_2018 cs_HtoH_2018 cs_HtoL_2018
-tempname cs_LtoL_2019 cs_LtoH_2019 cs_HtoH_2019 cs_HtoL_2019
-tempname cs_LtoL_2020 cs_LtoH_2020 cs_HtoH_2020 cs_HtoL_2020
+tempname cs_LtoL_2011 cs_LtoH_2011
+tempname cs_LtoL_2012 cs_LtoH_2012
+tempname cs_LtoL_2013 cs_LtoH_2013
+tempname cs_LtoL_2014 cs_LtoH_2014
+tempname cs_LtoL_2015 cs_LtoH_2015
+tempname cs_LtoL_2016 cs_LtoH_2016
+tempname cs_LtoL_2017 cs_LtoH_2017
+tempname cs_LtoL_2018 cs_LtoH_2018
+tempname cs_LtoL_2019 cs_LtoH_2019
+tempname cs_LtoL_2020 cs_LtoH_2020
 
 forvalues yy = 2011(1)2020 {
     matrix `cs_LtoL_`yy'' = J(`total_month', 1, .)
     matrix `cs_LtoH_`yy'' = J(`total_month', 1, .)
-    matrix `cs_HtoH_`yy'' = J(`total_month', 1, .)
-    matrix `cs_HtoL_`yy'' = J(`total_month', 1, .) 
 }
 
-    // all of them (in total, 4 * 10 matrices) are 121 by 1 matrix to store the monthly weights for quarterly aggregations 
+    // all of them (in total, 2 * 10 matrices) are 121 by 1 matrix to store the monthly weights for quarterly aggregations 
 
 forvalues yy = 2011(1)2020 {
     forvalues month_index = `pre_window_len'(-1)1 { // 36, 35, 34, ..., 1
@@ -88,10 +86,6 @@ forvalues yy = 2011(1)2020 {
             matrix `cs_LtoL_`yy''[`month_index_for_weights', 1] = r(mean)
         summarize cohort`yy' if FT_Rel_Time==-`month_index' & FT_LtoH==1 & e(sample)==1
             matrix `cs_LtoH_`yy''[`month_index_for_weights', 1] = r(mean)
-        summarize cohort`yy' if FT_Rel_Time==-`month_index' & FT_HtoH==1 & e(sample)==1
-            matrix `cs_HtoH_`yy''[`month_index_for_weights', 1] = r(mean)
-        summarize cohort`yy' if FT_Rel_Time==-`month_index' & FT_HtoL==1 & e(sample)==1
-            matrix `cs_HtoL_`yy''[`month_index_for_weights', 1] = r(mean)
     }
 
     forvalues month_index = 0(1)`post_window_len' { // 0, 1, 2, ...., 84
@@ -100,10 +94,6 @@ forvalues yy = 2011(1)2020 {
             matrix `cs_LtoL_`yy''[`month_index_for_weights', 1] = r(mean)
         summarize cohort`yy' if FT_Rel_Time==`month_index' & FT_LtoH==1 & e(sample)==1
             matrix `cs_LtoH_`yy''[`month_index_for_weights', 1] = r(mean)
-        summarize cohort`yy' if FT_Rel_Time==`month_index' & FT_HtoH==1 & e(sample)==1
-            matrix `cs_HtoH_`yy''[`month_index_for_weights', 1] = r(mean)
-        summarize cohort`yy' if FT_Rel_Time==`month_index' & FT_HtoL==1 & e(sample)==1
-            matrix `cs_HtoL_`yy''[`month_index_for_weights', 1] = r(mean)
     }
     
 }
@@ -280,20 +270,18 @@ matrix `Hto_quarter_index_mat' = J(`total_quarters', 1, .)
 local total_month = `pre_window_len' + `post_window_len' + 1 // 97
 
 *&& cs stands for cohort share 
-tempname cs_LtoL_2011 cs_LtoH_2011 cs_HtoH_2011 cs_HtoL_2011
-tempname cs_LtoL_2012 cs_LtoH_2012 cs_HtoH_2012 cs_HtoL_2012
-tempname cs_LtoL_2013 cs_LtoH_2013 cs_HtoH_2013 cs_HtoL_2013
-tempname cs_LtoL_2014 cs_LtoH_2014 cs_HtoH_2014 cs_HtoL_2014
-tempname cs_LtoL_2015 cs_LtoH_2015 cs_HtoH_2015 cs_HtoL_2015
-tempname cs_LtoL_2016 cs_LtoH_2016 cs_HtoH_2016 cs_HtoL_2016
-tempname cs_LtoL_2017 cs_LtoH_2017 cs_HtoH_2017 cs_HtoL_2017
-tempname cs_LtoL_2018 cs_LtoH_2018 cs_HtoH_2018 cs_HtoL_2018
-tempname cs_LtoL_2019 cs_LtoH_2019 cs_HtoH_2019 cs_HtoL_2019
-tempname cs_LtoL_2020 cs_LtoH_2020 cs_HtoH_2020 cs_HtoL_2020
+tempname cs_HtoH_2011 cs_HtoL_2011
+tempname cs_HtoH_2012 cs_HtoL_2012
+tempname cs_HtoH_2013 cs_HtoL_2013
+tempname cs_HtoH_2014 cs_HtoL_2014
+tempname cs_HtoH_2015 cs_HtoL_2015
+tempname cs_HtoH_2016 cs_HtoL_2016
+tempname cs_HtoH_2017 cs_HtoL_2017
+tempname cs_HtoH_2018 cs_HtoL_2018
+tempname cs_HtoH_2019 cs_HtoL_2019
+tempname cs_HtoH_2020 cs_HtoL_2020
 
 forvalues yy = 2011(1)2020 {
-    matrix `cs_LtoL_`yy'' = J(`total_month', 1, .)
-    matrix `cs_LtoH_`yy'' = J(`total_month', 1, .)
     matrix `cs_HtoH_`yy'' = J(`total_month', 1, .)
     matrix `cs_HtoL_`yy'' = J(`total_month', 1, .) 
 }
@@ -303,10 +291,6 @@ forvalues yy = 2011(1)2020 {
 
     forvalues month_index = `pre_window_len'(-1)1 { // 36, 35, 34, ..., 1
         local month_index_for_weights = `pre_window_len' + 1 - `month_index' // 36 corresponds to 1, 35 corresponds to 2, ... 1 corresponds to 36
-        summarize cohort`yy' if FT_Rel_Time==-`month_index' & FT_LtoL==1 & e(sample)==1
-            matrix `cs_LtoL_`yy''[`month_index_for_weights', 1] = r(mean)
-        summarize cohort`yy' if FT_Rel_Time==-`month_index' & FT_LtoH==1 & e(sample)==1
-            matrix `cs_LtoH_`yy''[`month_index_for_weights', 1] = r(mean)
         summarize cohort`yy' if FT_Rel_Time==-`month_index' & FT_HtoH==1 & e(sample)==1
             matrix `cs_HtoH_`yy''[`month_index_for_weights', 1] = r(mean)
         summarize cohort`yy' if FT_Rel_Time==-`month_index' & FT_HtoL==1 & e(sample)==1
@@ -315,10 +299,6 @@ forvalues yy = 2011(1)2020 {
 
     forvalues month_index = 0(1)`post_window_len' { // 0, 1, 2, ...., 60
         local month_index_for_weights = `pre_window_len' + 1 + `month_index' // 0 corresponds to 37, 1 corresponds to 38, ... 60 corresponds to 97
-        summarize cohort`yy' if FT_Rel_Time==`month_index' & FT_LtoL==1 & e(sample)==1
-            matrix `cs_LtoL_`yy''[`month_index_for_weights', 1] = r(mean)
-        summarize cohort`yy' if FT_Rel_Time==`month_index' & FT_LtoH==1 & e(sample)==1
-            matrix `cs_LtoH_`yy''[`month_index_for_weights', 1] = r(mean)
         summarize cohort`yy' if FT_Rel_Time==`month_index' & FT_HtoH==1 & e(sample)==1
             matrix `cs_HtoH_`yy''[`month_index_for_weights', 1] = r(mean)
         summarize cohort`yy' if FT_Rel_Time==`month_index' & FT_HtoL==1 & e(sample)==1
@@ -417,7 +397,7 @@ forvalues right_month_index = 3(3)`post_window_len' {
             (`cs_HtoH_2011'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2011 + `cs_HtoH_2012'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2012 + `cs_HtoH_2013'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2013 + `cs_HtoH_2014'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2014 + `cs_HtoH_2015'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2015 + `cs_HtoH_2016'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2016 + `cs_HtoH_2017'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2017 + `cs_HtoH_2018'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2018 + `cs_HtoH_2019'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2019 + `cs_HtoH_2020'[`mi_weight', 1] * `event_prefix'_HtoH_X_Post`middle_month_index'_2020) ///
         )/3 + ///
         ( ///
-            (`cs_HtoL_2011'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2011 + `cs_HtoL_2012'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2012 + `cs_HtoL_2013'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2013 + `cs_HtoL_2014'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2014 + `cs_HtoL_2015'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2015 + `cs_HtoL_2016'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2016 + `cs_HtoL_2017'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2017 + `cs_HtoL_2018'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2018 + `cs_HtoL_2019'[`ri_weight', 1] * `event_prefix'_LtoH_X_Post`right_month_index'_2019 + `cs_LtoH_2020'[`ri_weight', 1] * `event_prefix'_LtoH_X_Post`right_month_index'_2020) - ///
+            (`cs_HtoL_2011'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2011 + `cs_HtoL_2012'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2012 + `cs_HtoL_2013'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2013 + `cs_HtoL_2014'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2014 + `cs_HtoL_2015'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2015 + `cs_HtoL_2016'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2016 + `cs_HtoL_2017'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2017 + `cs_HtoL_2018'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2018 + `cs_HtoL_2019'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2019 + `cs_HtoL_2020'[`ri_weight', 1] * `event_prefix'_HtoL_X_Post`right_month_index'_2020) - ///
             (`cs_HtoH_2011'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2011 + `cs_HtoH_2012'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2012 + `cs_HtoH_2013'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2013 + `cs_HtoH_2014'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2014 + `cs_HtoH_2015'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2015 + `cs_HtoH_2016'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2016 + `cs_HtoH_2017'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2017 + `cs_HtoH_2018'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2018 + `cs_HtoH_2019'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2019 + `cs_HtoH_2020'[`ri_weight', 1] * `event_prefix'_HtoH_X_Post`right_month_index'_2020) ///
         )/3, level(95)
     

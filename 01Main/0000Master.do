@@ -28,6 +28,7 @@ if	"`c(username)'" == "wenzhi0" {
     ssc install xlincom, replace
     ssc install coefplot, replace
     ssc install estout, replace
+    ssc install ppmlhdfe, replace
 }
 
 if  "`c(username)'" =="virginiaminni" {
@@ -88,29 +89,32 @@ version 17.0
 *-? dataset construction
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-/* capture log close  */
-/* log using "${Results}/001DataCleaning/logfile_20241126_DataConstruction", replace text */
+/* capture log close 
+log using "${Results}/001DataCleaning/logfile_20250113_DataConstruction", replace text
 
-/* do "${DoFiles}/01Main/0101GenerateWorkerOutcomes.do" */
-/* do "${DoFiles}/01Main/0102HFMeasure.do" */
-/* do "${DoFiles}/01Main/0103GenerateEventDummies.do" */
-/* do "${DoFiles}/01Main/0104GenerateHeterogeneityIndicators.do" */
-/* do "${DoFiles}/01Main/0105SalesProductivityDatasets.do" */
-/* do "${DoFiles}/01Main/0106TeamLevelDataSets.do" */
+do "${DoFiles}/01Main/0101GenerateWorkerOutcomes.do"
+do "${DoFiles}/01Main/0102HFMeasure.do"
+do "${DoFiles}/01Main/0103GenerateEventDummies.do"
+do "${DoFiles}/01Main/0104GenerateHeterogeneityIndicators.do"
+do "${DoFiles}/01Main/0105SalesProductivityDatasets.do"
+do "${DoFiles}/01Main/0106TeamLevelDataset.do"
 
-/* log close */
+//&? It takes around 15 min to create all the main datasets used in the paper.
+log close */
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? event studies 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-*!! quarterly aggregation programs
-/* do "${DoFiles}/01Main/0201CoefPrograms_LHminusLL.do" 
+/* *!! quarterly aggregation programs
+do "${DoFiles}/01Main/0201CoefPrograms_LHminusLL.do" 
 do "${DoFiles}/01Main/0202CoefPrograms_HLminusHH.do"
 do "${DoFiles}/01Main/0203CoefPrograms_Dual_TestingforAsymmetries.do"
 do "${DoFiles}/01Main/0204CoefPrograms_LHminusLL_OnlyPost.do" 
 do "${DoFiles}/01Main/0205CoefPrograms_HLminusHH_OnlyPost.do"
-do "${DoFiles}/01Main/0206CoefPrograms_Dual_TestingforAsymmetries_OnlyPost.do" */
+do "${DoFiles}/01Main/0206CoefPrograms_Dual_TestingforAsymmetries_OnlyPost.do"
+do "${DoFiles}/01Main/0207CoefPrograms_CohortDynamics.do" */
+
 
 *!! event study regressions 
 /* do "${DoFiles}/01Main/0301_01TwoMainOutcomesInEventStudies.do"

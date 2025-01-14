@@ -12,7 +12,7 @@ Results:
     "${Results}/HeterogeneityInFourMainOutcomes.tex"
 
 RA: WWZ 
-Time: 2024-11-20
+Time: 2025-01-13
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -21,7 +21,7 @@ Time: 2024-11-20
 
 use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
 
-global Hetero_Vars TenureMHigh SameOffice Young TenureLow SameGender OfficeSizeHigh JobNum LaborRegHigh LowFLFP WPerf WPerf0p10p90 TeamPerfMBase DiffM2y
+global Hetero_Vars TenureMHigh SameOffice Young SameGender OfficeSizeHigh JobNum LaborRegHigh LowFLFP WPerf WPerf0p10p90 TeamPerfMBase
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-1. "event * post" dummies
@@ -228,22 +228,16 @@ esttab SameOffice_CSGC SameOffice_TSJVC SameOffice_PWLC SameOffice_Exit using "$
     keep(lc_1) coeflabels(lc_1 "Same office as manager") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
-esttab Young_CSGC Young_TSJVC Young_PWLC Young_Exit using "${Results}/HeterogeneityInFourMainOutcomes.tex" ///
-    , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
-    nomtitles collabels(,none) ///
-    keep(lc_1) coeflabels(lc_1 "Worker age, young") ///
-    cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
-    prehead("") posthead("") prefoot("") postfoot("")
-esttab TenureLow_CSGC TenureLow_TSJVC TenureLow_PWLC TenureLow_Exit using "${Results}/HeterogeneityInFourMainOutcomes.tex" ///
-    , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
-    nomtitles collabels(,none) ///
-    keep(lc_1) coeflabels(lc_1 "Worker tenure, low") ///
-    cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
-    prehead("") posthead("") prefoot("") postfoot("")
 esttab SameGender_CSGC SameGender_TSJVC SameGender_PWLC SameGender_Exit using "${Results}/HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Same gender as manager") ///
+    cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
+    prehead("") posthead("") prefoot("") postfoot("")
+esttab Young_CSGC Young_TSJVC Young_PWLC Young_Exit using "${Results}/HeterogeneityInFourMainOutcomes.tex" ///
+    , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
+    nomtitles collabels(,none) ///
+    keep(lc_1) coeflabels(lc_1 "Worker age, young") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
 
@@ -288,11 +282,5 @@ esttab TeamPerfMBase_CSGC TeamPerfMBase_TSJVC TeamPerfMBase_PWLC TeamPerfMBase_E
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Team performance, high (p50)") ///
-    cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
-    prehead("") posthead("") prefoot("") postfoot("")
-esttab DiffM2y_CSGC DiffM2y_TSJVC DiffM2y_PWLC DiffM2y_Exit using "${Results}/HeterogeneityInFourMainOutcomes.tex" ///
-    , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
-    nomtitles collabels(,none) ///
-    keep(lc_1) coeflabels(lc_1 "Manager change, post transition") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker-year-month. 95\% confidence intervals used and standard errors are clustered by manager. Coefficients in columns (1), (2), and (3) are estimated from a regression as in equation \ref{eq:het} and the table reports the coefficient at the 20th quarter since the manager transition. Controls include worker FE and year months FE. Coefficients in column (4) are estimated from a cross-sectional regression, where the outcome variable is whether the worker left the firm within 2 years after the treatment, and where controls include the fixed effects of event time, the interaction of office and function, as well as the interaction between age band and gender. Each row displays the differential heterogeneous impact of each respective variable. Panel (a): the first row looks at the differential impact between having the manager with over and under 7 years of tenure (the median tenure years for high-flyers managers); the second row looks at the differential impact between sharing and not sharing the office with the manager; the third row looks at the differential impact between being under and over 30 years old; the fourth row looks at the differential impact between being under and over 2 years of tenure; the fifth row looks at the differential impact between sharing and not sharing the same gender with the manager. Panel (b): the first row looks at the differential impact between large and small offices (above and below the median number of workers); the second row looks at the differential impact between offices with high and low number of different jobs (above and below median); the third row looks at the differential impact between countries having stricter and laxer labor laws (above and below median); the fourth row looks at the differential impact between the gender gap (women - men) in countries with the female over male labor force participation ratio above and below median. Panel (c): the first row looks at the differential impact between better and worse performing workers at baseline in terms of salary growth; the second row looks at the differential impact between the top 10\% and the bottom 10\% workers in terms of salary growth; the third row looks at the differential impact between better and worse performing teams at baseline in terms of salary growth; the fourth row looks at the differential impact between workers changing and not changing the manager 2 years after the transition." "\end{tablenotes}")

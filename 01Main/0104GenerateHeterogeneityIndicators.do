@@ -19,11 +19,12 @@ Input:
     "${TempData}/03EventStudyDummies.dta"    <== created in 0103 do file 
     "${RawCntyData}/2.WEF ProblemFactor.dta" <== raw data (country level)
     "${RawCntyData}/3.WB FMShares Decade"    <== raw data (country level)
-    "${FinalData}/MType.dta"                 ==> not self-constructed, taken as raw datasets for now
+    "${TempData}/01WorkersOutcomes.dta"      <== created in 0101 do file 
     
 Output:
-    ${TempData}/temp_Mngr_Characteristics.dta <== auxiliary dataset 
-    "${TempData}/04MainOutcomesInEventStudies.dta" <== key output dataset
+    "${TempData}/temp_Mngr_Characteristics.dta"      <== auxiliary dataset 
+    "${TempData}/temp_Mngr_TeamPayGrowth.dta"        <== auxiliary dataset 
+    "${TempData}/04MainOutcomesInEventStudies.dta"   <== key output dataset
 
 Description of the Output Dataset:
     On the one hand, it adds more heterogeneity indicators used in analysis to the "${TempData}/03EventStudyDummies.dta" dataset.
@@ -33,7 +34,7 @@ Description of the Output Dataset:
         All subsequent individual-level analysis will be mainly using this dataset!
 
 RA: WWZ 
-Time: 2024-11-26
+Time: 2025-01-13
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -43,6 +44,10 @@ Time: 2024-11-26
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-1. manager characteristics
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
+*!! s-1-1-1. managers' personal characteristics
+*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
 
 use "${RawMNEData}/AllSnapshotWC.dta", clear 
 sort IDlse YearMonth
@@ -59,6 +64,19 @@ rename IDlse IDlseMHR
 label drop _all 
 
 save "${TempData}/temp_Mngr_Characteristics.dta", replace 
+
+*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
+*!! s-1-1-2. managers' team-level average pay growth rates
+*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
+
+use "${TempData}/01WorkersOutcomes.dta", clear 
+
+xtset IDlse YearMonth
+generate PayGrowth = LogPayBonus - l.LogPayBonus
+
+collapse (mean) AvPayGrowth = PayGrowth, by(IDlseMHR YearMonth)
+
+save "${TempData}/temp_Mngr_TeamPayGrowth.dta", replace
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-2. merge manager characteristics back to the main datasets
@@ -162,7 +180,11 @@ generate JobNum1 = (JobNumOffice1 >= r(p50)) if JobNumOffice1!=.
 merge m:1 ISOCode Year using "${RawCntyData}/2.WEF ProblemFactor.dta", keepusing(LaborRegWEF LaborRegWEFB)
     keep if _merge!=2
     drop _merge 
-bysort IDlse: egen LaborRegHigh1= mean(cond(FT_Rel_Time==0, LaborRegWEFB, .))
+bysort IDlse: egen LaborReg= mean(cond(FT_Rel_Time==0, LaborRegWEF, .))
+
+summarize LaborReg if q_eventstudies==1, detail
+generate  LaborRegHigh1 = 1 if LaborReg>=r(p50) & q_eventstudies==1 // median
+replace   LaborRegHigh1 = 0 if LaborRegHigh1==. & LaborReg!=.
 
 *!! LowFLFP1
 generate Cohort = AgeBand
@@ -194,7 +216,7 @@ rename WPerf0B WPerf1
 rename WPerf0p10p90B WPerf0p10p901
 
 *!! TeamPerfMBase1
-merge m:1 IDlseMHR YearMonth using "${FinalData}/MType.dta", keepusing(AvPayGrowth)
+merge m:1 IDlseMHR YearMonth using "${TempData}/temp_Mngr_TeamPayGrowth.dta", keepusing(AvPayGrowth)
     keep if _merge!=2
     drop _merge 
 bysort IDlse: egen TeamPerf1 = mean(cond(inrange(FT_Rel_Time, -24, -1), AvPayGrowth, .))
