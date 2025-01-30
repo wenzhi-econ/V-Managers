@@ -38,6 +38,35 @@ generate FT_HtoL_X_Post = FT_HtoL * FT_Post
 *!! Movers within 2 years after the event 
 bysort IDlse: egen Movers_2yrs = max(cond(inrange(FT_Rel_Time, 0, 24), TransferSJ, .))
 
+*!! Descriptive: countries for which we have productivity data 
+tab ISOCode if ProductivityStd!=. & (FT_LtoL==1 | FT_LtoH==1) & LogPayBonus!=.
+/* 
+ISO_COUNTRY |
+      _CODE |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        BLR |        141        0.22        0.22
+        COL |        234        0.37        0.59
+        CRI |        620        0.97        1.56
+        ECU |         21        0.03        1.59
+        GRC |      2,275        3.57        5.16
+        GTM |        500        0.78        5.94
+        HND |        277        0.43        6.38
+        IDN |      6,644       10.41       16.79
+        IND |     31,723       49.72       66.51
+        ITA |      4,670        7.32       73.83
+        MEX |      8,312       13.03       86.86
+        MYS |        636        1.00       87.86
+        NIC |        392        0.61       88.47
+        PAN |         39        0.06       88.53
+        PHL |      1,043        1.63       90.17
+        RUS |      5,253        8.23       98.40
+        SGP |          3        0.00       98.41
+        SLV |        600        0.94       99.35
+        ZAF |        417        0.65      100.00
+------------+-----------------------------------
+      Total |     63,800      100.00
+*/
+
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-2. DiD regressions 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -132,4 +161,4 @@ esttab Prod Prod_Movers LogPayBonus_Movers LogPayBonus_Gain MScore_Gain MScoreB_
     prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccccc}" "\toprule" "\toprule" "& & \multicolumn{2}{c}{Conditional on lateral move} & \multicolumn{3}{c}{Conditional on vertical move} \\" "\addlinespace[10pt] \cmidrule(lr){3-4} \cmidrule(lr){5-7} \\" " & \multicolumn{1}{c}{Sales bonus (s.d.)}  & \multicolumn{1}{c}{Sales bonus (s.d.)}  & \multicolumn{1}{c}{Pay + bonus (in logs)} & \multicolumn{1}{c}{Pay + bonus (in logs)} & \multicolumn{1}{c}{Effective leader} & \multicolumn{1}{c}{High Effective leader} \\ ") ///
     posthead("\hline") ///
     prefoot("\hline") ///
-    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item Notes. An observation is a employee-month. Standard errors clustered at the manager level. Column (1) is a DiD specification as equation \ref{eq:sales} on the sample of LtoL and LtoH workers. Columns (2) and (3) are the same DiD specification conditional on the worker making at least one lateral moves within 2 years after the event.  Columns (4), (5), and (6) are estimated using periods after the LtoL and LtoH workers are promoted as managers. Since they can only be promoted as managers after the manager transition events, this is not a DiD design, and the estimated coefficients on whether the worker is in the LtoH event group are reported. \emph{Sales bonus (s.d.)} is normalized sales bonus as a measure of productivity. \emph{Pay + bonus (in logs)} is the sum of regular pay and additional bonuses. \emph{Effective leader score} is the workers' anonymous rating of the manager via the survey question \emph{My line manager is an effective leader} with scale 1-5, which is asked every year in the annual survey and the overall mean is 4.1. \emph{High Effective leader score} is a binary variable indicating if the score is larger than 4." "\end{tablenotes}")
+    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item Notes. An observation is a employee-month. Standard errors clustered at the manager level. Column (1) is a DiD specification as equation \ref{eq:sales} on the sample of LtoL and LtoH workers. Columns (2) and (3) are the same DiD specification conditional on the worker making at least one lateral moves within 2 years after the event.  Columns (4), (5), and (6) are estimated using periods after the LtoL and LtoH workers are promoted as managers. Since they can only be promoted as managers after the manager transition events, this is not a DiD design, and the estimated coefficients on whether the worker is in the LtoH event group are reported. \emph{Sales bonus (s.d.)} is normalized sales bonus as a measure of productivity. The variable is available in the following countries: BLR, COL, CRI, ECU, GRC, GTM, HND, IDN, IND, ITA, MEX, MYS, NIC, PAN, PHL, RUS, SGP, SLV, ZAF. \emph{Pay + bonus (in logs)} is the sum of regular pay and additional bonuses. \emph{Effective leader score} is the workers' anonymous rating of the manager via the survey question \emph{My line manager is an effective leader} with scale 1-5, which is asked every year in the annual survey and the overall mean is 4.1. \emph{High Effective leader score} is a binary variable indicating if the score is larger than 4." "\end{tablenotes}")

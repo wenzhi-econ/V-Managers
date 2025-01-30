@@ -281,3 +281,14 @@ di 0 + 2/(1.05) +  7/(1.05)^2 + 11/(1.05)^3 + 19/(1.05)^4 + 24/(1.05)^5 + 28/(1.
 
 * 94% with no dynamic effects after 7 years 
 * 375% with 5% dynamic effects after 7 years 
+
+* month 12 coef, month 24 coef
+
+
+
+
+
+
+
+
+

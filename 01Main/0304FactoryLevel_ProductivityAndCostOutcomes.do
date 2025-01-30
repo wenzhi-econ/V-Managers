@@ -94,7 +94,7 @@ label variable TotWorkersBC        "Number of white-collar workers"
 label variable Mngr                "Ind-YM level, =1, if the worker's WL >= 2"
 label variable EarlyAgeM           "Ind-YM level, =1, if the worker's manager is HF"
 
-label variable shareHF             "Ind-YM level, share of months working for a HF manager (before current month)"
+label variable shareHF             "Ind-YM level, share of months working for a HF manager"
 
 xtset IDlse YearMonth, monthly
 generate shareHF_1yrBefore = L12.shareHF
@@ -121,53 +121,8 @@ save "${TempData}/temp_FactoryLevelAnalysis.dta", replace
 
 use "${TempData}/temp_FactoryLevelAnalysis.dta", clear 
 
-/* drop if lp==. & lcfr==. & lc==. */
-
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-3-1. productivity and cost against cumulative exposure to HF managers
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-reghdfe lp shareHF TotWorkersWC TotWorkersBC MShare, absorb(Year ISOCode TotBigC) cluster(OfficeCode)
-    global b_prod_HF = _b["shareHF"]
-    global b_prod_HF = string(${b_prod_HF}, "%4.3f")
-    global se_prod_HF = _se["shareHF"]
-    global se_prod_HF = string(${se_prod_HF}, "%3.2f")
-    global N_prod_HF = e(N)
-    global N_prod_HF = string(${N_prod_HF}, "%3.0f")
-
-binscatter lp shareHF, ///
-    absorb(ISOCode) controls(i.Year TotWorkersWC TotWorkersBC MShare i.TotBigC) ///
-    mcolors(ebblue) lcolors(red) ///
-    text(5.35 0.3 "beta = ${b_prod_HF}", size(medium)) ///
-    text(5.3 0.3 "s.e. = ${se_prod_HF}", size(medium)) ///
-    text(5.25 0.3 "N = ${N_prod_HF}", size(medium)) ///
-    xtitle("Exposure to high-flyers managers (cumulative up to t-1)", size(medium)) ///
-    ytitle("Output per worker (in logs)", size(medium)) ///
-    ylabel(5.2(0.1)6) xlabel(0(0.1)0.35)
-
-graph export "${Results}/FactoryOutput_CumExposuretoHF.pdf", replace as(pdf)
-
-reghdfe lcfr shareHF TotWorkersWC TotWorkersBC MShare, absorb(Year ISOCode) cluster(OfficeCode)
-    global b_cost_HF = _b["shareHF"]
-    global b_cost_HF = string(${b_cost_HF}, "%4.3f")
-    global se_cost_HF = _se["shareHF"]
-    global se_cost_HF = string(${se_cost_HF}, "%3.2f")
-    global N_cost_HF = e(N)
-
-binscatter lcfr shareHF, ///
-    absorb(ISOCode) controls(i.Year TotWorkersWC TotWorkersBC MShare) ///
-    mcolor(ebblue) lcolor(red) ///
-    text(6.3 0.3 "beta = ${b_cost_HF}", size(medium)) ///
-    text(6.25 0.3 "s.e. = ${se_cost_HF}", size(medium)) ///
-    text(6.20 0.3 "N = ${N_cost_HF}", size(medium)) ///
-    xtitle("Exposure to high-flyers managers (cumulative up to t-1)", size(medium)) ///
-    ytitle("Cost per ton in logs (EUR)", size(medium)) ///
-    ylabel(5.9(0.1)6.5) xlabel(0(0.1)0.35)
-
-graph export "${Results}/FactoryCost_CumExposuretoHF.pdf", replace as(pdf)
-
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-3-2. productivity and cost against lagged cumulative exposure to HF managers
+*-? s-3-1. productivity against lagged cumulative exposure to HF managers
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 reghdfe lp shareHF_1yrBefore TotWorkersWC TotWorkersBC MShare, absorb(Year ISOCode TotBigC) cluster(OfficeCode)
@@ -189,6 +144,10 @@ binscatter lp shareHF_1yrBefore, ///
     ylabel(5.2(0.1)6, grid gstyle(dot)) xlabel(0(0.1)0.35)
 
 graph export "${Results}/FactoryOutput_CumExposuretoHF_1yrBefore.pdf", replace as(pdf)
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-3-2. cost against lagged cumulative exposure to HF managers
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 reghdfe lcfr shareHF_1yrBefore TotWorkersWC TotWorkersBC MShare, absorb(Year ISOCode) cluster(OfficeCode)
     global b_cost_HF = _b["shareHF_1yrBefore"]

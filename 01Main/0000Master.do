@@ -32,11 +32,11 @@ if	"`c(username)'" == "wenzhi0" {
 }
 
 if  "`c(username)'" =="virginiaminni" {
-    global user "/Users/virginiaminni/Library/CloudStorage/Dropbox/Managers"
+    global user "/Users/virginiaminni/Dropbox/JMP_Managers"
 }
 
 if 	"`c(username)'" == "virginia_m"   {		
-    global user = "C:\Users\virginia_m\Dropbox\Managers"
+    global user = "C:/Users/virginia_m/Dropbox/JMP_Managers"
 }
 
 
