@@ -157,7 +157,7 @@ plot_pcolormesh(
     "LtoL workers",
     "Function 5 years after the event",
     "Function at the event",
-    "FuncTransition_LtoL.png",
+    "Tran_Func_All_Num_LtoL.png",
 )
 
 plot_pcolormesh(
@@ -166,5 +166,67 @@ plot_pcolormesh(
     "LtoH workers",
     "Function 5 years after the event",
     "Function at the event",
-    "FuncTransition_LtoH.png",
+    "Tran_Func_All_Num_LtoH.png",
 )
+
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-1-2. modified function transition matrix
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+
+mod_func_tran_mat_LtoL = func_tran_mat_LtoL.copy()
+mod_func_tran_mat_LtoH = func_tran_mat_LtoH.copy()
+
+for i in range(func_tran_mat_LtoL.shape[0]):
+    mod_func_tran_mat_LtoL.iloc[i, i] = 0
+    mod_func_tran_mat_LtoH.iloc[i, i] = 0
+
+mod_func_tran_mat_LtoL = mod_func_tran_mat_LtoL.apply(
+    lambda x: x / x.sum(), axis=1
+)
+
+mod_func_tran_mat_LtoH = mod_func_tran_mat_LtoH.apply(
+    lambda x: x / x.sum(), axis=1
+)
+
+fig, ax = plt.subplots()
+c = ax.pcolormesh(mod_func_tran_mat_LtoL, cmap="viridis")
+fig.colorbar(c, ax=ax)
+
+ax.set_title("LtoL workers")
+ax.set_xlabel("Function 5 years after the event")
+ax.set_ylabel("Function at the event")
+
+ax.set_xticks(
+    np.arange(mod_func_tran_mat_LtoL.shape[1]) + 0.5, labels=func_value_dict
+)
+ax.set_yticks(
+    np.arange(mod_func_tran_mat_LtoL.shape[0]) + 0.5, labels=func_value_dict
+)
+plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+plt.savefig(
+    os.path.join(results_path, "Tran_Func_Diff_Ratio_LtoL"),
+    bbox_inches="tight",
+)
+plt.show()
+
+plt.close("all")
+fig, ax = plt.subplots()
+c = ax.pcolormesh(mod_func_tran_mat_LtoH, cmap="viridis")
+fig.colorbar(c, ax=ax)
+
+ax.set_title("LtoH workers")
+ax.set_xlabel("Function 5 years after the event")
+ax.set_ylabel("Function at the event")
+
+ax.set_xticks(
+    np.arange(mod_func_tran_mat_LtoH.shape[1]) + 0.5, labels=func_value_dict
+)
+ax.set_yticks(
+    np.arange(mod_func_tran_mat_LtoH.shape[0]) + 0.5, labels=func_value_dict
+)
+plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+plt.savefig(
+    os.path.join(results_path, "Tran_Func_Diff_Ratio_LtoH"),
+    bbox_inches="tight",
+)
+plt.show()

@@ -1,34 +1,24 @@
 /* 
-This do file calcualtes different transfer numbers across jobs (event date versus 5 years after the event) for different groups.
+This do file calculates different transfer numbers across jobs (event date versus 5 years after the event) for different groups.
 
 Input:
-    "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta" <== constructed in 0102 do file.
-    "${FinalData}/AllSnapshotMCulture.dta" <== ONET info is stored in the original dataset 
+    "${TempData}/04MainOutcomesInEventStudies.dta" <== constructed in 0104 do file
 
 Output:
 
 RA: WWZ 
-Time: 2024-10-30
+Time: 2025-01-29
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 1. a cross-section of event workers: work info
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${TempData}/04MainOutcomesInEventStudies_EarlyAgeM.dta", clear 
-
-merge 1:1 IDlse YearMonth using "${FinalData}/AllSnapshotMCulture.dta", keepusing(ONETName)
+use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-1. calendar time of the event 
+*-? s-1-1. 5 years after the event date 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-generate FT_Event_Time = . 
-replace  FT_Event_Time = FT_Calend_Time_LtoL if FT_Calend_Time_LtoL!=. & FT_Event_Time==.
-replace  FT_Event_Time = FT_Calend_Time_LtoH if FT_Calend_Time_LtoH!=. & FT_Event_Time==.
-replace  FT_Event_Time = FT_Calend_Time_HtoL if FT_Calend_Time_HtoL!=. & FT_Event_Time==.
-replace  FT_Event_Time = FT_Calend_Time_HtoH if FT_Calend_Time_HtoH!=. & FT_Event_Time==.
-format   FT_Event_Time %tm
 
 generate FT_Event_Time_5yrsLater = FT_Event_Time + 60 
 format   FT_Event_Time_5yrsLater %tm 
@@ -79,12 +69,29 @@ keep if FT_LtoL==1 | FT_LtoH==1
     //&? keep only tow treatment groups 
     //&? 24,726 unique workers 
 
-keep if (Func!=. & Func_5yrsLater!=.) ///
+keep if ///
+    (Func!=. & Func_5yrsLater!=.) ///
     | (SubFunc!=. & SubFunc_5yrsLater!=.) ///
     | (StandardJob!="" & StandardJob_5yrsLater!="") ///
     | (ONETName!="" & ONETName_5yrsLater!="")
         //&? keep only those workers with work information at 5 years after the event date
-        //&? 8,866 workers 
+        //&? 9,007 workers 
+
+tab FT_LtoL FT_LtoH
+
+/* =1, if the |
+    worker |
+experience |
+  s a low- |   =1, if the worker
+        to | experiences a low- to
+  low-type |   high-type manager
+   manager |        change
+    change |         0          1 |     Total
+-----------+----------------------+----------
+         0 |         0      1,208 |     1,208 
+         1 |     7,799          0 |     7,799 
+-----------+----------------------+----------
+     Total |     7,799      1,208 |     9,007  */
 
 keep IDlse FT_LtoL FT_LtoH ///
     Func Func_5yrsLater ///

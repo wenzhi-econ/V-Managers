@@ -133,7 +133,7 @@ plot_pcolormesh_full(
     "LtoL workers",
     "Subfunction 5 years after the event",
     "Subfunction at the event",
-    "SubFuncTransition_LtoL_Full.png",
+    "Tran_AllSubFunc_All_Num_LtoL.png",
 )
 
 plot_pcolormesh_full(
@@ -141,7 +141,7 @@ plot_pcolormesh_full(
     "LtoH workers",
     "Subfunction 5 years after the event",
     "Subfunction at the event",
-    "SubFuncTransition_LtoH_Full.png",
+    "Tran_AllSubFunc_All_Num_LtoH.png",
 )
 
 # -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
@@ -314,7 +314,7 @@ plot_pcolormesh_T10(
     "LtoL workers",
     "Subfunction 5 years after the event",
     "Subfunction at the event",
-    "SubFuncTransition_LtoL_T10.png",
+    "Tran_PartSubFunc_All_Num_LtoL.png",
 )
 
 plot_pcolormesh_T10(
@@ -323,5 +323,5 @@ plot_pcolormesh_T10(
     "LtoH workers",
     "Subfunction 5 years after the event",
     "Subfunction at the event",
-    "SubFuncTransition_LtoH_T10.png",
+    "Tran_PartSubFunc_All_Num_LtoH.png",
 )
