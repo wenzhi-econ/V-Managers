@@ -1,131 +1,163 @@
 #! python3
 
 """
-This file plots heatmaps for workers' job transition information 5 years after
-the event.
+This file plots heatmaps for function transition 1-7 years after the event,
+separately for LtoL and LtoH event workers.
 
-Wang Wenzhi 
-Time: 2024-10-30
+RA: WWZ
+Time: 2025-01-30
 """
 
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
-# ?? step 0. import necessary packages
+# ?? step 0. import necessary packages and settings
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
 
 # -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
-# -? s-0-1. Paths specification
+# -? s-0-1. path specification in the 01Main folder
 # -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+
 import sys
 import os
 
-data_path = "E:\\__RA\\02MANAGERS\\Paper Managers\\Data\\02TempData"
-sys.path.append(data_path)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../01Main")))
 
-results_path = "E:\\__RA\\02MANAGERS\\Paper Managers\\Results"
+import _pysetup as setup
+
+
+def results(*args):
+    """
+    This function allows me to easily produce output to the results folder.
+    """
+    return os.path.join(setup.results_directory, *args)
+
 
 # -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
-# -? s-0-2. Other necessary packages
+# -? s-0-2. other necessary packages
 # -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+import seaborn as sns
+
+mpl.use("WebAgg")
+plt.style.use("seaborn-v0_8-whitegrid")
+# print(sns.color_palette())
 
 np.set_printoptions(threshold=sys.maxsize, linewidth=150)
 pd.set_option("mode.copy_on_write", True)
 
+
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
-# ?? step 1. load the dataset and create a transition matrix
+# ?? step 1. load the dataset
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
 
-dta_path = os.path.join(data_path, "temp_TransitionJobs_5yrsAfterEvents.dta")
-transition_dta = pd.read_stata(dta_path, convert_categoricals=False)
+# -? s-1-1. load the dataset
+transition_dta = pd.read_stata(setup.data("temp_TranFunc_LtoLvsLtoH.dta"), convert_categoricals=False)
 
-for var in ["Func", "Func_5yrsLater", "SubFunc", "SubFunc_5yrsLater"]:
+# -? s-1-2. specify correct dtypes for function-related variables
+func_cols = [
+    var for var in transition_dta.columns if var != "FT_LtoL" and var != "FT_LtoH" and var != "IDlse"
+]
+for var in func_cols:
     transition_dta[var] = transition_dta[var].astype("Int64")
 
+# -? s-1-3. fill in the missing values with 99
+for var in transition_dta.columns:
+    print(f"# of missing for {var}: {transition_dta[var].isnull().sum()}")
+
+transition_dta = transition_dta.fillna(99)
+
+# ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
+# ?? step 2. obtain the function transition data
+# ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
+
 # -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
-# -? s-1-1. function transition matrix
+# -? s-2-1. a dictionary indicating the mapping from values to function info
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# &? the value label and tabulation info is in the 0901 do file
+
+func_value_dict = {
+    1: "Audit",
+    2: "Communications",
+    3: "Customer Development",
+    4: "Finance",
+    5: "General Management",
+    6: "Human Resources",
+    7: "Information Technology",
+    8: "Legal",
+    9: "Marketing",
+    10: "Research/Development",
+    11: "Supply Chain",
+    12: "Workplace Services",
+    14: "Information and Analytics",
+    15: "Project Management",
+    16: "Operations",
+    17: "Data and Analytics",
+    99: "Missing",
+}
+
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-2-2. a function to calculate the transition matrix
+# -?        (adjustments for missing values are needed)
 # -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
 
-func_pre = transition_dta["Func"].unique()
-func_post = transition_dta["Func_5yrsLater"].unique()
-func = np.union1d(func_pre, func_post)
 
-# !!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!
-# !! s-1-1-1. a function to calculate transition numbers
-# !!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!
+def calculate_transition_matrix(data, year):
+    #!! column names to be used in the worker-level dataset
+    column_at_event = "Func0"
+    column_after_event = f"Func{year}"
 
+    #!! all possible function values
+    func_value_list = list(func_value_dict.keys())
 
-def calculate_transition_matrix(data, variable_prefix):
+    #!! initialize a transition matrix (index and columns are function values)
+    transition_mat = pd.DataFrame(0, index=func_value_list, columns=func_value_list)
 
-    #!! step 1. obtain column names based on the input
-    column_before_move = f"{variable_prefix}"
-    column_after_move = f"{variable_prefix}_5yrsLater"
-
-    #!! step 2. obtain the comprehensive lists for the input variable
-    lists_for_var = func
-
-    #!! step 3. initialize a transition matrix
-    transition_matrix = pd.DataFrame(
-        0, index=lists_for_var, columns=lists_for_var
-    )
-
-    #!! step 4. count transitions
+    #!! count transitions
     for _, row in data.iterrows():
-        transition_matrix.loc[
-            row[column_before_move], row[column_after_move]
-        ] += 1
+        transition_mat.loc[row[column_at_event], row[column_after_event]] += 1
 
-    return transition_matrix
+    #!! adjust for missing values
+    transition_mat = transition_mat.drop(99, axis=0)
+    transition_mat = transition_mat.drop(99, axis=1)
 
+    #!! get the ratio
+    num_workers = transition_mat.sum().sum()
+    transition_mat = transition_mat / num_workers
+    print(f"# workers underlying the transition ratio matrix: {num_workers}")
 
-# !!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!
-# !! s-1-1-2. a function to plot a heatmap
-# !!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!
+    #!! additional test on the shape of the transition matrix
+    assert transition_mat.shape == (16, 16)
 
-
-def plot_pcolormesh(
-    matrix,
-    value_dict,
-    title,
-    xlabel="post-event",
-    ylabel="pre-event",
-    output_name="output_fig.png",
-):
-    fig, ax = plt.subplots()
-    c = ax.pcolormesh(matrix, cmap="viridis")
-    fig.colorbar(c, ax=ax)
-
-    for i in range(matrix.shape[0]):
-        for j in range(matrix.shape[1]):
-            ax.text(
-                j + 0.5,
-                i + 0.5,
-                f"{matrix.iloc[i, j]}",
-                ha="center",
-                va="center",
-                color="pink",
-                fontsize="x-small",
-            )
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-
-    ax.set_xticks(np.arange(matrix.shape[1]) + 0.5, labels=value_dict)
-    ax.set_yticks(np.arange(matrix.shape[0]) + 0.5, labels=value_dict)
-    plt.setp(
-        ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
-    )
-    plt.savefig(os.path.join(results_path, output_name), bbox_inches="tight")
-    plt.show()
+    return transition_mat
 
 
-# !!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!
-# !! s-1-1-3. calculate function transition matrices and draw heatmaps,
-# !!          separately for LtoL and LtoH groups
-# !!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!#!!
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-2-3. obtain all 2 (groups) * 7 (years) transition matrices
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
 
-func_value_dict = [
+tran_1yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 1)
+tran_1yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 1)
+tran_2yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 2)
+tran_2yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 2)
+tran_3yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 3)
+tran_3yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 3)
+tran_4yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 4)
+tran_4yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 4)
+tran_5yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 5)
+tran_5yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 5)
+tran_6yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 6)
+tran_6yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 6)
+tran_7yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 7)
+tran_7yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 7)
+
+# ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
+# ?? step 3. draw the heat map
+# ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
+
+func_list = [
     "Audit",
     "Communications",
     "Customer Development",
@@ -139,94 +171,140 @@ func_value_dict = [
     "Supply Chain",
     "Workplace Services",
     "Information and Analytics",
+    "Project Management",
     "Operations",
     "Data and Analytics",
 ]
 
-func_tran_mat_LtoL = calculate_transition_matrix(
-    transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], "Func"
+
+def plot_heatmap(data, year, group, fig_name):
+    plt.close("all")
+    fig, ax = plt.subplots(layout="constrained")
+    c = ax.imshow(data)
+    color_bar = fig.colorbar(c, ax=ax)
+    ax.grid(True, alpha=0.3, linestyle="--")
+    ax.set_title(f"{year} after the event, {group}")
+    ax.set_xlabel(f"Function {year} year after the event")
+    ax.set_ylabel("Function at the event")
+    ax.set_xticks(
+        np.arange(data.shape[1]),
+        labels=func_list,
+    )
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    ax.set_yticks(
+        np.arange(data.shape[0]),
+        labels=func_list,
+    )
+    plt.savefig(fig_name)
+    plt.show()
+
+
+plot_heatmap(tran_1yr_LtoH - tran_1yr_LtoL, "1 year", "LtoH - LtoL", results("Tran_Func_1yr_LtoHvsLtoL.png"))
+plot_heatmap(tran_2yr_LtoH - tran_2yr_LtoL, "2 years", "LtoH - LtoL", results("Tran_Func_2yr_LtoHvsLtoL.png"))
+plot_heatmap(tran_3yr_LtoH - tran_3yr_LtoL, "3 years", "LtoH - LtoL", results("Tran_Func_3yr_LtoHvsLtoL.png"))
+plot_heatmap(tran_4yr_LtoH - tran_4yr_LtoL, "4 years", "LtoH - LtoL", results("Tran_Func_4yr_LtoHvsLtoL.png"))
+plot_heatmap(tran_5yr_LtoH - tran_5yr_LtoL, "5 years", "LtoH - LtoL", results("Tran_Func_5yr_LtoHvsLtoL.png"))
+plot_heatmap(tran_6yr_LtoH - tran_6yr_LtoL, "6 years", "LtoH - LtoL", results("Tran_Func_6yr_LtoHvsLtoL.png"))
+plot_heatmap(tran_7yr_LtoH - tran_7yr_LtoL, "7 years", "LtoH - LtoL", results("Tran_Func_7yr_LtoHvsLtoL.png"))
+
+plot_heatmap(tran_1yr_LtoH, "1 year", "LtoH", results("Tran_Func_1yr_LtoH.png"))
+plot_heatmap(tran_2yr_LtoH, "2 year", "LtoH", results("Tran_Func_2yr_LtoH.png"))
+plot_heatmap(tran_3yr_LtoH, "3 year", "LtoH", results("Tran_Func_3yr_LtoH.png"))
+plot_heatmap(tran_4yr_LtoH, "4 year", "LtoH", results("Tran_Func_4yr_LtoH.png"))
+plot_heatmap(tran_5yr_LtoH, "5 year", "LtoH", results("Tran_Func_5yr_LtoH.png"))
+plot_heatmap(tran_6yr_LtoH, "6 year", "LtoH", results("Tran_Func_6yr_LtoH.png"))
+plot_heatmap(tran_7yr_LtoH, "7 year", "LtoH", results("Tran_Func_7yr_LtoH.png"))
+
+plot_heatmap(tran_1yr_LtoL, "1 year", "LtoL", results("Tran_Func_1yr_LtoL.png"))
+plot_heatmap(tran_2yr_LtoL, "2 year", "LtoL", results("Tran_Func_2yr_LtoL.png"))
+plot_heatmap(tran_3yr_LtoL, "3 year", "LtoL", results("Tran_Func_3yr_LtoL.png"))
+plot_heatmap(tran_4yr_LtoL, "4 year", "LtoL", results("Tran_Func_4yr_LtoL.png"))
+plot_heatmap(tran_5yr_LtoL, "5 year", "LtoL", results("Tran_Func_5yr_LtoL.png"))
+plot_heatmap(tran_6yr_LtoL, "6 year", "LtoL", results("Tran_Func_6yr_LtoL.png"))
+plot_heatmap(tran_7yr_LtoL, "7 year", "LtoL", results("Tran_Func_7yr_LtoL.png"))
+
+# ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
+# ?? step 4. extension: focus on job movers
+# ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
+
+tran_1yr_LtoL = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_1yr"] == 1))], 1
+)
+tran_1yr_LtoH = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_1yr"] == 1))], 1
+)
+tran_2yr_LtoL = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_2yr"] == 1))], 2
+)
+tran_2yr_LtoH = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_2yr"] == 1))], 2
+)
+tran_3yr_LtoL = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_3yr"] == 1))], 3
+)
+tran_3yr_LtoH = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_3yr"] == 1))], 3
+)
+tran_4yr_LtoL = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_4yr"] == 1))], 4
+)
+tran_4yr_LtoH = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_4yr"] == 1))], 4
+)
+tran_5yr_LtoL = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_5yr"] == 1))], 5
+)
+tran_5yr_LtoH = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_5yr"] == 1))], 5
+)
+tran_6yr_LtoL = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_6yr"] == 1))], 6
+)
+tran_6yr_LtoH = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_6yr"] == 1))], 6
+)
+tran_7yr_LtoL = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_7yr"] == 1))], 7
+)
+tran_7yr_LtoH = calculate_transition_matrix(
+    transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_7yr"] == 1))], 7
 )
 
-func_tran_mat_LtoH = calculate_transition_matrix(
-    transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], "Func"
+
+plot_heatmap(
+    tran_1yr_LtoH - tran_1yr_LtoL, "1 year", "LtoH - LtoL", results("Tran_Func_JobMovers_1yr_LtoHvsLtoL.png")
+)
+plot_heatmap(
+    tran_2yr_LtoH - tran_2yr_LtoL, "2 years", "LtoH - LtoL", results("Tran_Func_JobMovers_2yr_LtoHvsLtoL.png")
+)
+plot_heatmap(
+    tran_3yr_LtoH - tran_3yr_LtoL, "3 years", "LtoH - LtoL", results("Tran_Func_JobMovers_3yr_LtoHvsLtoL.png")
+)
+plot_heatmap(
+    tran_4yr_LtoH - tran_4yr_LtoL, "4 years", "LtoH - LtoL", results("Tran_Func_JobMovers_4yr_LtoHvsLtoL.png")
+)
+plot_heatmap(
+    tran_5yr_LtoH - tran_5yr_LtoL, "5 years", "LtoH - LtoL", results("Tran_Func_JobMovers_5yr_LtoHvsLtoL.png")
+)
+plot_heatmap(
+    tran_6yr_LtoH - tran_6yr_LtoL, "6 years", "LtoH - LtoL", results("Tran_Func_JobMovers_6yr_LtoHvsLtoL.png")
+)
+plot_heatmap(
+    tran_7yr_LtoH - tran_7yr_LtoL, "7 years", "LtoH - LtoL", results("Tran_Func_JobMovers_7yr_LtoHvsLtoL.png")
 )
 
-plot_pcolormesh(
-    func_tran_mat_LtoL,
-    func_value_dict,
-    "LtoL workers",
-    "Function 5 years after the event",
-    "Function at the event",
-    "Tran_Func_All_Num_LtoL.png",
-)
+plot_heatmap(tran_1yr_LtoH, "1 year", "LtoH", results("Tran_Func_JobMovers_1yr_LtoH.png"))
+plot_heatmap(tran_2yr_LtoH, "2 year", "LtoH", results("Tran_Func_JobMovers_2yr_LtoH.png"))
+plot_heatmap(tran_3yr_LtoH, "3 year", "LtoH", results("Tran_Func_JobMovers_3yr_LtoH.png"))
+plot_heatmap(tran_4yr_LtoH, "4 year", "LtoH", results("Tran_Func_JobMovers_4yr_LtoH.png"))
+plot_heatmap(tran_5yr_LtoH, "5 year", "LtoH", results("Tran_Func_JobMovers_5yr_LtoH.png"))
+plot_heatmap(tran_6yr_LtoH, "6 year", "LtoH", results("Tran_Func_JobMovers_6yr_LtoH.png"))
+plot_heatmap(tran_7yr_LtoH, "7 year", "LtoH", results("Tran_Func_JobMovers_7yr_LtoH.png"))
 
-plot_pcolormesh(
-    func_tran_mat_LtoH,
-    func_value_dict,
-    "LtoH workers",
-    "Function 5 years after the event",
-    "Function at the event",
-    "Tran_Func_All_Num_LtoH.png",
-)
-
-# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
-# -? s-1-2. modified function transition matrix
-# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
-
-mod_func_tran_mat_LtoL = func_tran_mat_LtoL.copy()
-mod_func_tran_mat_LtoH = func_tran_mat_LtoH.copy()
-
-for i in range(func_tran_mat_LtoL.shape[0]):
-    mod_func_tran_mat_LtoL.iloc[i, i] = 0
-    mod_func_tran_mat_LtoH.iloc[i, i] = 0
-
-mod_func_tran_mat_LtoL = mod_func_tran_mat_LtoL.apply(
-    lambda x: x / x.sum(), axis=1
-)
-
-mod_func_tran_mat_LtoH = mod_func_tran_mat_LtoH.apply(
-    lambda x: x / x.sum(), axis=1
-)
-
-fig, ax = plt.subplots()
-c = ax.pcolormesh(mod_func_tran_mat_LtoL, cmap="viridis")
-fig.colorbar(c, ax=ax)
-
-ax.set_title("LtoL workers")
-ax.set_xlabel("Function 5 years after the event")
-ax.set_ylabel("Function at the event")
-
-ax.set_xticks(
-    np.arange(mod_func_tran_mat_LtoL.shape[1]) + 0.5, labels=func_value_dict
-)
-ax.set_yticks(
-    np.arange(mod_func_tran_mat_LtoL.shape[0]) + 0.5, labels=func_value_dict
-)
-plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-plt.savefig(
-    os.path.join(results_path, "Tran_Func_Diff_Ratio_LtoL"),
-    bbox_inches="tight",
-)
-plt.show()
-
-plt.close("all")
-fig, ax = plt.subplots()
-c = ax.pcolormesh(mod_func_tran_mat_LtoH, cmap="viridis")
-fig.colorbar(c, ax=ax)
-
-ax.set_title("LtoH workers")
-ax.set_xlabel("Function 5 years after the event")
-ax.set_ylabel("Function at the event")
-
-ax.set_xticks(
-    np.arange(mod_func_tran_mat_LtoH.shape[1]) + 0.5, labels=func_value_dict
-)
-ax.set_yticks(
-    np.arange(mod_func_tran_mat_LtoH.shape[0]) + 0.5, labels=func_value_dict
-)
-plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-plt.savefig(
-    os.path.join(results_path, "Tran_Func_Diff_Ratio_LtoH"),
-    bbox_inches="tight",
-)
-plt.show()
+plot_heatmap(tran_1yr_LtoL, "1 year", "LtoL", results("Tran_Func_JobMovers_1yr_LtoL.png"))
+plot_heatmap(tran_2yr_LtoL, "2 year", "LtoL", results("Tran_Func_JobMovers_2yr_LtoL.png"))
+plot_heatmap(tran_3yr_LtoL, "3 year", "LtoL", results("Tran_Func_JobMovers_3yr_LtoL.png"))
+plot_heatmap(tran_4yr_LtoL, "4 year", "LtoL", results("Tran_Func_JobMovers_4yr_LtoL.png"))
+plot_heatmap(tran_5yr_LtoL, "5 year", "LtoL", results("Tran_Func_JobMovers_5yr_LtoL.png"))
+plot_heatmap(tran_6yr_LtoL, "6 year", "LtoL", results("Tran_Func_JobMovers_6yr_LtoL.png"))
+plot_heatmap(tran_7yr_LtoL, "7 year", "LtoL", results("Tran_Func_JobMovers_7yr_LtoL.png"))

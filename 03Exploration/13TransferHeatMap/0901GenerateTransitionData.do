@@ -7,97 +7,140 @@ Input:
 Output:
 
 RA: WWZ 
-Time: 2025-01-29
+Time: 2025-01-30
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 1. a cross-section of event workers: work info
+*?? step 1. a cross-section of event workers: function info
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 use "${TempData}/04MainOutcomesInEventStudies.dta", clear 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-1. 5 years after the event date 
+*-? s-1-1. keep a panel of relevant workers 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-generate FT_Event_Time_5yrsLater = FT_Event_Time + 60 
-format   FT_Event_Time_5yrsLater %tm 
+keep if FT_Rel_Time!=. & FT_Mngr_both_WL2==1
+keep if FT_LtoH==1 | FT_LtoL==1
+    //&? a panel of LtoL and LtoH event workers 
+    //&? 25,001 unique workers
+
+keep IDlse YearMonth FT_Rel_Time FT_Event_Time FT_LtoL FT_LtoH Func TransferSJ
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-2-2. job info 5 years after the event date  
+*-? s-1-2. 1-7 years after the event 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-sort IDlse YearMonth 
-bysort IDlse: egen Func_5yrsLater = mean(cond(YearMonth==FT_Event_Time_5yrsLater, Func, .))
+generate FT_1yrLater = FT_Event_Time + 12
+generate FT_2yrLater = FT_Event_Time + 24
+generate FT_3yrLater = FT_Event_Time + 36
+generate FT_4yrLater = FT_Event_Time + 48
+generate FT_5yrLater = FT_Event_Time + 60
+generate FT_6yrLater = FT_Event_Time + 72
+generate FT_7yrLater = FT_Event_Time + 84
 
-sort IDlse YearMonth 
-bysort IDlse: egen SubFunc_5yrsLater = mean(cond(YearMonth==FT_Event_Time_5yrsLater, SubFunc, .))
-
-generate temp_StandardJob_5yrsLater = StandardJob if YearMonth==FT_Event_Time_5yrsLater
-sort IDlse YearMonth 
-bysort IDlse: egen StandardJob_5yrsLater = mode(temp_StandardJob_5yrsLater)
-drop temp_StandardJob_5yrsLater
-
-generate temp_ONETName_5yrsLater = ONETName if YearMonth==FT_Event_Time_5yrsLater
-sort IDlse YearMonth 
-bysort IDlse: egen ONETName_5yrsLater = mode(temp_ONETName_5yrsLater)
-drop temp_ONETName_5yrsLater
-
-keep IDlse YearMonth ///
-    FT_Rel_Time FT_Mngr_both_WL2 FT_LtoL FT_LtoH FT_HtoH FT_HtoL ///
-    Func Func_5yrsLater ///
-    SubFunc SubFunc_5yrsLater ///
-    StandardJob StandardJob_5yrsLater ///
-    ONETName ONETName_5yrsLater 
-
-order IDlse YearMonth ///
-    FT_Rel_Time FT_Mngr_both_WL2 FT_LtoL FT_LtoH FT_HtoH FT_HtoL ///
-    Func Func_5yrsLater ///
-    SubFunc SubFunc_5yrsLater ///
-    StandardJob StandardJob_5yrsLater ///
-    ONETName ONETName_5yrsLater 
+format   FT_1yrLater %tm 
+format   FT_2yrLater %tm 
+format   FT_3yrLater %tm 
+format   FT_4yrLater %tm 
+format   FT_5yrLater %tm 
+format   FT_6yrLater %tm 
+format   FT_7yrLater %tm 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-2-3. keep a cross-section of event workers 
+*-? s-1-3. function information at different times 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-keep if FT_Rel_Time==0 & FT_Mngr_both_WL2==1
-    //&? same groups of workers in event studies 
-    //&? 29,288 unique workers 
+sort IDlse YearMonth
+bysort IDlse: egen Func0 = mean(cond(YearMonth==FT_Event_Time, Func, .))
+bysort IDlse: egen Func1 = mean(cond(YearMonth==FT_1yrLater,   Func, .))
+bysort IDlse: egen Func2 = mean(cond(YearMonth==FT_2yrLater,   Func, .))
+bysort IDlse: egen Func3 = mean(cond(YearMonth==FT_3yrLater,   Func, .))
+bysort IDlse: egen Func4 = mean(cond(YearMonth==FT_4yrLater,   Func, .))
+bysort IDlse: egen Func5 = mean(cond(YearMonth==FT_5yrLater,   Func, .))
+bysort IDlse: egen Func6 = mean(cond(YearMonth==FT_6yrLater,   Func, .))
+bysort IDlse: egen Func7 = mean(cond(YearMonth==FT_7yrLater,   Func, .))
 
-keep if FT_LtoL==1 | FT_LtoH==1  
-    //&? keep only tow treatment groups 
-    //&? 24,726 unique workers 
+bysort IDlse: egen Movers_1yr = max(cond(inrange(FT_Rel_Time, 0, 12), TransferSJ, .))
+bysort IDlse: egen Movers_2yr = max(cond(inrange(FT_Rel_Time, 0, 24), TransferSJ, .))
+bysort IDlse: egen Movers_3yr = max(cond(inrange(FT_Rel_Time, 0, 36), TransferSJ, .))
+bysort IDlse: egen Movers_4yr = max(cond(inrange(FT_Rel_Time, 0, 48), TransferSJ, .))
+bysort IDlse: egen Movers_5yr = max(cond(inrange(FT_Rel_Time, 0, 60), TransferSJ, .))
+bysort IDlse: egen Movers_6yr = max(cond(inrange(FT_Rel_Time, 0, 72), TransferSJ, .))
+bysort IDlse: egen Movers_7yr = max(cond(inrange(FT_Rel_Time, 0, 84), TransferSJ, .))
 
-keep if ///
-    (Func!=. & Func_5yrsLater!=.) ///
-    | (SubFunc!=. & SubFunc_5yrsLater!=.) ///
-    | (StandardJob!="" & StandardJob_5yrsLater!="") ///
-    | (ONETName!="" & ONETName_5yrsLater!="")
-        //&? keep only those workers with work information at 5 years after the event date
-        //&? 9,007 workers 
+forvalues i=1/7 {
+    replace Movers_`i'yr = . if Func`i'==.
+}
 
-tab FT_LtoL FT_LtoH
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-4. keep a cross section of relevant event workers 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-/* =1, if the |
-    worker |
-experience |
-  s a low- |   =1, if the worker
-        to | experiences a low- to
-  low-type |   high-type manager
-   manager |        change
-    change |         0          1 |     Total
------------+----------------------+----------
-         0 |         0      1,208 |     1,208 
-         1 |     7,799          0 |     7,799 
------------+----------------------+----------
-     Total |     7,799      1,208 |     9,007  */
+keep if FT_Rel_Time==0
+    //&? keep a cross-section of relevant event workers 
+keep if Func0!=.
 
-keep IDlse FT_LtoL FT_LtoH ///
-    Func Func_5yrsLater ///
-    SubFunc SubFunc_5yrsLater ///
-    StandardJob StandardJob_5yrsLater ///
-    ONETName ONETName_5yrsLater
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-5. investigate the function distribution over time 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-save "${TempData}/temp_TransitionJobs_5yrsAfterEvents.dta", replace 
+label list Func
+/* 
+           1 Audit
+           2 Communications
+           3 Customer Development
+           4 Finance
+           5 General Management
+           6 Human Resources
+           7 Information Technology
+           8 Legal
+           9 Marketing
+          10 Research/Development
+          11 Supply Chain
+          12 Workplace Services
+          13 UNKNW
+          14 Information and Analytics
+          15 Project Management
+          16 Operations
+          17 Data and Analytics
+          18 Data & Analytics
+*/
+forvalues i = 0/7 {
+    replace Func`i' = 17 if Func`i'==18
+        //&? 18 is a duplicate of 17 (Data and Analytics) ==> a minor correction 
+}
+tab Func0
+tab Func1
+tab Func2
+tab Func3
+tab Func4
+tab Func5
+tab Func6
+tab Func7
+    //&? 13 (unknown) is not a concern, since none of these variables have 13
+    //&? In total, there are 16 possible functions, with the following value label:
+/* 
+           1 Audit
+           2 Communications
+           3 Customer Development
+           4 Finance
+           5 General Management
+           6 Human Resources
+           7 Information Technology
+           8 Legal
+           9 Marketing
+          10 Research/Development
+          11 Supply Chain
+          12 Workplace Services
+          14 Information and Analytics
+          15 Project Management
+          16 Operations
+          17 Data and Analytics
+*/
+
+keep IDlse FT_LtoL FT_LtoH Func0 Func1 Func2 Func3 Func4 Func5 Func6 Func7 Movers_*
+    //&? keep only relevant variables 
+
+save "${TempData}/temp_TranFunc_LtoLvsLtoH.dta", replace 
 
