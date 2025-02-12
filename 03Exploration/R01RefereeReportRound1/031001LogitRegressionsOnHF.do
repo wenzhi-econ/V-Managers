@@ -1,13 +1,23 @@
 /* 
 This do file investigates the correlation between managers' high-flyer status and their characteristics.
 
+Notes: The regressions are based on two different samples: 
+    (1) those employees who have ever been WL2 in the data, and
+    (2) those whose promotion to WL2 can be observed.
+
+The regressors of interest are as follows:
+    the income group of the working country
+    mid career hire indicator 
+    specific function (when the worker is first observed as WL2)
+    if the manager has changed his function 
+    education and fields of study
+
 RA: WWZ 
-Time: 2025-01-29
+Time: 2025-01-30
 */
 
-
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 1. obtain the final dataset consisting of event managers
+*?? step 1. keep a panel of employees of interest 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -30,45 +40,21 @@ duplicates drop
 save "${TempData}/temp_EverWL2WorkerList.dta", replace 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-2. generate a list of managers who are in the event 
+*-? s-1-2. keep only those employees who have been observed as WL2
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 use "${TempData}/04MainOutcomesInEventStudies.dta", clear
 
-keep if FT_Rel_Time!=. & FT_Mngr_both_WL2==1
-    //&? a panel of event workers
-
-keep if FT_Rel_Time==0 | FT_Rel_Time==-1
-    //&? keep only pre- and post-event managers
-
-keep IDlseMHR
-duplicates drop
-
-rename IDlseMHR IDlse
-
-save "${TempData}/temp_EventMngrList.dta", replace 
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 2. get mangers' exit outcomes separately for event and non-event managers
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-
-use "${TempData}/04MainOutcomesInEventStudies.dta", clear
-
 merge m:1 IDlse using "${TempData}/temp_EverWL2WorkerList.dta", generate(EverWL2Worker)
-merge m:1 IDlse using "${TempData}/temp_EventMngrList.dta", generate(EventMngr)
 
-keep if EverWL2Worker==3 | EventMngr==3
-    //&? a panel of employees who are ever WL2 in the data or they are event managers in the event studies 
+keep if EverWL2Worker==3
+    //&? a panel of employees who are ever WL2 in the data
 
 label drop _merge
 replace EverWL2Worker = 0 if EverWL2Worker!=3
 replace EverWL2Worker = 1 if EverWL2Worker==3
-replace EventMngr = 0 if EventMngr!=3
-replace EventMngr = 1 if EventMngr==3
 
 label variable EverWL2Worker "Ever WL2 Workers"
-label variable EventMngr     "Event Managers"
-
 
 drop EarlyAgeM - FT_Calend_Time_HtoL WLM - DiffM2y1
 drop IDlseMHR
@@ -76,55 +62,78 @@ drop IDlseMHR
     //&? I can identify whether they are event managers in the event studies.
     //&? To prevent ambiguity, I will drop variables constructed only for WL1 workers.
 
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 3. get high-flyer status for managers 
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-3. get employees' high-flyer status
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 rename IDlse IDlseMHR
 merge m:1 IDlseMHR YearMonth using "${TempData}/02Mngr_EarlyAgeM.dta", keep(match master) nogenerate 
 rename IDlseMHR IDlse
 rename EarlyAgeM EarlyAge
 
-order IDlse EarlyAge YearMonth Female Func SubFunc OfficeCode HomeCountryISOCode StandardJob
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-4. determine whose promotion to WL2 can be observed
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+sort IDlse YearMonth
+bysort IDlse: generate occurrence = _n 
+bysort IDlse: egen WL_FirstOccurrence = mean(cond(occurrence==1, WL, .))
+generate q_WL2Prom = (WL_FirstOccurrence==1) if WL_FirstOccurrence!=.
+    //&? since I only keep a panel of employees who have ever been WL2 in the data
+    //&? if an employee's first occurrence WL is 1
+    //&? then I must be able to observe his promotion to WL2
+
+label variable q_WL2Prom "Promotion to WL2 can be observed"
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 4. get other variables  
+*?? step 2. obtain other relevant variables  
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-4-1. education 
+*-? s-2-1. education and fields of study
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 merge m:1 IDlse using "${RawMNEData}/EducationMax.dta" , keepusing(QualHigh FieldHigh1 FieldHigh2 FieldHigh3)
     drop if _merge==2 
     drop _merge 
 
-generate Bachelor       = QualHigh>=10 if QualHigh!=.
-generate MBA            = QualHigh==13 if QualHigh!=.
-generate AboveSecondary = QualHigh>=6  if QualHigh!=.
+generate BachelorAbove   = QualHigh>10  if QualHigh!=.
+generate BachelorOrBelow = QualHigh<=10 if QualHigh!=.
+
+label variable BachelorAbove "Above bachelor degree"
+label variable BachelorOrBelow "Bachelor degree or below"
 
 generate Econ = (FieldHigh1 == 4 | FieldHigh2 == 4 | FieldHigh3 == 4) if FieldHigh1!=.
-label variable Econ "Econ, Business, and Admin"
+label variable Econ "Econ, business, and admin"
 
 generate Sci = (FieldHigh1 == 5 | FieldHigh1 == 7 | FieldHigh1 == 9 | FieldHigh1 == 14 | FieldHigh1 == 15 | FieldHigh1 == 17 | ///
     FieldHigh2 == 5 | FieldHigh2 == 7 | FieldHigh2 == 9 | FieldHigh2 == 14 | FieldHigh2 == 15 | FieldHigh2 == 17 | ///
     FieldHigh3 == 5 | FieldHigh3 == 7 | FieldHigh3 == 9 | FieldHigh3 == 14 | FieldHigh3 == 15 | FieldHigh3 == 17) if FieldHigh1!=.
-label variable Sci "Sci, Tech, Engin, and Math"
+label variable Sci "Sci, tech, engin, and math"
 
 generate Hum = (FieldHigh1 == 6 | FieldHigh2 == 6 | FieldHigh3 == 6 | FieldHigh1 == 11 | FieldHigh2 == 11 | FieldHigh3 == 11 | ///
     FieldHigh1 == 12 | FieldHigh2 == 12 | FieldHigh3 == 12 | FieldHigh1 == 13 | FieldHigh2 == 13 | FieldHigh3 == 13 | ///
     FieldHigh1 == 19 | FieldHigh2 == 19 | FieldHigh3 == 19) if FieldHigh1!=.
-label variable Hum "Social Sciences and Humanities"
+label variable Hum "Social sciences and humanities"
 
 generate Other = (Econ == 0 & Sci == 0 & Hum == 0)  if FieldHigh1!=.
-label variable Other "Other Educ"
+label variable Other "Other educ"
 
-generate Missing = (FieldHigh1==.) 
-label variable Missing "Missing Education"
+
+generate Econ_Excl = (FieldHigh1 == 4) if FieldHigh1!=.
+label variable Econ_Excl "Econ, business, and admin (mutually exclusive)"
+
+generate Sci_Excl = (FieldHigh1 == 5 | FieldHigh1 == 7 | FieldHigh1 == 9 | FieldHigh1 == 14 | FieldHigh1 == 15 | FieldHigh1 == 17) if FieldHigh1!=.
+label variable Sci_Excl "Sci, tech, engin, and math (mutually exclusive)"
+
+generate Hum_Excl = (FieldHigh1 == 6 | FieldHigh1 == 11 | FieldHigh1 == 12 | FieldHigh1 == 13 | FieldHigh1 == 19) if FieldHigh1!=.
+label variable Hum_Excl "Social sciences and humanities (mutually exclusive)"
+
+generate Other_Excl = (Econ_Excl == 0 & Sci_Excl == 0 & Hum_Excl == 0)  if FieldHigh1!=.
+label variable Other_Excl "Other educ (mutually exclusive)"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-4-2. country's income group  
+*-? s-2-2. country's income group  
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 merge m:1 ISOCode using "${RawCntyData}/6.WB IncomeGroup.dta", keep(match master)
@@ -147,156 +156,160 @@ label variable LowIncome      "Low income countries"
 label variable UpperMidIncome "Middle income countries"
 label variable HighIncome     "High income countries"
 
-
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-4-3. mid-career hire 
+*-? s-2-3. mid-career hire 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-bysort IDlse : egen FF= min(YearMonth)
-bysort IDlse : egen FirstWL = mean(cond(YearMonth==FF, WL, .)) // first WL observed 
-bysort IDlse : egen FirstTenure = mean(cond(YearMonth==FF, Tenure, .)) // tenure in first month observed 
+sort   IDlse YearMonth
+bysort IDlse: egen FF          = min(YearMonth)
+bysort IDlse: egen FirstWL     = mean(cond(YearMonth==FF, WL, .))
+bysort IDlse: egen FirstTenure = mean(cond(YearMonth==FF, Tenure, .))
 
 generate MidCareerHire = (FirstWL>1 & FirstTenure<=1 & WL!=.)
 label variable MidCareerHire "Mid career hire"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-4-4. one's first function  
+*-? s-2-4. one's function when first observed as WL2
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-generate func_cd = (Func==3)  if !missing(Func)
-generate func_m  = (Func==9)  if !missing(Func)
-generate func_sc = (Func==11) if !missing(Func)
-generate func_rd = (Func==10) if !missing(Func)
-generate func_fi = (Func==4)  if !missing(Func)
-generate func_o  = 1           if !missing(Func)
+sort IDlse YearMonth
+bysort IDlse: egen YearMonth_FirstWL2 = min(cond(WL==2, YearMonth, .))
+bysort IDlse: egen Func_FirstWL2      = mean(cond(YearMonth==YearMonth_FirstWL2, Func, .))
+
+generate func_cd = (Func_FirstWL2==3)  if !missing(Func_FirstWL2)
+generate func_m  = (Func_FirstWL2==9)  if !missing(Func_FirstWL2)
+generate func_sc = (Func_FirstWL2==11) if !missing(Func_FirstWL2)
+generate func_rd = (Func_FirstWL2==10) if !missing(Func_FirstWL2)
+generate func_fi = (Func_FirstWL2==4)  if !missing(Func_FirstWL2)
+generate func_o  = 1           if !missing(Func_FirstWL2)
 replace  func_o  = 0 if (func_cd==1 | func_m==1 | func_sc==1 | func_rd==1 | func_fi==1)
 
 label variable func_cd "Sales function"
 label variable func_m  "Marketing function"
 label variable func_sc "Supply chain function"
-label variable func_rd "Research/Development function"
+label variable func_rd "Research/development function"
 label variable func_fi "Finance function"
 label variable func_o  "Other functions"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-4-5. does the worker change his function before WL2 promotion   
+*-? s-2-5. does the worker change his function before WL2 promotion   
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-sort IDlse YearMonth 
-bysort IDlse: egen WL2Month   = min(cond(WL==2, YearMonth, .))
-bysort IDlse: egen FirstMonth = min(YearMonth)
-
-bysort IDlse: egen temp_TransferFuncC = max(cond(YearMonth==WL2Month, TransferFuncC, .))
+bysort IDlse: egen temp_TransferFuncC = max(cond(YearMonth==YearMonth_FirstWL2, TransferFuncC, .))
 
 generate FuncChangeBeforeWL2 = .
-replace  FuncChangeBeforeWL2 = 1 if temp_TransferFuncC>0  & FirstMonth<WL2Month
-replace  FuncChangeBeforeWL2 = 0 if temp_TransferFuncC==0 & FirstMonth<WL2Month
-    //&? we can only define this variable for managers whose promotion can be observed
+replace  FuncChangeBeforeWL2 = 1 if temp_TransferFuncC>0  & q_WL2Prom==1
+replace  FuncChangeBeforeWL2 = 0 if temp_TransferFuncC==0 & q_WL2Prom==1
+    //&? we can only define this variable only for managers whose promotion can be observed
+label variable FuncChangeBeforeWL2 "Func. change before WL2"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-4-6. a cross section of managers 
+*-? s-2-6. a cross section of managers 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-keep if YearMonth==FirstMonth
+keep if YearMonth==YearMonth_FirstWL2
     //&? keep a cross section of managers 
+    //&? 33,198 unique managers
+
+keep IDlse EarlyAge q_WL2Prom ///
+    Female MidCareerHire ///
+    LowIncome UpperMidIncome HighIncome ///
+    func_cd func_m func_sc func_rd func_fi func_o FuncChangeBeforeWL2 ///
+    BachelorAbove BachelorOrBelow Econ* Sci* Hum* Other* 
+
+order IDlse EarlyAge q_WL2Prom ///
+    Female MidCareerHire ///
+    LowIncome UpperMidIncome HighIncome ///
+    func_cd func_m func_sc func_rd func_fi func_o FuncChangeBeforeWL2 ///
+    BachelorAbove BachelorOrBelow Econ* Sci* Hum* Other* 
+
+label variable Female "Female"
 
 save "${TempData}/temp_LogitCrossSectionMngrs.dta", replace
 
-order IDlse EarlyAge Female Func ISOCode Bachelor MBA AboveSecondary Econ Sci Hum Other Missing LowIncome UpperMidIncome HighIncome func_cd func_m func_sc func_rd func_fi func_o FuncChangeBeforeWL2
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 3. run linear probability models
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 5. on full managers
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-3-1. on full sample (all employees who have ever been WL2)
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 use "${TempData}/temp_LogitCrossSectionMngrs.dta", clear 
-label variable FuncChangeBeforeWL2 "Func. change before WL2"
 
-regress EarlyAge Female, robust
+regress EarlyAge Female MidCareerHire LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi, robust
     eststo reg1 
     summarize EarlyAge if e(sample)==1
     estadd scalar mean = r(mean)
-regress EarlyAge Female Bachelor AboveSecondary MBA, robust
+
+regress EarlyAge Female LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi FuncChangeBeforeWL2, robust
     eststo reg2 
     summarize EarlyAge if e(sample)==1
     estadd scalar mean = r(mean)
-regress EarlyAge Female Bachelor AboveSecondary MBA Econ Sci Hum Other, robust
+
+regress EarlyAge Female MidCareerHire LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi BachelorAbove, robust
     eststo reg3
     summarize EarlyAge if e(sample)==1
     estadd scalar mean = r(mean)
-regress EarlyAge Female Bachelor AboveSecondary MBA Econ Sci Hum Other LowIncome UpperMidIncome, robust
+
+regress EarlyAge Female MidCareerHire LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi Econ Sci Hum Other, robust
     eststo reg4
     summarize EarlyAge if e(sample)==1
     estadd scalar mean = r(mean)
 
-regress EarlyAge Female MidCareerHire, robust
-    eststo reg5
+regress EarlyAge Female MidCareerHire LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi Econ_Excl Sci_Excl Hum_Excl, robust
+    eststo reg4_Excl
     summarize EarlyAge if e(sample)==1
     estadd scalar mean = r(mean)
-regress EarlyAge Female MidCareerHire func_cd func_m func_sc func_rd func_fi, robust
-    eststo reg6
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-3-2. on promotion sample (whose promotion to WL2 can be observed)
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+regress EarlyAge Female LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi if q_WL2Prom==1, robust
+    eststo reg5 
     summarize EarlyAge if e(sample)==1
     estadd scalar mean = r(mean)
-regress EarlyAge Female MidCareerHire func_cd func_m func_sc func_rd func_fi FuncChangeBeforeWL2, robust
+
+regress EarlyAge Female LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi FuncChangeBeforeWL2 if q_WL2Prom==1, robust
+    eststo reg6 
+    summarize EarlyAge if e(sample)==1
+    estadd scalar mean = r(mean)
+
+regress EarlyAge Female LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi BachelorAbove if q_WL2Prom==1, robust
     eststo reg7
     summarize EarlyAge if e(sample)==1
     estadd scalar mean = r(mean)
 
-esttab reg1 reg2 reg3 reg4 reg5 reg6 reg7 using "${Results}/LogitOnHighFlyerStatus.tex", ///
+regress EarlyAge Female LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi Econ Sci Hum Other if q_WL2Prom==1, robust
+    eststo reg8
+    summarize EarlyAge if e(sample)==1
+    estadd scalar mean = r(mean)
+
+regress EarlyAge Female MidCareerHire LowIncome UpperMidIncome func_cd func_m func_sc func_rd func_fi Econ_Excl Sci_Excl Hum_Excl if q_WL2Prom==1, robust
+    eststo reg8_Excl
+    summarize EarlyAge if e(sample)==1
+    estadd scalar mean = r(mean)
+
+esttab reg1 reg2 reg3 reg4 reg5 reg6 reg7 reg8 using "${Results}/LinearProbModelOnHighFlyerStatus.tex", ///
     replace style(tex) fragment nocons label nofloat nobaselevels noobs ///
     nomtitles collabels(,none) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     b(3) se(2) ///
     stats(r2 mean N, labels("R-squared" "High-flyer, mean" "Obs") fmt(%9.3f %9.3f %9.0g)) ///
-    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lccccccc}" "\toprule" "\toprule") ///
+    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccccccc}" "\toprule" "\toprule" "& \multicolumn{4}{c}{Full manager sample} & \multicolumn{4}{c}{Managers whose promotion can be observed} \\" "\addlinespace[10pt] \cmidrule(lr){2-5} \cmidrule(lr){6-9} \\") ///
     posthead("\hline") ///
     prefoot("\hline") ///
-    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. Linear probability model with robust standard errors. The regression sample consists of a cross section of employees in the data who have ever been work level 2. " "\end{tablenotes}")
+    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. Linear probability model with robust standard errors. " "\end{tablenotes}")
 
-
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 5. on event managers
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-
-eststo clear 
-
-
-regress EarlyAge Female if EventMngr==1, robust
-    eststo reg1 
-    summarize EarlyAge if e(sample)==1
-    estadd scalar mean = r(mean)
-regress EarlyAge Female Bachelor AboveSecondary MBA if EventMngr==1, robust
-    eststo reg2 
-    summarize EarlyAge if e(sample)==1
-    estadd scalar mean = r(mean)
-regress EarlyAge Female Bachelor AboveSecondary MBA Econ Sci Hum Other if EventMngr==1, robust
-    eststo reg3
-    summarize EarlyAge if e(sample)==1
-    estadd scalar mean = r(mean)
-regress EarlyAge Female Bachelor AboveSecondary MBA Econ Sci Hum Other LowIncome UpperMidIncome if EventMngr==1, robust
-    eststo reg4
-    summarize EarlyAge if e(sample)==1
-    estadd scalar mean = r(mean)
-
-regress EarlyAge Female MidCareerHire if EventMngr==1, robust
-    eststo reg5
-    summarize EarlyAge if e(sample)==1
-    estadd scalar mean = r(mean)
-regress EarlyAge Female MidCareerHire func_cd func_m func_sc func_rd func_fi if EventMngr==1, robust
-    eststo reg6
-    summarize EarlyAge if e(sample)==1
-    estadd scalar mean = r(mean)
-regress EarlyAge Female MidCareerHire func_cd func_m func_sc func_rd func_fi FuncChangeBeforeWL2 if EventMngr==1, robust
-    eststo reg7
-    summarize EarlyAge if e(sample)==1
-    estadd scalar mean = r(mean)
-
-esttab reg1 reg2 reg3 reg4 reg5 reg6 reg7 using "${Results}/LogitOnHighFlyerStatus_EventMngr.tex", ///
+esttab reg1 reg2 reg3 reg4_Excl reg5 reg6 reg7 reg8_Excl using "${Results}/LinearProbModelOnHighFlyerStatus_FieldExcl.tex", ///
     replace style(tex) fragment nocons label nofloat nobaselevels noobs ///
     nomtitles collabels(,none) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     b(3) se(2) ///
     stats(r2 mean N, labels("R-squared" "High-flyer, mean" "Obs") fmt(%9.3f %9.3f %9.0g)) ///
-    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lccccccc}" "\toprule" "\toprule") ///
+    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccccccc}" "\toprule" "\toprule" "& \multicolumn{4}{c}{Full manager sample} & \multicolumn{4}{c}{Managers whose promotion can be observed} \\" "\addlinespace[10pt] \cmidrule(lr){2-5} \cmidrule(lr){6-9} \\") ///
     posthead("\hline") ///
     prefoot("\hline") ///
-    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. Linear probability model with robust standard errors. The regression sample consists of a cross section of managers who have shown up in the event studies." "\end{tablenotes}")
+    postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. Linear probability model with robust standard errors. " "\end{tablenotes}")
+
