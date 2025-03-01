@@ -2,3 +2,7 @@ Archive/
 z2_OldDoFiles/Libraries
 z2_OldDoFiles/GFE_generic
 tempCodeRunnerFile.do
+Master*.do
+*.sh
+*__pycache__
+Libraries/*
