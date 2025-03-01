@@ -12,7 +12,7 @@ Results:
     "${Results}/HeterogeneityInFourMainOutcomes.tex"
 
 RA: WWZ 
-Time: 2025-01-13
+Time: 2025-02-27
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -246,7 +246,7 @@ esttab OfficeSizeHigh_CSGC OfficeSizeHigh_TSJVC OfficeSizeHigh_PWLC OfficeSizeHi
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Office size, large") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
-    prehead("\hline \multicolumn{3}{c}{\textit{Panel (b): environment characteristics}} \\ \hline") posthead("") prefoot("") postfoot("")
+    prehead("\hline \multicolumn{3}{c}{\textit{Panel (b): office and country-wide characteristics}} \\ \hline") posthead("") prefoot("") postfoot("")
 esttab JobNum_CSGC JobNum_TSJVC JobNum_PWLC JobNum_Exit using "${Results}/HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
