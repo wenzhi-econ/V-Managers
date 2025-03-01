@@ -2,7 +2,7 @@
 This do file runs event studies on the task intensity measures for cognitive, routine, and social tasks.
 
 RA: WWZ 
-Time: 2025-02-10
+Time: 2025-02-17
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -22,11 +22,11 @@ merge m:1 StandardJob using "${TempData}/temp_ONET_FinalJobLevelPrank.dta"
 /* 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                       589,258
-        from master                   589,114  
-        from using                        144  
+    Not matched                       160,516
+        from master                   159,781  (_merge==1)
+        from using                        735  (_merge==2)
 
-    Matched                         1,313,301  
+    Matched                         1,742,634  (_merge==3)
     -----------------------------------------
 */
 
@@ -44,7 +44,7 @@ foreach var in prank_cognitive prank_routine prank_social {
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 capture log close
-log using "${Results}/logfile_20250210_EventStudiesOnTaskIntensityMeasure", replace text
+log using "${Results}/logfile_20250217_EventStudiesOnTaskIntensityMeasure", replace text
 
 /* keep if inrange(_n, 1, 10000)  */
     // used to test the codes

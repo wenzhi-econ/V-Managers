@@ -1,12 +1,12 @@
 /* 
-This do file transforms the raw ONET task intensity score to a percentile rank based on 2011m12 personnel records.
+This do file transforms the raw ONET task intensity score to a percentile rank based on personnel records across all year-months.
 
 Input:
     "${TempData}/temp_ONET_RawTaskIntensity.dta" <== created in 030709_01 do file 
     "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file
 
 RA: WWZ
-Time: 2025-02-10
+Time: 2025-02-17
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -33,35 +33,30 @@ keep IDlse YearMonth StandardJob
 
 merge m:1 StandardJob using "${TempData}/temp_ONET_RawTaskIntensity.dta", keep(match) nogenerate
 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-2. cdf plots across all year months
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
 codebook ONETSOCCode
     //&? 78 unique ONET occupation codes in all periods
-
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-2. cdf plots in 2011m12
-*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-codebook ONETSOCCode if YearMonth==tm(2011m12)
-    //&? 61 unique ONET occupation codes
-
-keep if YearMonth==tm(2011m12)
 
 cdfplot intensity_cognitive ///
     , xlabel(0(1)10, grid gstyle(dot)) xtitle("Raw cognitive task intensity", size(medlarge)) ///
     ylabel(0(0.1)1, grid gstyle(dot)) ytitle("Cumulative probability", size(medlarge)) ///
     title("Distribution of raw cognitive task intensity (scale 0-10)")
-graph export "${Results}/Dist_RawTaskIntensity_Cognitive.png", replace as(png)
+graph export "${Results}/Dist_RawTaskIntensity_Cognitive_WholeSample.png", replace as(png)
 
 cdfplot intensity_routine ///
     , xlabel(0(1)10, grid gstyle(dot)) xtitle("Raw routine task intensity", size(medlarge)) ///
     ylabel(0(0.1)1, grid gstyle(dot)) ytitle("Cumulative probability", size(medlarge)) ///
     title("Distribution of raw routine task intensity (scale 0-10)")
-graph export "${Results}/Dist_RawTaskIntensity_Routine.png", replace as(png)
+graph export "${Results}/Dist_RawTaskIntensity_Routine_WholeSample.png", replace as(png)
 
 cdfplot intensity_social ///
     , xlabel(0(1)10, grid gstyle(dot)) xtitle("Raw social task intensity", size(medlarge)) ///
     ylabel(0(0.1)1, grid gstyle(dot)) ytitle("Cumulative probability", size(medlarge)) ///
     title("Distribution of raw social task intensity (scale 0-10)")
-graph export "${Results}/Dist_RawTaskIntensity_Social.png", replace as(png)
+graph export "${Results}/Dist_RawTaskIntensity_Social_WholeSample.png", replace as(png)
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-3. calculate the fraction for each ONET occupation

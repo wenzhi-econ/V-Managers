@@ -22,30 +22,29 @@ merge m:1 StandardJob using "${TempData}/temp_ONET_FinalJobLevelPrank.dta"
 /* 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                       589,258
-        from master                   589,114  
-        from using                        144  
+    Not matched                       160,516
+        from master                   159,781  (_merge==1)
+        from using                        735  (_merge==2)
 
-    Matched                         1,313,301  
+    Matched                         1,742,634  (_merge==3)
     -----------------------------------------
 */
-
 
 sort IDlse YearMonth
 bysort IDlse: generate occurrence = _n 
 
 sort IDlse YearMonth
-bysort IDlse: generate dist_cognitive = prank_cognitive[_n] - prank_cognitive[_n-1]
+bysort IDlse: generate dist_cognitive = prank_cognitive[_n] - prank_cognitive[_n-1] if YearMonth[_n]==YearMonth[_n-1]+1
 replace dist_cognitive = 0 if occurrence==1
 bysort IDlse: generate cumdist_cognitive = sum(dist_cognitive)
 
 sort IDlse YearMonth
-bysort IDlse: generate dist_routine = prank_routine[_n] - prank_routine[_n-1]
+bysort IDlse: generate dist_routine = prank_routine[_n] - prank_routine[_n-1] if YearMonth[_n]==YearMonth[_n-1]+1
 replace dist_routine = 0 if occurrence==1
 bysort IDlse: generate cumdist_routine = sum(dist_routine)
 
 sort IDlse YearMonth
-bysort IDlse: generate dist_social = prank_social[_n] - prank_social[_n-1]
+bysort IDlse: generate dist_social = prank_social[_n] - prank_social[_n-1] if YearMonth[_n]==YearMonth[_n-1]+1
 replace dist_social = 0 if occurrence==1
 bysort IDlse: generate cumdist_social = sum(dist_social)
 
@@ -63,7 +62,7 @@ foreach var in cumdist_cognitive cumdist_routine cumdist_social {
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 capture log close
-log using "${Results}/logfile_20250210_EventStudiesOnTaskDistanceMeasure_Separate", replace text
+log using "${Results}/logfile_20250217_EventStudiesOnTaskDistanceMeasure_Separate", replace text
 
 /* keep if inrange(_n, 1, 10000)  */
     // used to test the codes

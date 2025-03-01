@@ -22,14 +22,13 @@ merge m:1 StandardJob using "${TempData}/temp_ONET_FinalJobLevelPrank.dta"
 /* 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                       589,258
-        from master                   589,114  
-        from using                        144  
+    Not matched                       160,516
+        from master                   159,781  (_merge==1)
+        from using                        735  (_merge==2)
 
-    Matched                         1,313,301  
+    Matched                         1,742,634  (_merge==3)
     -----------------------------------------
 */
-
 
 sort IDlse YearMonth
 bysort IDlse: generate occurrence = _n 
@@ -37,28 +36,20 @@ bysort IDlse: generate occurrence = _n
 sort IDlse YearMonth
 bysort IDlse: generate dist = ///
     ((prank_cognitive[_n] * prank_cognitive[_n-1]) + (prank_routine[_n] * prank_routine[_n-1]) + (prank_social[_n] * prank_social[_n-1])) ///
-    / sqrt((prank_cognitive[_n]^2 + prank_routine[_n]^2 + prank_social[_n]^2) * (prank_cognitive[_n-1]^2 + prank_routine[_n-1]^2 + prank_social[_n-1]^2))
+    / sqrt((prank_cognitive[_n]^2 + prank_routine[_n]^2 + prank_social[_n]^2) * (prank_cognitive[_n-1]^2 + prank_routine[_n-1]^2 + prank_social[_n-1]^2)) ///
+    if YearMonth[_n]==YearMonth[_n-1]+1
 replace dist = 1 if occurrence==1
 replace dist = 1 - dist
 
 sort IDlse YearMonth
 bysort IDlse: generate cumdist = sum(dist)
 
-foreach var in cumdist {
-    capture drop temp
-    generate temp = `var' * 100
-    replace `var' = temp 
-    capture drop temp
-}
-    //&? convert the percentile rank to the 0-100 scale
-    //&? this step is unnecessary but can make interpretation easier
-
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 1. obtain the final dataset for the event studies
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 capture log close
-log using "${Results}/logfile_20250210_EventStudiesOnTaskDistanceMeasure_Composite", replace text
+log using "${Results}/logfile_20250217_EventStudiesOnTaskDistanceMeasure_Composite", replace text
 
 /* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
