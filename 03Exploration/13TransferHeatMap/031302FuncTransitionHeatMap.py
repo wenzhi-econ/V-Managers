@@ -5,7 +5,7 @@ This file plots heatmaps for function transition 1-7 years after the event,
 separately for LtoL and LtoH event workers.
 
 RA: WWZ
-Time: 2025-01-30
+Time: 2025-02-20
 """
 
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
@@ -42,7 +42,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 mpl.use("WebAgg")
-plt.style.use("seaborn-v0_8-whitegrid")
+# plt.style.use("seaborn-v0_8-whitegrid")
 # print(sns.color_palette())
 
 np.set_printoptions(threshold=sys.maxsize, linewidth=150)
@@ -153,6 +153,45 @@ tran_6yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["
 tran_7yr_LtoL = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoL"] == 1)], 7)
 tran_7yr_LtoH = calculate_transition_matrix(transition_dta.loc[(transition_dta["FT_LtoH"] == 1)], 7)
 
+""" Determine the scale of the heatmaps
+list_of_transition_matrices = [
+    tran_1yr_LtoL,
+    tran_1yr_LtoH,
+    tran_2yr_LtoL,
+    tran_2yr_LtoH,
+    tran_3yr_LtoL,
+    tran_3yr_LtoH,
+    tran_4yr_LtoL,
+    tran_4yr_LtoH,
+    tran_5yr_LtoL,
+    tran_5yr_LtoH,
+    tran_6yr_LtoL,
+    tran_6yr_LtoH,
+    tran_7yr_LtoL,
+    tran_7yr_LtoH,
+]
+for mat in list_of_transition_matrices:
+    print(mat.min().min())
+    print(mat.max().max())
+
+# &? a proper and consistent scale [0, 0.4]
+
+list_of_diff_matrices = [
+    tran_1yr_LtoH - tran_1yr_LtoL,
+    tran_2yr_LtoH - tran_2yr_LtoL,
+    tran_3yr_LtoH - tran_3yr_LtoL,
+    tran_4yr_LtoH - tran_4yr_LtoL,
+    tran_5yr_LtoH - tran_5yr_LtoL,
+    tran_6yr_LtoH - tran_6yr_LtoL,
+    tran_7yr_LtoH - tran_7yr_LtoL,
+]
+for mat in list_of_diff_matrices:
+    print(mat.min().min())
+    print(mat.max().max())
+
+# &? a proper and consistent scale [-0.15, 0.15]
+"""
+
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
 # ?? step 3. draw the heat map
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
@@ -176,56 +215,112 @@ func_list = [
     "Data and Analytics",
 ]
 
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-3-1. a function to plot the heatmap
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
 
-def plot_heatmap(data, year, group, fig_name):
+
+def heatmap(data, year, group, diff=False, fig_name=None):
     plt.close("all")
     fig, ax = plt.subplots(layout="constrained")
-    c = ax.imshow(data)
-    color_bar = fig.colorbar(c, ax=ax)
-    ax.grid(True, alpha=0.3, linestyle="--")
+    if not diff:
+        c = ax.imshow(data, vmin=0, vmax=0.4, cmap="Blues")
+    elif diff:
+        c = ax.imshow(data, vmin=-0.15, vmax=0.15, cmap="coolwarm")
+    fig.colorbar(c, ax=ax)
+    ax.grid(False)
     ax.set_title(f"{year} after the event, {group}")
-    ax.set_xlabel(f"Function {year} year after the event")
-    ax.set_ylabel("Function at the event")
-    ax.set_xticks(
-        np.arange(data.shape[1]),
-        labels=func_list,
-    )
+    ax.set_xlabel(f"Occupation {year} after the event")
+    ax.set_ylabel("Occupation at the event")
+    ax.set_xticks(np.arange(data.shape[1]), labels=func_list)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-    ax.set_yticks(
-        np.arange(data.shape[0]),
-        labels=func_list,
-    )
-    plt.savefig(fig_name)
+    ax.set_yticks(np.arange(data.shape[0]), labels=func_list)
+    if fig_name is not None:
+        plt.savefig(fig_name)
     plt.show()
 
 
-plot_heatmap(tran_1yr_LtoH - tran_1yr_LtoL, "1 year", "LtoH - LtoL", results("Tran_Func_1yr_LtoHvsLtoL.png"))
-plot_heatmap(tran_2yr_LtoH - tran_2yr_LtoL, "2 years", "LtoH - LtoL", results("Tran_Func_2yr_LtoHvsLtoL.png"))
-plot_heatmap(tran_3yr_LtoH - tran_3yr_LtoL, "3 years", "LtoH - LtoL", results("Tran_Func_3yr_LtoHvsLtoL.png"))
-plot_heatmap(tran_4yr_LtoH - tran_4yr_LtoL, "4 years", "LtoH - LtoL", results("Tran_Func_4yr_LtoHvsLtoL.png"))
-plot_heatmap(tran_5yr_LtoH - tran_5yr_LtoL, "5 years", "LtoH - LtoL", results("Tran_Func_5yr_LtoHvsLtoL.png"))
-plot_heatmap(tran_6yr_LtoH - tran_6yr_LtoL, "6 years", "LtoH - LtoL", results("Tran_Func_6yr_LtoHvsLtoL.png"))
-plot_heatmap(tran_7yr_LtoH - tran_7yr_LtoL, "7 years", "LtoH - LtoL", results("Tran_Func_7yr_LtoHvsLtoL.png"))
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-3-2. difference in LtoH and LtoL transition matrices
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
 
-plot_heatmap(tran_1yr_LtoH, "1 year", "LtoH", results("Tran_Func_1yr_LtoH.png"))
-plot_heatmap(tran_2yr_LtoH, "2 year", "LtoH", results("Tran_Func_2yr_LtoH.png"))
-plot_heatmap(tran_3yr_LtoH, "3 year", "LtoH", results("Tran_Func_3yr_LtoH.png"))
-plot_heatmap(tran_4yr_LtoH, "4 year", "LtoH", results("Tran_Func_4yr_LtoH.png"))
-plot_heatmap(tran_5yr_LtoH, "5 year", "LtoH", results("Tran_Func_5yr_LtoH.png"))
-plot_heatmap(tran_6yr_LtoH, "6 year", "LtoH", results("Tran_Func_6yr_LtoH.png"))
-plot_heatmap(tran_7yr_LtoH, "7 year", "LtoH", results("Tran_Func_7yr_LtoH.png"))
+heatmap(
+    tran_1yr_LtoH - tran_1yr_LtoL,
+    "1 year",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_1yr_LtoHvsLtoL.png"),
+)
+heatmap(
+    tran_2yr_LtoH - tran_2yr_LtoL,
+    "2 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_2yr_LtoHvsLtoL.png"),
+)
+heatmap(
+    tran_3yr_LtoH - tran_3yr_LtoL,
+    "3 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_3yr_LtoHvsLtoL.png"),
+)
+heatmap(
+    tran_4yr_LtoH - tran_4yr_LtoL,
+    "4 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_4yr_LtoHvsLtoL.png"),
+)
+heatmap(
+    tran_5yr_LtoH - tran_5yr_LtoL,
+    "5 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_5yr_LtoHvsLtoL.png"),
+)
+heatmap(
+    tran_6yr_LtoH - tran_6yr_LtoL,
+    "6 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_6yr_LtoHvsLtoL.png"),
+)
+heatmap(
+    tran_7yr_LtoH - tran_7yr_LtoL,
+    "7 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_7yr_LtoHvsLtoL.png"),
+)
 
-plot_heatmap(tran_1yr_LtoL, "1 year", "LtoL", results("Tran_Func_1yr_LtoL.png"))
-plot_heatmap(tran_2yr_LtoL, "2 year", "LtoL", results("Tran_Func_2yr_LtoL.png"))
-plot_heatmap(tran_3yr_LtoL, "3 year", "LtoL", results("Tran_Func_3yr_LtoL.png"))
-plot_heatmap(tran_4yr_LtoL, "4 year", "LtoL", results("Tran_Func_4yr_LtoL.png"))
-plot_heatmap(tran_5yr_LtoL, "5 year", "LtoL", results("Tran_Func_5yr_LtoL.png"))
-plot_heatmap(tran_6yr_LtoL, "6 year", "LtoL", results("Tran_Func_6yr_LtoL.png"))
-plot_heatmap(tran_7yr_LtoL, "7 year", "LtoL", results("Tran_Func_7yr_LtoL.png"))
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-3-3. separate for LtoL and LtoH workers
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+
+heatmap(tran_1yr_LtoH, "1 year", "LtoH", diff=False, fig_name=results("Tran_Func_1yr_LtoH.png"))
+heatmap(tran_2yr_LtoH, "2 year", "LtoH", diff=False, fig_name=results("Tran_Func_2yr_LtoH.png"))
+heatmap(tran_3yr_LtoH, "3 year", "LtoH", diff=False, fig_name=results("Tran_Func_3yr_LtoH.png"))
+heatmap(tran_4yr_LtoH, "4 year", "LtoH", diff=False, fig_name=results("Tran_Func_4yr_LtoH.png"))
+heatmap(tran_5yr_LtoH, "5 year", "LtoH", diff=False, fig_name=results("Tran_Func_5yr_LtoH.png"))
+heatmap(tran_6yr_LtoH, "6 year", "LtoH", diff=False, fig_name=results("Tran_Func_6yr_LtoH.png"))
+heatmap(tran_7yr_LtoH, "7 year", "LtoH", diff=False, fig_name=results("Tran_Func_7yr_LtoH.png"))
+
+heatmap(tran_1yr_LtoL, "1 year", "LtoL", diff=False, fig_name=results("Tran_Func_1yr_LtoL.png"))
+heatmap(tran_2yr_LtoL, "2 year", "LtoL", diff=False, fig_name=results("Tran_Func_2yr_LtoL.png"))
+heatmap(tran_3yr_LtoL, "3 year", "LtoL", diff=False, fig_name=results("Tran_Func_3yr_LtoL.png"))
+heatmap(tran_4yr_LtoL, "4 year", "LtoL", diff=False, fig_name=results("Tran_Func_4yr_LtoL.png"))
+heatmap(tran_5yr_LtoL, "5 year", "LtoL", diff=False, fig_name=results("Tran_Func_5yr_LtoL.png"))
+heatmap(tran_6yr_LtoL, "6 year", "LtoL", diff=False, fig_name=results("Tran_Func_6yr_LtoL.png"))
+heatmap(tran_7yr_LtoL, "7 year", "LtoL", diff=False, fig_name=results("Tran_Func_7yr_LtoL.png"))
 
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
 # ?? step 4. extension: focus on job movers
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
+
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-4-1. re-calculate the transition matrices for job movers
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
 
 tran_1yr_LtoL = calculate_transition_matrix(
     transition_dta.loc[((transition_dta["FT_LtoL"] == 1) & (transition_dta["Movers_1yr"] == 1))], 1
@@ -270,41 +365,72 @@ tran_7yr_LtoH = calculate_transition_matrix(
     transition_dta.loc[((transition_dta["FT_LtoH"] == 1) & (transition_dta["Movers_7yr"] == 1))], 7
 )
 
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
+# -? s-4-2. heatmaps for LtoH-LtoL
+# -?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?#-?
 
-plot_heatmap(
-    tran_1yr_LtoH - tran_1yr_LtoL, "1 year", "LtoH - LtoL", results("Tran_Func_JobMovers_1yr_LtoHvsLtoL.png")
+heatmap(
+    tran_1yr_LtoH - tran_1yr_LtoL,
+    "1 year",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_JobMovers_1yr_LtoHvsLtoL.png"),
 )
-plot_heatmap(
-    tran_2yr_LtoH - tran_2yr_LtoL, "2 years", "LtoH - LtoL", results("Tran_Func_JobMovers_2yr_LtoHvsLtoL.png")
+heatmap(
+    tran_2yr_LtoH - tran_2yr_LtoL,
+    "2 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_JobMovers_2yr_LtoHvsLtoL.png"),
 )
-plot_heatmap(
-    tran_3yr_LtoH - tran_3yr_LtoL, "3 years", "LtoH - LtoL", results("Tran_Func_JobMovers_3yr_LtoHvsLtoL.png")
+heatmap(
+    tran_3yr_LtoH - tran_3yr_LtoL,
+    "3 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_JobMovers_3yr_LtoHvsLtoL.png"),
 )
-plot_heatmap(
-    tran_4yr_LtoH - tran_4yr_LtoL, "4 years", "LtoH - LtoL", results("Tran_Func_JobMovers_4yr_LtoHvsLtoL.png")
+heatmap(
+    tran_4yr_LtoH - tran_4yr_LtoL,
+    "4 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_JobMovers_4yr_LtoHvsLtoL.png"),
 )
-plot_heatmap(
-    tran_5yr_LtoH - tran_5yr_LtoL, "5 years", "LtoH - LtoL", results("Tran_Func_JobMovers_5yr_LtoHvsLtoL.png")
+heatmap(
+    tran_5yr_LtoH - tran_5yr_LtoL,
+    "5 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_JobMovers_5yr_LtoHvsLtoL.png"),
 )
-plot_heatmap(
-    tran_6yr_LtoH - tran_6yr_LtoL, "6 years", "LtoH - LtoL", results("Tran_Func_JobMovers_6yr_LtoHvsLtoL.png")
+heatmap(
+    tran_6yr_LtoH - tran_6yr_LtoL,
+    "6 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_JobMovers_6yr_LtoHvsLtoL.png"),
 )
-plot_heatmap(
-    tran_7yr_LtoH - tran_7yr_LtoL, "7 years", "LtoH - LtoL", results("Tran_Func_JobMovers_7yr_LtoHvsLtoL.png")
+heatmap(
+    tran_7yr_LtoH - tran_7yr_LtoL,
+    "7 years",
+    "LtoH - LtoL",
+    diff=True,
+    fig_name=results("Tran_Func_JobMovers_7yr_LtoHvsLtoL.png"),
 )
 
-plot_heatmap(tran_1yr_LtoH, "1 year", "LtoH", results("Tran_Func_JobMovers_1yr_LtoH.png"))
-plot_heatmap(tran_2yr_LtoH, "2 year", "LtoH", results("Tran_Func_JobMovers_2yr_LtoH.png"))
-plot_heatmap(tran_3yr_LtoH, "3 year", "LtoH", results("Tran_Func_JobMovers_3yr_LtoH.png"))
-plot_heatmap(tran_4yr_LtoH, "4 year", "LtoH", results("Tran_Func_JobMovers_4yr_LtoH.png"))
-plot_heatmap(tran_5yr_LtoH, "5 year", "LtoH", results("Tran_Func_JobMovers_5yr_LtoH.png"))
-plot_heatmap(tran_6yr_LtoH, "6 year", "LtoH", results("Tran_Func_JobMovers_6yr_LtoH.png"))
-plot_heatmap(tran_7yr_LtoH, "7 year", "LtoH", results("Tran_Func_JobMovers_7yr_LtoH.png"))
+heatmap(tran_1yr_LtoH, "1 year", "LtoH", diff=False, fig_name=results("Tran_Func_JobMovers_1yr_LtoH.png"))
+heatmap(tran_2yr_LtoH, "2 year", "LtoH", diff=False, fig_name=results("Tran_Func_JobMovers_2yr_LtoH.png"))
+heatmap(tran_3yr_LtoH, "3 year", "LtoH", diff=False, fig_name=results("Tran_Func_JobMovers_3yr_LtoH.png"))
+heatmap(tran_4yr_LtoH, "4 year", "LtoH", diff=False, fig_name=results("Tran_Func_JobMovers_4yr_LtoH.png"))
+heatmap(tran_5yr_LtoH, "5 year", "LtoH", diff=False, fig_name=results("Tran_Func_JobMovers_5yr_LtoH.png"))
+heatmap(tran_6yr_LtoH, "6 year", "LtoH", diff=False, fig_name=results("Tran_Func_JobMovers_6yr_LtoH.png"))
+heatmap(tran_7yr_LtoH, "7 year", "LtoH", diff=False, fig_name=results("Tran_Func_JobMovers_7yr_LtoH.png"))
 
-plot_heatmap(tran_1yr_LtoL, "1 year", "LtoL", results("Tran_Func_JobMovers_1yr_LtoL.png"))
-plot_heatmap(tran_2yr_LtoL, "2 year", "LtoL", results("Tran_Func_JobMovers_2yr_LtoL.png"))
-plot_heatmap(tran_3yr_LtoL, "3 year", "LtoL", results("Tran_Func_JobMovers_3yr_LtoL.png"))
-plot_heatmap(tran_4yr_LtoL, "4 year", "LtoL", results("Tran_Func_JobMovers_4yr_LtoL.png"))
-plot_heatmap(tran_5yr_LtoL, "5 year", "LtoL", results("Tran_Func_JobMovers_5yr_LtoL.png"))
-plot_heatmap(tran_6yr_LtoL, "6 year", "LtoL", results("Tran_Func_JobMovers_6yr_LtoL.png"))
-plot_heatmap(tran_7yr_LtoL, "7 year", "LtoL", results("Tran_Func_JobMovers_7yr_LtoL.png"))
+heatmap(tran_1yr_LtoL, "1 year", "LtoL", diff=False, fig_name=results("Tran_Func_JobMovers_1yr_LtoL.png"))
+heatmap(tran_2yr_LtoL, "2 year", "LtoL", diff=False, fig_name=results("Tran_Func_JobMovers_2yr_LtoL.png"))
+heatmap(tran_3yr_LtoL, "3 year", "LtoL", diff=False, fig_name=results("Tran_Func_JobMovers_3yr_LtoL.png"))
+heatmap(tran_4yr_LtoL, "4 year", "LtoL", diff=False, fig_name=results("Tran_Func_JobMovers_4yr_LtoL.png"))
+heatmap(tran_5yr_LtoL, "5 year", "LtoL", diff=False, fig_name=results("Tran_Func_JobMovers_5yr_LtoL.png"))
+heatmap(tran_6yr_LtoL, "6 year", "LtoL", diff=False, fig_name=results("Tran_Func_JobMovers_6yr_LtoL.png"))
+heatmap(tran_7yr_LtoL, "7 year", "LtoL", diff=False, fig_name=results("Tran_Func_JobMovers_7yr_LtoL.png"))

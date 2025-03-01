@@ -34,11 +34,11 @@ merge m:1 StandardJob using "${TempData}/temp_ONET_FinalJobLevelPrank.dta"
 /* 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                       495,670
-        from master                   495,521  (_merge==1)
-        from using                        149  (_merge==2)
+    Not matched                       139,475
+        from master                   138,700  (_merge==1)
+        from using                        775  (_merge==2)
 
-    Matched                         1,161,024  (_merge==3)
+    Matched                         1,517,845  (_merge==3)
     -----------------------------------------
 */
 
@@ -92,7 +92,7 @@ keep if FT_Rel_Time==0
 keep if prank_cognitive0!=.
 
 codebook prank_cognitive0
-    //&? 39 unique values 
+    //&? 49 unique values 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-6. reshape long so that cdfplot command can be used
