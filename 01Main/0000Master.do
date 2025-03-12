@@ -63,6 +63,8 @@ if 	"`c(username)'" == "virginia_m" {
     global user = "C:/Users/virginia_m/Dropbox/JMP_Managers"
 }
 
+if 	"`c(username)'" == "ra" global user = "C:/Users/RA"
+
 cd "${user}"
 
 global Paper        "${user}/Paper Managers"
