@@ -153,6 +153,6 @@ esttab lp_control lp_l1_control lp_l2_control lc_control lc_l1_control lc_l2_con
     using "${Results}/ProdvsHFmngr.tex" ///
     , replace style(tex) fragment nocons label nofloat nobaselevels nomtitles ///
     collabels(, none) keep(share_hf_managers) ///
-    stats(mean N r2, labels("Mean" "N" "R-squared") fmt(%9.3f %9.0f %9.3f)) /// 
+    stats(mean r2 N, labels("Mean" "R-squared" "N") fmt(%9.3f %9.3f %9.0f)) /// 
     prehead("\begin{tabular}{lcccccc}" "\toprule" "\toprule" "& \multicolumn{3}{c}{Output per worker in logs} & \multicolumn{3}{c}{Costs per output in logs} \\" "\addlinespace[10pt] \cmidrule(lr){2-4} \cmidrule(lr){5-7} \\" "& \multicolumn{1}{c}{\shortstack{Current \\ Year}} & \multicolumn{1}{c}{\shortstack{Lagged \\ -1 Year}} & \multicolumn{1}{c}{\shortstack{Lagged \\ -2 Year}} & \multicolumn{1}{c}{\shortstack{Current \\ Year}} & \multicolumn{1}{c}{\shortstack{Lagged \\ -1 Year}} & \multicolumn{1}{c}{\shortstack{Lagged \\ -2 Year}} \\ ") ///
     postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is an office-year. Standard errors clustered at the office level. Control variables include country FE, year FE, and office size. In Columns (1)-(3), the outcome variables are current-year, and lagged (-1 and -2 year) output per worker in logs. In Columns (4)-(6), the outcome variables are current-year, and lagged (-1 and -2 year) costs per output in logs." "\end{tablenotes}")

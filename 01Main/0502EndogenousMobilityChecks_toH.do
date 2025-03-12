@@ -74,20 +74,20 @@ esttab reg1 reg2 reg3 reg4 using "${Results}/EndogenousMobilityChecks_ToH.tex", 
     replace fragment nofloat nonotes nocons label nobaselevels interaction("$\times$") ///
     keep(FT_toH) ///
     star(* 0.10 ** 0.05 *** 0.01) b(4) se(3) ///
-    stats(mean_toL r2 N, labels("Mean, low-flyer manager" "N" "R-squared") fmt(%9.3f %9.3f %9.0g)) ///
+    stats(mean_toL r2 N, labels("Mean, low-flyer manager" "R-squared" "N") fmt(%9.3f %9.3f %9.0g)) ///
     prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{l*{4}{c}}" "\hline\hline \\" "\multicolumn{5}{c}{\textit{Panel (a): team performance}} \\\\[-1ex]")
 
 esttab reg5 reg6 reg7 reg8 using "${Results}/EndogenousMobilityChecks_ToH.tex", ///
     append fragment nofloat nonotes nocons label nobaselevels interaction("$\times$") ///
     keep(FT_toH) ///
     star(* 0.10 ** 0.05 *** 0.01) b(4) se(3) ///
-    stats(mean_toL r2 N, labels( "Mean, low-flyer manager" "N" "R-squared") fmt(%9.3f %9.3f %9.0g)) ///
+    stats(mean_toL r2 N, labels("Mean, low-flyer manager" "R-squared" "N") fmt(%9.3f %9.3f %9.0g)) ///
     prehead("\hline \\ \multicolumn{5}{c}{\textit{Panel (b): team diversity}} \\\\[-1ex]") 
 
 esttab reg9 reg10 reg11 reg12 using "${Results}/EndogenousMobilityChecks_ToH.tex", ///
     append fragment nofloat nonotes nocons label nobaselevels interaction("$\times$") ///
     keep(FT_toH) ///
     star(* 0.10 ** 0.05 *** 0.01) b(4) se(3) ///
-    stats(mean_toL r2 N, labels( "Mean, low-flyer manager" "N" "R-squared") fmt(%9.3f %9.3f %9.0g)) ///
+    stats(mean_toL r2 N, labels("Mean, low-flyer manager" "R-squared" "N") fmt(%9.3f %9.3f %9.0g)) ///
     prehead("\hline \\ \multicolumn{5}{c}{\textit{Panel (c): team homophily with manager}} \\\\[-1ex]") ///
     postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item"  "Notes. An observation is a team-month. Sample restricted to observations between 6 and 36 months before the manager switch. Standard errors clustered at the manager level. Controls include: function, country and year FE. In Panel (a), \textit{Salary (logs)} is the log of the average salary in the team; \textit{Salary grade increase} is share of workers with a salary increase; \textit{Lateral move} is the share of workers that experience a lateral move; \textit{Cross-functional move} is the share of workers that experience a function change. In Panel (b), each outcome variable is a fractionalization index (1- Herfindahl-Hirschman index) for the relevant characteristic; it is 0 when all team members are the same and it is 1 when there is maximum team diversity. In Panel (c), each outcome variable is the share of workers that share the same characteristic with the manager (gender, age group, office, nationality)." "\end{tablenotes}")
