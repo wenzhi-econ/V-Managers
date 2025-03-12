@@ -10,7 +10,7 @@ This do file runs event study regressions on two main outcomes of interest: Tran
 Notes on the event study regressions:
     (1) All four treatment groups are included (though Lto and Hto groups do not have same time window), while never-treated workers are not. 
     (2) The omitted group in the regressions are month -3, -2, and -1 for all four treatment groups.
-    (3) For LtoL and LtoH groups, the relative time period is [-36, +84], while for HtoH and HtoL groups, the relative time period is [-36, +60].
+    (3) For placebo LtoL and LtoH groups, the relative time period is [-36, +84], while for placebo HtoH and HtoL groups, the relative time period is [-36, +60].
 
 Some key results (quarterly aggregated coefficients with their p-values, and other key summary statistics) are stored in the output file. 
 
@@ -248,52 +248,5 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
     graph save "${Results}/FT_Loss_AllEstimates_`var'_Placebo.gph", replace   
     
 }
-/* 
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 4. event studies on number of work level promotions
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-
-foreach var in PromWLC {
-
-    if "`var'" == "PromWLC" global title "Work-level promotions"
-
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-    *-? step 1. Main Regression
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-    reghdfe `var' ${four_events_dummies} if (FT_Mngr_both_WL2==1 & FT_Post==1), absorb(IDlse YearMonth) vce(cluster IDlseMHR) 
-    
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-    *-? step 2. LtoH versus LtoL
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-    *!! quarterly estimates
-    LH_minus_LL_OnlyPost, event_prefix(FT) post_window_len(84) outcome(`var')
-    twoway ///
-        (scatter coeff_`var'_gains quarter_`var'_gains, lcolor(ebblue) mcolor(ebblue)) ///
-        (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
-        , yline(0, lcolor(maroon)) xline(0, lcolor(maroon)) ///
-        xlabel(0(2)28, grid gstyle(dot) labsize(medsmall)) /// 
-        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
-        xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
-        legend(off)
-    graph save "${Results}/FT_Gains_AllEstimates_`var'_Placebo.gph", replace
-
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-    *-? step 3. HtoL versus HtoH
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-
-    *!! quarterly estimates
-    HL_minus_HH_OnlyPost, event_prefix(FT) post_window_len(60) outcome(`var')
-    twoway ///
-        (scatter coeff_`var'_loss quarter_`var'_loss, lcolor(ebblue) mcolor(ebblue)) ///
-        (rcap lb_`var'_loss ub_`var'_loss quarter_`var'_loss, lcolor(ebblue)) ///
-        , yline(0, lcolor(maroon)) xline(0, lcolor(maroon)) ///
-        xlabel(0(2)20, grid gstyle(dot) labsize(medsmall)) /// 
-        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
-        xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
-        legend(off)
-    graph save "${Results}/FT_Loss_AllEstimates_`var'_Placebo.gph", replace   
-} */
 
 capture log close
