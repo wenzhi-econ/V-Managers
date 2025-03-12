@@ -1,30 +1,29 @@
 /* 
-This do file compares key variables between H- and L-type managers in the sample of WL2 managers.
+This do file compares key variables between H- and L-type managers.
 
-Input files:
+Notes:
+    The sample includes all employees who have ever been WL2 in the dataset.
+
+Input:
     "${TempData}/04MainOutcomesInEventStudies.dta" <== constructed in 0104 do file
     "${RawMNEData}/Univoice.dta"                   <== raw data 
     "${RawMNEData}/EducationMax.dta"               <== raw data 
     "${RawCntyData}/6.WB IncomeGroup.dta"          <== raw data
 
-Intermediary files:
-    "${TempData}/temp_EverWL2WorkerPanel.dta"
-    "${TempData}/temp_MngrEffectiveness_Survey.dta"
+Auxiliary files:
+    "${TempData}/temp_EverWL2WorkerPanel.dta"       <== auxiliary dataset, will be removed if $if_erase_temp_file==1
+    "${TempData}/temp_MngrEffectiveness_Survey.dta" <== auxiliary dataset, will be removed if $if_erase_temp_file==1
 
-Output files:
+Output:
     "${TempData}/temp_EventMngrStatisticsHFVsNHF.dta"
-    "${Results}/logfile_20241127_EventMngrHFvsNHFStatistics.txt"
 
 Results:
-    "${Results}/MngrHFvsNHFStatistics.tex"
+    "${TempData}/temp_Table3_SummaryStatistics_MngrHvsL_FullMngrSample.dta" <== dataset used to create the summary statistics table 
+    "${Results}/MngrHFvsNHFStatistics.tex"                                  <== final table 
 
 RA: WWZ 
-Time: 2024-11-05
+Time: 2025-03-12
 */
-
-capture log close 
-
-log using "${Results}/logfile_20241127_EventMngrHFvsNHFStatistics", replace text
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 1. obtain the final dataset consisting of event managers
@@ -125,14 +124,6 @@ merge m:1 IDlse using "${TempData}/temp_MngrEffectiveness_Survey.dta", keepusing
 *!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
 
 merge 1:1 IDlse YearMonth using "${TempData}/05SalesProdOutcomes.dta" , keepusing(ProductivityStd)
-    drop if _merge==2 
-    drop _merge 
-
-*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
-*!! s-1-2-5. VPA 
-*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!*!!
-
-merge 1:1 IDlse YearMonth using "${RawMNEData}/AllSnapshotWC.dta" , keepusing(VPA)
     drop if _merge==2 
     drop _merge 
 
@@ -257,7 +248,6 @@ replace  HighIncome = 0 if IncomeGroup=="Upper middle income" | IncomeGroup=="Lo
 label variable LowIncome      "Low income countries"
 label variable UpperMidIncome "Middle income countries"
 
-
 order IDlse YearMonth EarlyAge ///
     PayGrowth WLAgg3 VPA LineManagerMean ///
     Female ///
@@ -266,13 +256,13 @@ order IDlse YearMonth EarlyAge ///
     func_cd func_m func_sc func_o func_rd func_fi ///
     LowIncome UpperMidIncome
 
-save "${TempData}/temp_EventMngrStatisticsHFVsNHF_SalesBonus_FullMngrSample.dta", replace 
+save "${TempData}/temp_Table3_SummaryStatistics_MngrHvsL_FullMngrSample.dta", replace 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 3: produce the summary table 
+*?? step 3: produce the summary statistics table 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${TempData}/temp_EventMngrStatisticsHFVsNHF_SalesBonus_FullMngrSample.dta", clear 
+use "${TempData}/temp_Table3_SummaryStatistics_MngrHvsL_FullMngrSample.dta", clear 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-3-1: demographics variables  
@@ -336,8 +326,15 @@ preserve
         prehead("") ///
         posthead("\hline \\ \multicolumn{4}{c}{\textit{Panel (c): performance after high-flyer status is determined}} \\\\[-1ex]") ///
         prefoot("\hline") ///
-        postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item Notes. Showing mean and standard deviations (in parentheses) and p-values for the difference in means. The  difference in means is computed using standard errors clustered by manager. \emph{Perf. rating} refers to the performance assessment given annually to each employee; \emph{Effective leader (survey)} refers to the workers' anonymous upward feedback on the managers' leadership; and \emph{Mid-career recruit} refers to managers who have been hired directly as managers by the firm (at work-level 2 instead of work-level 1). Working countries' income groups are classified by World Bank, and the omitted income group is high income country." "\end{tablenotes}")
+        postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item Notes. The table reports means, standard deviations (in parentheses), and p-values for differences in means, which are computed using standard errors clustered by manager. \emph{Mid-career recruit} refers to managers who have been hired directly as managers by the firm (at work-level 2 instead of work-level 1). Working countries' income groups are classified by World Bank, and the omitted income group is high income country. \emph{Perf. rating} refers to the performance assessment given annually to each employee; and \emph{Effective leader (survey)} refers to the workers' anonymous upward feedback on the managers' leadership. " "\end{tablenotes}")
 
 restore 
 
-log close
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 4. remove auxiliary datasets 
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+if $if_erase_temp_file==1 {
+    erase "${TempData}/temp_EverWL2WorkerPanel.dta"
+    erase "${TempData}/temp_MngrEffectiveness_Survey.dta"
+}

@@ -1,5 +1,8 @@
 /* 
-This do file replicates Table B4 in the paper.
+This do file runs DID-style regressions using productivity (i.e., sales bonus) as the outcome variable.
+
+Notes:
+    The regressions are further run conditional on workers' lateral and vertical move status.
 
 Input:
     "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file 
@@ -118,8 +121,6 @@ merge m:1 IDlseMHR YearMonth using "${RawMNEData}/ListWbecM.dta"
     keep if _merge==3
     drop _merge
 
-generate Year = year(dofm(YearMonth))
-
 merge m:1 IDlse Year using "${RawMNEData}/Univoice.dta", keep(match master) nogenerate keepusing(LineManager)
 
 sort IDlseMHR YearMonth IDlse
@@ -148,8 +149,6 @@ reghdfe MScoreB FT_LtoH ${control_vars} if WL==2 & FT_Mngr_both_WL2==1 & (FT_Lto
 label variable FT_LtoH "LtoH"
 label variable FT_LtoH_X_Post "LtoH $\times$ Post"
 
-esttab Prod Prod_Movers LogPayBonus_Movers LogPayBonus_Gain MScore_Gain MScoreB_Gain, keep(FT_LtoH_X_Post FT_LtoH)
-
 esttab Prod Prod_Movers LogPayBonus_Movers LogPayBonus_Gain MScore_Gain MScoreB_Gain using "${Results}/ResultsConditionalOnLateralAndVerticalMoves.tex", ///
     replace style(tex) fragment nocons label nofloat nobaselevels noobs ///
     nomtitles collabels(,none) ///
@@ -157,8 +156,8 @@ esttab Prod Prod_Movers LogPayBonus_Movers LogPayBonus_Gain MScore_Gain MScoreB_
     keep(FT_LtoH_X_Post FT_LtoH) ///
     order(FT_LtoH_X_Post FT_LtoH) ///
     b(3) se(2) ///
-    stats(r2 cmean N, labels("R-squared" "Mean, LtoL group" "Obs") fmt(%9.3f %9.3f %9.0g)) ///
-    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccccc}" "\toprule" "\toprule" "& & \multicolumn{2}{c}{Conditional on lateral move} & \multicolumn{3}{c}{Conditional on vertical move} \\" "\addlinespace[10pt] \cmidrule(lr){3-4} \cmidrule(lr){5-7} \\" " & \multicolumn{1}{c}{Sales bonus (s.d.)}  & \multicolumn{1}{c}{Sales bonus (s.d.)}  & \multicolumn{1}{c}{Pay + bonus (in logs)} & \multicolumn{1}{c}{Pay + bonus (in logs)} & \multicolumn{1}{c}{Effective leader} & \multicolumn{1}{c}{High Effective leader} \\ ") ///
+    stats(cmean r2 N, labels("Mean, LtoL group" "R-squared" "N") fmt(%9.3f %9.3f %9.0g)) ///
+    prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccccc}" "\toprule" "\toprule" "& \multicolumn{1}{c}{Full} & \multicolumn{2}{c}{Conditional on lateral move} & \multicolumn{3}{c}{Conditional on vertical move} \\" "\addlinespace[10pt] \cmidrule(lr){2-2} \cmidrule(lr){3-4} \cmidrule(lr){5-7} \\" " & \multicolumn{1}{c}{Sales bonus (s.d.)}  & \multicolumn{1}{c}{Sales bonus (s.d.)}  & \multicolumn{1}{c}{Pay + bonus (in logs)} & \multicolumn{1}{c}{Pay + bonus (in logs)} & \multicolumn{1}{c}{Effective leader} & \multicolumn{1}{c}{High Effective leader} \\ ") ///
     posthead("\hline") ///
     prefoot("\hline") ///
     postfoot("\hline" "\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item Notes. An observation is a employee-month. Standard errors clustered at the manager level. Column (1) is a DiD specification as equation \ref{eq:sales} on the sample of LtoL and LtoH workers. Columns (2) and (3) are the same DiD specification conditional on the worker making at least one lateral moves within 2 years after the event.  Columns (4), (5), and (6) are estimated using periods after the LtoL and LtoH workers are promoted as managers. Since they can only be promoted as managers after the manager transition events, this is not a DiD design, and the estimated coefficients on whether the worker is in the LtoH event group are reported. \emph{Sales bonus (s.d.)} is normalized sales bonus as a measure of productivity. The variable is available in the following countries: BLR, COL, CRI, ECU, GRC, GTM, HND, IDN, IND, ITA, MEX, MYS, NIC, PAN, PHL, RUS, SGP, SLV, ZAF. \emph{Pay + bonus (in logs)} is the sum of regular pay and additional bonuses. \emph{Effective leader score} is the workers' anonymous rating of the manager via the survey question \emph{My line manager is an effective leader} with scale 1-5, which is asked every year in the annual survey and the overall mean is 4.1. \emph{High Effective leader score} is a binary variable indicating if the score is larger than 4." "\end{tablenotes}")
