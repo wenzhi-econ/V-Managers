@@ -8,7 +8,7 @@ Input:
     "${TempData}/02Mngr_EarlyAgeM.dta"  <== created in 0102 do file 
 
 Output:
-    "${TempData}/temp_Mngr_WL.dta         <== auxiliary dataset 
+    "${TempData}/temp_Mngr_WL.dta         <== auxiliary dataset, will be removed if $if_erase_temp_file==1
     "${TempData}/03EventStudyDummies.dta" <== output dataset
 
 Description of the Output Dataset:
@@ -234,3 +234,7 @@ order IDlse YearMonth ///
 compress
 save "${TempData}/03EventStudyDummies.dta", replace
 
+
+if $if_erase_temp_file==1 {
+    erase "${TempData}/temp_Mngr_WL.dta"
+}

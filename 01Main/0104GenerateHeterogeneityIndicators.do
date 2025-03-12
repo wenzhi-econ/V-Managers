@@ -3,7 +3,6 @@ This do file constructs a set of variables that are used in heterogeneity analys
     TenureMHigh1
     SameOffice1
     Young1
-    TenureLow1
     SameGender1
     OfficeSizeHigh1
     JobNum1
@@ -12,29 +11,26 @@ This do file constructs a set of variables that are used in heterogeneity analys
     WPerf1
     WPerf0p10p901
     TeamPerfMBase1
-    DiffM2y1
 
 Input:
-    "${RawMNEData}/AllSnapshotWC.dta"        <== raw data 
-    "${TempData}/03EventStudyDummies.dta"    <== created in 0103 do file 
-    "${RawCntyData}/2.WEF ProblemFactor.dta" <== raw data (country level)
-    "${RawCntyData}/3.WB FMShares Decade"    <== raw data (country level)
-    "${TempData}/01WorkersOutcomes.dta"      <== created in 0101 do file 
+    "${RawMNEData}/AllSnapshotWC.dta"                <== raw data 
+    "${RawCntyData}/2.WEF ProblemFactor.dta"         <== raw data (country level)
+    "${RawCntyData}/3.WB FMShares Decade"            <== raw data (country level)
+    "${TempData}/01WorkersOutcomes.dta"              <== created in 0101 do file 
+    "${TempData}/03EventStudyDummies.dta"            <== created in 0103 do file 
     
 Output:
-    "${TempData}/temp_Mngr_Characteristics.dta"      <== auxiliary dataset 
-    "${TempData}/temp_Mngr_TeamPayGrowth.dta"        <== auxiliary dataset 
+    "${TempData}/temp_Mngr_Characteristics.dta"      <== auxiliary dataset, will be removed if $if_erase_temp_file==1 
+    "${TempData}/temp_Mngr_TeamPayGrowth.dta"        <== auxiliary dataset, will be removed if $if_erase_temp_file==1
     "${TempData}/04MainOutcomesInEventStudies.dta"   <== key output dataset
 
 Description of the Output Dataset:
-    On the one hand, it adds more heterogeneity indicators used in analysis to the "${TempData}/03EventStudyDummies.dta" dataset.
+    On the one hand, it adds heterogeneity indicators used in analysis to the "${TempData}/03EventStudyDummies.dta" dataset.
     On the other hand, it excludes many not so relevant variables in the raw dataset and auxiliary variables from the dataset to reduce the size.
-    In particular, a set of heterogeneity indicators used in the heterogeneity table.
-    Note: 
-        All subsequent individual-level analysis will be mainly using this dataset!
+    Notes: All subsequent individual-level analysis will be mainly based on this dataset!
 
 RA: WWZ 
-Time: 2025-01-13
+Time: 2025-03-12
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -157,11 +153,6 @@ generate TenureMHigh1 = (TenureM1>=r(p50)) if TenureM1!=.
 bysort IDlse: egen Age1 = mean(cond(FT_Rel_Time==0, AgeBand, .))
 generate Young1 = Age1==1 if Age1!=.
 
-*!! TenureLow1
-bysort IDlse: egen Tenure1 = mean(cond(FT_Rel_Time==0, Tenure, .))
-summarize Tenure1 if q_eventstudies==1, detail
-generate TenureLow1 = (Tenure1<=r(p50)) if Tenure1!=.
-
 *!! OfficeSizeHigh1
 bysort IDlse: egen OfficeSize1= mean(cond(FT_Rel_Time==0, OfficeSize, .))
 summarize OfficeSize1 if q_eventstudies==1, detail 
@@ -225,12 +216,6 @@ summarize TeamPerf1 if q_eventstudies==1, detail
 generate TeamPerfM0B = (TeamPerf1>=r(p50)) if TeamPerf1!=.
 rename TeamPerfM0B TeamPerfMBase1
 
-*!! DiffM2y1
-bysort IDlse: egen MPost2y = mean(cond(FT_Rel_Time==24, IDlseMHR, .))
-bysort IDlse: egen MPre    = mean(cond(FT_Rel_Time==0,  IDlseMHR, .)) 
-generate DiffM2y = (MPost2y!=MPre) if MPost2y!=. & MPre!=.
-rename DiffM2y DiffM2y1
-
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? final step. save only necessary variables 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -248,12 +233,15 @@ keep ///
     Female AgeBand Tenure WL Func SubFunc Office OfficeCode SalaryGrade ///
     ISOCode Country HomeCountryISOCode ///
     Org4 Org5 Pay Bonus PayBonus BonusPayRatio Benefit LogBenefit Package LogPackage ///
-    StandardJob ONETName ONETCode ONETDistance ONETDistanceC ONETB ONETBC ONETSkillsDistance ONETContextDistance ONETActivitiesDistance ONETAbilitiesDistance ONETAbilitiesDistanceC ONETActivitiesDistanceC ONETContextDistanceC ONETSkillsDistanceC ///
+    StandardJob VPA ///
     WLM FemaleM TenureM AgeBandM FuncM OfficeCodeM ISOCodeM HomeCountryISOCodeM ///
-    q_eventstudies TenureMHigh1 SameOffice1 Young1 TenureLow1 SameGender1 OfficeSizeHigh1 JobNum1 LaborRegHigh1 LowFLFP1 WPerf1 WPerf0p10p901 TeamPerfMBase1 DiffM2y1
+    q_eventstudies TenureMHigh1 SameOffice1 Young1 SameGender1 OfficeSizeHigh1 JobNum1 LaborRegHigh1 LowFLFP1 WPerf1 WPerf0p10p901 TeamPerfMBase1
+
+capture drop Year 
+generate Year = year(dofm(YearMonth))
 
 order ///
-    IDlse YearMonth ///
+    IDlse YearMonth Year ///
     IDlseMHR EarlyAgeM ChangeM ChangeMR ///
     FT_Mngr_both_WL2 FT_Never_ChangeM ///
     FT_Rel_Time FT_LtoL FT_LtoH FT_HtoH FT_HtoL FT_Event_Time FT_Calend_Time_* ///
@@ -265,12 +253,13 @@ order ///
     Female AgeBand Tenure WL Func SubFunc Office OfficeCode SalaryGrade ///
     ISOCode Country HomeCountryISOCode ///
     Org4 Org5 Pay Bonus PayBonus BonusPayRatio Benefit LogBenefit Package LogPackage ///
-    StandardJob ONETName ONETCode ONETDistance ONETDistanceC ONETB ONETBC ONETSkillsDistance ONETContextDistance ONETActivitiesDistance ONETAbilitiesDistance ONETAbilitiesDistanceC ONETActivitiesDistanceC ONETContextDistanceC ONETSkillsDistanceC ///
+    StandardJob VPA ///
     WLM FemaleM TenureM AgeBandM FuncM OfficeCodeM ISOCodeM HomeCountryISOCodeM ///
-    q_eventstudies TenureMHigh1 SameOffice1 Young1 TenureLow1 SameGender1 OfficeSizeHigh1 JobNum1 LaborRegHigh1 LowFLFP1 WPerf1 WPerf0p10p901 TeamPerfMBase1 DiffM2y1
+    q_eventstudies TenureMHigh1 SameOffice1 Young1 SameGender1 OfficeSizeHigh1 JobNum1 LaborRegHigh1 LowFLFP1 WPerf1 WPerf0p10p901 TeamPerfMBase1
 
 label variable IDlse      "Employee ID"
 label variable YearMonth  "Year-Month"
+label variable Year       "Year"
 label variable IDlseMHR   "Employee's manager ID"
 label variable EarlyAgeM  "=1, if the manager is a high-flyer (determined by age at promotion)"
 label variable ChangeM    "=1, at the month when the manager is different from that in previous month"
@@ -297,13 +286,13 @@ label variable ISOCodeM            "Manager's working country"
 label variable HomeCountryISOCodeM "Manager's home country"
 label variable OfficeCodeM         "Manager's office code"
 
-*&? The following indicators are only defined for workers in the event studies sample, i.e., under q_eventstudies==1
+*&? The following indicators are only defined for workers in the event studies sample, i.e., under q_eventstudies==1.
+*&? These indicators are used in the heterogeneity table.
 
 label variable TenureMHigh1      "Post-event manager has a high tenure at the event time"
 label variable SameOffice1       "Post-event manager shares the same office with the worker"
-label variable Young1            "The worker at the event time is below 30 years old"
-label variable TenureLow1        "The worker at the event time has a short tenure"
 label variable SameGender1       "Post-event manager shares the same gender with the worker"
+label variable Young1            "The worker at the event time is below 30 years old"
 label variable OfficeSizeHigh1   "Post-event office size is large" 
 label variable JobNum1           "Post-event office has a large number of different StandardJobs" 
 label variable LaborRegHigh1     "Country is highly labor law regulated"
@@ -311,8 +300,13 @@ label variable LowFLFP1          "Country has a low female labor force participa
 label variable WPerf1            "The worker's baseline pay growth is above 50%"
 label variable WPerf0p10p901     "=1, if the worker's baseline pay growth is above 90%; =0, if below 10%"
 label variable TeamPerfMBase1    "The worker's associated team has a high baseline pay growth"
-label variable DiffM2y1          "=1, if post-event manager is no longer 24 months after the event"
 
 compress
 sort IDlse YearMonth
 save "${TempData}/04MainOutcomesInEventStudies.dta", replace 
+
+
+if $if_erase_temp_file==1 {
+    erase "${TempData}/temp_Mngr_Characteristics.dta"
+    erase "${TempData}/temp_Mngr_TeamPayGrowth.dta"
+}

@@ -247,8 +247,6 @@ merge 1:1 IDlse YearMonth using "${TempData}/05SalesProdOutcomes.dta", keepusing
 
 generate one = 1 
 
-generate Year = year(dofm(YearMonth))
-
 collapse ///
     (mean) AvPay=PayBonus ShareChangeSalaryGrade=ChangeSalaryGrade SharePromWL=PromWL AvProductivityStd=ProductivityStd ///
     (mean) TeamFracFemale TeamFracAgeBand TeamFracOfficeCode TeamFracCountry ///
