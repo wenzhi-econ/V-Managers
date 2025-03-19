@@ -1,8 +1,21 @@
 /* 
 This do file shows the transfer heat map, after characterizing a job as an occupation with a specific task.
 
+Notes: a job is classified into either a cognitive, routine, or social occupation based on its highest task intensity.
+
+Input: 
+    "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file 
+    "${TempData}/0702ONET_FinalJobLevelPrank.dta"  <== created in 0107_02 do file 
+
+Output:
+    "${TempData}/temp_ONET_OccHeatMap.dta"
+
+Description of the output dataset:
+    (1) An individual-level dataset containing one's job classification at the event time, and 1-7 years after the event.
+    (2) It only contains workers in the event studies, and workers in the LtoL and LtoH groups.
+
 RA: WWZ 
-Time: 2025-02-17
+Time: 2025-03-19
 */
 
 
@@ -27,7 +40,7 @@ keep IDlse YearMonth FT_Rel_Time FT_Event_Time FT_LtoL FT_LtoH Func StandardJob
 *-? s-1-2. obtain ONET task intensity measures 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-merge m:1 StandardJob using "${TempData}/temp_ONET_FinalJobLevelPrank.dta"
+merge m:1 StandardJob using "${TempData}/0702ONET_FinalJobLevelPrank.dta"
     //&? constructed in 030709_02 do file 
     keep if _merge==3
     drop _merge 
