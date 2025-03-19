@@ -1,8 +1,14 @@
 /* 
 This do file calculates the unique values for different levels of observations.
 
+Input:
+    ${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file
+
+Output:
+    "${Results}/SummaryStatistics_DistinctObsAtDifferentLevels.tex"
+
 RA: WWZ
-Time: 2025-03-12
+Time: 2025-03-19
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -58,6 +64,18 @@ egen tag_IDSJ = tag(IDlse StandardJob)
 count if tag_IDSJ==1
     global obs_IDSJ = r(N)
 
+global obs_total        = strofreal(${obs_total}, "%10.0fc")
+global obs_employee     = strofreal(${obs_employee}, "%10.0fc")
+global obs_mngr         = strofreal(${obs_mngr}, "%10.0fc")
+global obs_supervisor   = strofreal(${obs_supervisor}, "%10.0fc")
+global obs_YearMonth    = strofreal(${obs_YearMonth}, "%10.0fc")
+global obs_SJ           = strofreal(${obs_SJ}, "%10.0fc")
+global obs_SubFuncWL    = strofreal(${obs_SubFuncWL}, "%10.0fc")
+global obs_office       = strofreal(${obs_office}, "%10.0fc")
+global obs_country      = strofreal(${obs_country}, "%10.0fc")
+global obs_country_year = strofreal(${obs_country_year}, "%10.0fc")
+global obs_office_year  = strofreal(${obs_office_year}, "%10.0fc")
+global obs_IDSJ         = strofreal(${obs_IDSJ}, "%10.0fc")
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2. produce the table 
@@ -69,7 +87,7 @@ local file "${Results}/SummaryStatistics_DistinctObsAtDifferentLevels.tex"
 
 file open  pub using "`file'", write replace
 
-file write pub "\begin{tabular}{lc}" _newline
+file write pub "\begin{tabular}{ll}" _newline
 file write pub "\toprule" _newline
 file write pub "\toprule" _newline
 file write pub "Variable & \multicolumn{1}{c}{No. unique values}\\ " _newline
@@ -90,7 +108,7 @@ file write pub "\hline" _newline
 file write pub "\end{tabular}" _newline
 file write pub "\begin{tablenotes}" _newline
 file write pub "\footnotesize" _newline
-file write pub "\item Notes. An observation is a worker-month-year. The data contain personnel records for the entire white-collar employee base from January 2011 until December 2021." _newline
+file write pub "\item Notes. The data contain personnel records for the entire white-collar employee base from January 2011 until December 2021." _newline
 file write pub "\end{tablenotes}" _newline
 
 file close pub

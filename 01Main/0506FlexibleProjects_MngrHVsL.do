@@ -5,7 +5,7 @@ Input:
     "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file 
     "${RawMNEData}/FLEX.dta"                       <== raw data
 
-Results:
+Output:
     "${Results}/FTFlexibleProjects.tex"
 
 RA: WWZ 

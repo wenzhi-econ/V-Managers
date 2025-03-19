@@ -1,5 +1,5 @@
 /* 
-This set of do files (0606) investigates whether H-type managers are more likely to move their subordinates to their pre-existing networks.
+This set of do files (0507) investigates whether H-type managers are more likely to move their subordinates to their pre-existing networks.
 
 In this do file, I run a set of cross-sectional regressions on whether the event worker is in their post-event managers' pre-existing networks within given years after the event.
 

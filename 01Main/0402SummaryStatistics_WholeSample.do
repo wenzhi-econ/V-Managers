@@ -62,6 +62,8 @@ order IDlse YearMonth IDlseMHR ///
 
 *!! gender (set it at worker level, not individual-year-month level)
 replace Female = 0 if missing(Female)
+    //&? a limited number of missing gender observations
+    //&? classify them as non-female
 replace Female = . if tag_Ind==0
 label variable Female "Female"
 
@@ -214,4 +216,4 @@ esttab using "${Results}/SummaryStatistics_FullSample.tex", ///
     prehead(" ") ///
     posthead("\multicolumn{6}{c}{\emph{Panel (c): outcome variables}} \\ [+5pt]") ///
     prefoot(" ") ///
-    postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker-month-year or a worker, depending on the nature of the variable. The data contain personnel records for the entire white-collar employee base from January 2011 until December 2021. In Panel (a) cohort refers to the age group and education data is only available for a subset of workers. In Panel (b) work level denotes the hierarchical tier (from level 1 at the bottom to level 6). In Panel (c) salary information is only available since January 2015 and the data on performance ratings start in January 2017." "\end{tablenotes}") 
+    postfoot("\hline" "\end{tabular}" "\begin{tablenotes}" "\footnotesize" "\item" "Notes. An observation is a worker-month-year or a worker or a manager, depending on the nature of the variable. The data contain personnel records for the entire white-collar employee base from January 2011 until December 2021. In Panel (a) cohort refers to the age group and education data is only available for a subset of workers. In Panel (b) work level denotes the hierarchical tier (from level 1 at the bottom to level 6). In Panel (c) salary information is only available since January 2015 and the information on sales bonus is only available for a subset of countries." "\end{tablenotes}") 

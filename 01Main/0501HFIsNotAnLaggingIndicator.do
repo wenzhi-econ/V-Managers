@@ -1,13 +1,13 @@
 /* 
 This do file investigates the correlation between factory-level productivity against share of HF managers.
 
-Input files:
+Input:
     "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file 
     "${RawMNEData}/OfficeSize.dta"                  <== raw data
     "${RawMNEData}/TonsperFTEconservative.dta"      <== raw data
     "${RawMNEData}/CPTwideOld.dta"                  <== raw data
 
-Results:
+Output:
     "${Results}/ProdvsHFmngr.tex"
 
 RA: WWZ 

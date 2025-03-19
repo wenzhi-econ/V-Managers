@@ -3,7 +3,7 @@ This do file constructs a team level dataset focusing on those workers who exper
 
 impt: The team id is uniquely defined by a (IDlseMHRPreMost, IDlseMHRPost, FT_Event_Time) pair.
 impt: Managers identified by IDlseMHRPreMost is not necessarily the same pre-event manager for each individual.
-impt: Team-level treatment status is not necessarily the same individual-level treatment status.
+impt: Team-level treatment status is not necessarily identical to individual-level treatment status.
 
 Input:
     "${TempData}/04MainOutcomesInEventStudies.dta" <== created in 0104 do file 

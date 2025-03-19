@@ -1,5 +1,5 @@
 /* 
-This set of do files (0606) investigates whether H-type managers are more likely to move their subordinates to their pre-existing networks.
+This set of do files (0507) investigates whether H-type managers are more likely to move their subordinates to their pre-existing networks.
 
 In this do file, I create post-event managers' pre-event colleagues experiences (their managers, their subordinates, and their same-level colleagues).
 

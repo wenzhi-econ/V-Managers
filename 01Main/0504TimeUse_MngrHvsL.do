@@ -1,10 +1,3 @@
-* Analysis of TIME USE DATA 
-* Weekly data over 2019 entire year, random sample of 2000 employees spanning multiple work levels, gender, age, countries and functions 
-
-* From the calendar data, I do not know who reports to who, so I cannot track the behavior of the worker, but I can track the behavior of the manager. I can look on average how do high flighrs spend their time differently from the rest of the managers. 
-
-* managerial talent interpretation: the results are actually consistent with manager selection rather than training: different time use behavior + accumulate experience (tenure) differently
-
 /* 
 This do file contrasts H-type managers' time use data with L-managers.
 
@@ -12,9 +5,9 @@ Input:
     "${RawMNEData}/timeuse.dta" <== raw data
         this data contains WL2 managers, taking the weekly annual average for each variable over 2019 
 
-Analysis of the dataset:
+Notes about the dataset:
     (1) Weekly data over 2019 entire year, random sample of 2000 employees spanning multiple work levels, gender, age, countries and functions. 
-    (2) From the calendar data, I do not know who reports to who, so I cannot track the behavior of the worker, but I can track the behavior of the manager. I can look on average how do high flighrs spend their time differently from the rest of the managers. 
+    (2) From the calendar data, I do not know who reports to who, so I cannot track the behavior of the worker, but I can track the behavior of the manager. I can look on average how do high flyers spend their time differently from the rest of the managers. 
     (3) Managerial talent interpretation: the results are actually consistent with manager selection rather than training: different time use behavior + accumulate experience (tenure) differently
 */
 
