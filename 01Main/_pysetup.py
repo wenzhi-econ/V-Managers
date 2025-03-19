@@ -4,8 +4,8 @@
 This file should be imported in all python scripts used in this project to
 specify working directory and data paths.
 
-RA: WWZ 
-Time: 2025-01-30
+RA: WWZ
+Time: 2025-03-19
 """
 
 # ??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??#??
@@ -27,8 +27,10 @@ jmp_directory = os.path.join(working_directory, "Paper Managers")
 dofiles_directory = os.path.join(jmp_directory, "DoFiles")
 results_directory = os.path.join(jmp_directory, "Results")
 
-finaldata_directory = os.path.join(jmp_directory, "Data")
-tempdata_directory = os.path.join(finaldata_directory, "02TempData")
+data_directory = os.path.join(jmp_directory, "Data")
+tempdata_directory = os.path.join(data_directory, "02TempData")
+rawdata_directory = os.path.join(data_directory, "01RawData")
+rawmnedata_directory = os.path.join(rawdata_directory, "01MNEData")
 
 
 # !! function to access datasets in the TempData folder
