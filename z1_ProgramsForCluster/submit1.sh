@@ -3,7 +3,7 @@
 #SBATCH --account=pi-virginiaminni
 #SBATCH --job-name=main_outcomes_eventstudies
 #SBATCH --partition=highmem
-#SBATCH --mem=96G
+#SBATCH --mem=192G
 #SBATCH --time=1-12:00:00
 
 # Print some useful variables
@@ -22,10 +22,9 @@ mkdir -p $scratch_dir
 export STATATMP=$scratch_dir
 
 # run script
-dofile='0001Master.do'
+dofile='Master1.do'
 
 srun stata-mp -b do $dofile
-
 
 # remove scratch directory when done
 rm -r $scratch_dir
