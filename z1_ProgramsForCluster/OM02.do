@@ -64,6 +64,12 @@ grstyle set plain, horizontal grid
 *?? IMPORTANT main programs 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-do "${DoFiles}/030710PayOutcomesInEventStudies_LosingHF.do"
+do "${DoFiles}/0201CoefPrograms_LHminusLL.do" 
+do "${DoFiles}/0202CoefPrograms_HLminusHH.do"
+do "${DoFiles}/0203CoefPrograms_Dual_TestingforAsymmetries.do"
+do "${DoFiles}/0204CoefPrograms_LHminusLL_OnlyPost.do" 
+do "${DoFiles}/0205CoefPrograms_HLminusHH_OnlyPost.do"
+do "${DoFiles}/0206CoefPrograms_Dual_TestingforAsymmetries_OnlyPost.do"
+do "${DoFiles}/0207CoefPrograms_CohortDynamics.do"
 
-    //&? This is the only step you are going to change every time you want to run a different do file on the cluster.
+do "${DoFiles}/032001_02OM_Pay.do"

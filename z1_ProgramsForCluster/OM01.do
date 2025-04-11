@@ -64,13 +64,12 @@ grstyle set plain, horizontal grid
 *?? IMPORTANT main programs 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-*!! quarterly aggregation programs
 do "${DoFiles}/0201CoefPrograms_LHminusLL.do" 
-do "${DoFiles}/0202CoefPrograms_HLminusHH.do" 
+do "${DoFiles}/0202CoefPrograms_HLminusHH.do"
+do "${DoFiles}/0203CoefPrograms_Dual_TestingforAsymmetries.do"
+do "${DoFiles}/0204CoefPrograms_LHminusLL_OnlyPost.do" 
+do "${DoFiles}/0205CoefPrograms_HLminusHH_OnlyPost.do"
+do "${DoFiles}/0206CoefPrograms_Dual_TestingforAsymmetries_OnlyPost.do"
+do "${DoFiles}/0207CoefPrograms_CohortDynamics.do"
 
-    //&? Remember to run the quarterly aggregation programs before running the event studies
-
-*!! robust event studies 
-do "${DoFiles}/0303_06Robustness_PlaceboMngrHFStatus.do"
-
-    //&? This is the only step you are going to change every time you want to run a different do file on the cluster.
+do "${DoFiles}/032001_01OM_TwoKeyOutcomes.do"

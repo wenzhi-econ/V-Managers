@@ -22,7 +22,7 @@ mkdir -p $scratch_dir
 export STATATMP=$scratch_dir
 
 # run script
-dofile='Master1.do'
+dofile='OM01.do'
 
 srun stata-mp -b do $dofile
 
