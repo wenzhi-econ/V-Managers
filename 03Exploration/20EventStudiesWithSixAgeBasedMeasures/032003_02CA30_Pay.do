@@ -5,8 +5,8 @@ Input:
     "${TempData}/031903FinalEventStudySample_SixHFMeasures.dta" <== created in 0104 do file
 
 Output:
-    "${Results}/20250410log_AgeBasedHF2_CA30_PayOutcomes.txt"
-    "${Results}/AgeBasedHF2_CA30_PayOutcomes.dta"
+    "${Results}/20250410log_AgeBasedHF3_CA30_PayOutcomes.txt"
+    "${Results}/AgeBasedHF3_CA30_PayOutcomes.dta"
 
 RA: WWZ 
 Time: 2025-04-10
@@ -14,7 +14,7 @@ Time: 2025-04-10
 
 
 capture log close
-log using "${Results}/20250410log_AgeBasedHF2_CA30_PayOutcomes", replace text
+log using "${Results}/20250410log_AgeBasedHF3_CA30_PayOutcomes", replace text
 
 use "${TempData}/031903FinalEventStudySample_SixHFMeasures.dta", clear
 
@@ -165,7 +165,7 @@ foreach var in LogPayBonus LogPay LogBonus {
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTGain_`var'})
-    graph save "${Results}/AgeBasedHF2_CA30_AllEstimates1_Gains_`var'.gph", replace
+    graph save "${Results}/AgeBasedHF3_CA30_AllEstimates1_Gains_`var'.gph", replace
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 3. HtoL versus HtoH
@@ -188,7 +188,7 @@ foreach var in LogPayBonus LogPay LogBonus {
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTLoss_`var'})
-    graph save "${Results}/AgeBasedHF2_CA30_AllEstimates2_Loss_`var'.gph", replace   
+    graph save "${Results}/AgeBasedHF3_CA30_AllEstimates2_Loss_`var'.gph", replace   
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 4. Testing for asymmetries
@@ -218,7 +218,7 @@ foreach var in LogPayBonus LogPay LogBonus {
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note("Pre-trends joint p-value = ${PTDiff_`var'}" "Post coeffs. joint p-value = ${postevent_`var'}")
-    graph save "${Results}/AgeBasedHF2_CA30_AllEstimates3_GainsMinusLoss_`var'.gph", replace
+    graph save "${Results}/AgeBasedHF3_CA30_AllEstimates3_GainsMinusLoss_`var'.gph", replace
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 5. Additional three-quarter estimates plot 
@@ -254,7 +254,7 @@ foreach var in LogPayBonus LogPay LogBonus {
         xlabel(, labsize(medlarge)) ///
         ${yaxis_setup}
 
-    graph save "${Results}/AgeBasedHF2_CA30_ThreeQuarterEstimates_`var'.gph", replace
+    graph save "${Results}/AgeBasedHF3_CA30_ThreeQuarterEstimates_`var'.gph", replace
 }
 
 keep ///
@@ -266,6 +266,6 @@ keep ///
 keep if inrange(_n, 1, 41)
 
 
-save "${Results}/AgeBasedHF2_CA30_PayOutcomes.dta", replace 
+save "${Results}/AgeBasedHF3_CA30_PayOutcomes.dta", replace 
 
 log close

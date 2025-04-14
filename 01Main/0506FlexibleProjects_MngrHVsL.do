@@ -29,7 +29,7 @@ label variable InFLEX "Registered on Platform"
 drop _merge 
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-1-2. auxilary variable for regressions 
+*-? s-1-2. auxiliary variable for regressions 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 generate Post = (FT_Rel_Time >= 0) if FT_Rel_Time != .
@@ -42,6 +42,7 @@ save "${TempData}/temp_FLEX.dta", replace
 
 use "${TempData}/temp_FLEX.dta", clear 
 
+capture drop Year
 generate Year = year(dofm(YearMonth))
 
 eststo clear

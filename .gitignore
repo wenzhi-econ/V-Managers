@@ -2,7 +2,20 @@ Archive/
 z2_OldDoFiles/Libraries
 z2_OldDoFiles/GFE_generic
 tempCodeRunnerFile.do
-Master*.do
-*.sh
+# Master*.do
+# *.sh
 *__pycache__
-Libraries/*
+# Libraries/*
+
+*.aux 
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls 
+*.log
+*.out
+*.synctex.gz
+
+05*/0500_01*/*.tex
+05*/0500_01*/*.png
+05*/0500_01*/*.docx

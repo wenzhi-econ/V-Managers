@@ -139,5 +139,15 @@ keep IDlse YearMonth AgeBand AgeBandUpdated AgeContinuous q_exact_age AgeContinu
 
 save "${TempData}/031900_02AgeContinuous.dta", replace
 
+
+use "${TempData}/031900_02AgeContinuous.dta", clear 
+
+histogram AgeContinuous_imputed, width(1) xlabel(15(5)80, grid gstyle(dot)) xscale(r(15 80))
+graph export "${Results}/Dist_AgeContinuous_imputed.png", replace as(png)
+
+histogram AgeContinuous_exact, width(1) xlabel(15(5)80, grid gstyle(dot)) xscale(r(15 80)) 
+graph export "${Results}/Dist_AgeContinuous_exact.png", replace as(png)
+
+
 /* histogram AgeContinuous_imputed, width(1)
 histogram AgeContinuous, width(1) */
