@@ -13,3 +13,5 @@ foreach pkg in egenmore ftools reghdfe ppmlhdfe xlincom balancetable estout coef
     net from "http://fmwww.bc.edu/repec/bocode/`website_folder'"
     net install `pkg', replace
 }
+
+net install mediation, from("http://fmwww.bc.edu/repec/bocode/m") replace

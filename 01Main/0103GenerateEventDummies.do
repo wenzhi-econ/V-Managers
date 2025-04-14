@@ -85,6 +85,7 @@ replace  ChangeMR = . if IDlseMHR==.
 
 bysort IDlse: egen temp_Date_FirstMngrChange = min(cond(ChangeM==1, YearMonth ,.))
 bysort IDlse: egen Date_FirstMngrChange      = mean(cond(ChangeMR==1 & YearMonth==temp_Date_FirstMngrChange, temp_Date_FirstMngrChange, .))
+    //todo This step seems to be sincerely wrong. I need to check this when I have time.
 replace ChangeMR = 0 if YearMonth>Date_FirstMngrChange & ChangeMR==1
     // impt: we only consider first manager change
 replace ChangeMR = 0 if ChangeMR==. 

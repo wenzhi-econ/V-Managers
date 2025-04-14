@@ -45,6 +45,7 @@ save "${TempData}/temp_ActiveLearn.dta", replace
 
 use "${TempData}/temp_ActiveLearn.dta", clear 
 
+capture drop Year
 generate Year = year(dofm(YearMonth))
 
 replace ActiveLearnerYTD = 0 if ActiveLearnerYTD==. ///
