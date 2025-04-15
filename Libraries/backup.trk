@@ -1,499 +1,13 @@
-* 00000013
+* 00000012
 *! version 1.0.0
 * Do not erase or edit this file
 * It is used by Stata to track the ado and help
 * files you have installed.
 
-S http://fmwww.bc.edu/repec/bocode/f
-N ftools.pkg
-D 25 Feb 2025
-U 1
-d 'FTOOLS': module to provide alternatives to common Stata commands optimized for large datasets
-d 
-d  ftools consists of a Mata file and several Stata commands: The
-d Mata file creates identifiers (factors) from variables by using
-d hash functions instead of sorting the data, so it runs in time
-d O(N) and not in O(N log N). The Stata commands exploit this to
-d avoid sort operations,  at the cost of being slower for small
-d datasets (mainly because of the cost involved in moving data from
-d Stata to Mata). Implemented commands are fcollapse, fegen group,
-d and fsort. Note that most of the capabilities of levels and
-d contract are already supported by these commands. Possible
-d commands include more egen functions and merge and reshape
-d alternatives.
-d 
-d KW: levels
-d KW: collapse
-d KW: contract
-d KW: egen
-d KW: sort
-d KW: factor variables
-d KW: Mata
-d 
-d Requires: Stata version 11.2
-d 
-d Distribution-Date: 20230821
-d 
-d Author: Sergio Correia, Board of Governors of the Federal Reserve System
-d Support: email sergio.correia@@gmail.com
-d 
-f f\ftools.ado
-f f\ftools.mata
-f f\ftools.sthlp
-f f\fcollapse.ado
-f f\fcollapse.sthlp
-f f\fegen.ado
-f f\fegen_group.ado
-f f\fegen.sthlp
-f f\fisid.ado
-f f\fisid.sthlp
-f f\flevelsof.ado
-f f\flevelsof.sthlp
-f f\fmerge.ado
-f f\fmerge.sthlp
-f f\freshape.ado
-f f\fsort.ado
-f f\fsort.sthlp
-f f\ftab.ado
-f j\join.ado
-f j\join.sthlp
-f l\local_inlist.ado
-f l\local_inlist.sthlp
-f f\fcollapse_functions.mata
-f f\fcollapse_main.mata
-f f\ftools_type_aliases.mata
-f f\ftools.mata
-f f\ftools_common.mata
-f f\ftools_hash1.mata
-f f\ftools_main.mata
-f f\ftools_experimental.mata
-f f\ftools_plugin.mata
-f f\ftools_type_aliases.mata
-f m\ms_compile_mata.ado
-f m\ms_expand_varlist.ado
-f m\ms_fvstrip.ado
-f m\ms_fvstrip.sthlp
-f m\ms_fvunab.ado
-f m\ms_get_version.ado
-f m\ms_parse_absvars.ado
-f m\ms_parse_varlist.ado
-f m\ms_parse_vce.ado
-f m\ms_add_comma.ado
-e
-S http://fmwww.bc.edu/repec/bocode/r
-N reghdfe.pkg
-D 25 Feb 2025
-U 2
-d 'REGHDFE': module to perform linear or instrumental-variable regression absorbing any number of high-dimensional fixed effects
-d 
-d  reghdfe fits a linear or instrumental-variable regression
-d absorbing an arbitrary number of categorical factors and
-d factorial interactions Optionally, it saves the estimated fixed
-d effects.
-d 
-d KW: regression
-d KW: instrumental variables
-d KW: fixed effects
-d KW: high dimension fixed effects
-d 
-d Requires: Stata version 11.2
-d 
-d Distribution-Date: 20230821
-d 
-d Author: Sergio Correia, Board of Governors of the Federal Reserve System
-d Support: email sergio.correia@@gmail.com
-d 
-f r\reghdfe.ado
-f r\reghdfe.mata
-f r\reghdfe3.ado
-f r\reghdfe_p.ado
-f r\reghdfe3_p.ado
-f r\reghdfe5.ado
-f r\reghdfe5_p.ado
-f r\reghdfe_estat.ado
-f r\reghdfe3_estat.ado
-f r\reghdfe5_estat.ado
-f r\reghdfe_parse.ado
-f r\reghdfe5_parse.ado
-f r\reghdfe_footnote.ado
-f r\reghdfe3_footnote.ado
-f r\reghdfe5_footnote.ado
-f e\estfe.ado
-f r\reghdfe_header.ado
-f r\reghdfe5_header.ado
-f r\reghdfe5_parse.ado
-f r\reghdfe.sthlp
-f r\reghdfe3.sthlp
-f r\reghdfe5.sthlp
-f r\reghdfe.mata
-f r\reghdfe_programming.sthlp
-e
-S http://fmwww.bc.edu/repec/bocode/p
-N ppmlhdfe.pkg
-D 25 Feb 2025
-U 3
-d 'PPMLHDFE': module for Poisson pseudo-likelihood regression with multiple levels of fixed effects
-d 
-d   ppmlhdfe implements Poisson pseudo-maximum likelihood
-d regressions (PPML) with multi-way fixed effects, as  described
-d by Correia, Guimarães, Zylkin (arXiv:1903.01690).  The estimator
-d employed is robust to statistical separation and    convergence
-d issues, due to the procedures developed in Correia, Guimarães,
-d Zylkin (arXiv:1903.01633).
-d 
-d KW: Poisson pseudo-likelihood
-d KW: ppml
-d KW: fixed effects
-d KW: high dimension fixed effects
-d 
-d Requires: Stata version 11.2, reghdfe, ftools  from SSC (q.v.)
-d 
-d Distribution-Date: 20230907
-d 
-d Author: Sergio Correia, Board of Governors of the Federal Reserve System
-d Support: email sergio.correia@@gmail.com
-d 
-d Author: Paulo Guimaraes, University of Porto
-d Support: email pguimaraes@@fep.up.pt
-d 
-d Author: Thomas Zylkin, University of Richmond
-d Support: email tzylkin@@richmond.edu
-d 
-f p\ppmlhdfe.ado
-f p\ppmlhdfe.sthlp
-f p\ppmlhdfe_header.ado
-f p\ppmlhdfe_p.ado
-f p\ppmlhdfe.mata
-f r\reghdfe5.mata
-f p\ppmlhdfe_functions.mata
-f p\ppmlhdfe_separation_relu.mata
-f p\ppmlhdfe_separation_simplex.mata
-e
-S http://fmwww.bc.edu/repec/bocode/x
-N xlincom.pkg
-D 25 Feb 2025
-U 4
-d 'XLINCOM': module to estimate multiple linear combinations of parameters
-d 
-d  xlincom computes point estimates, standard errors, t or z
-d statistics, p-values, and confidence intervals for single or
-d multiple linear combinations of coefficients as well as their
-d covariances. nlcom is also able to do this, but xlincom is much
-d faster (up to 300 times for complex models), and supports the
-d same syntax as lincom in most cases. xlincom internally calls
-d lincom for each linear combination and extracts estimates and
-d variances from its output. It has an optional post option to post
-d estimation results for subsequent testing or exporting with
-d pretty table commands.
-d 
-d KW: linear combinations
-d KW: lincom
-d KW: estimation
-d 
-d Requires: Stata version 8
-d 
-d Distribution-Date: 20230925
-d 
-d Author: Wouter Wakker
-d Support: email wouter.wakker@@outlook.com
-d 
-f x\xlincom.ado
-f x\xlincom_p.ado
-f x\xlincom.sthlp
-e
-S http://fmwww.bc.edu/repec/bocode/e
-N estout.pkg
-D 25 Feb 2025
-U 5
-d 'ESTOUT': module to make regression tables
-d 
-d  estout produces a table of regression results from one or
-d several models for use with spreadsheets, LaTeX, HTML, or a
-d word-processor table. eststo stores a quick copy of the active
-d estimation results for later tabulation. esttab is a wrapper for
-d estout. It displays a pretty looking publication-style regression
-d table without much typing. estadd adds additional results to the
-d e()-returns for one or several models previously fitted and
-d stored. This package subsumes the previously circulated esto,
-d esta, estadd,  and estadd_plus. An earlier version of estout is
-d available  as estout1.
-d 
-d KW: estimates
-d KW: LaTeX
-d KW: HTML
-d KW: word processor
-d KW: output
-d 
-d Requires: Stata version 8.2
-d 
-d Distribution-Date: 20230212
-d 
-d Author: Ben Jann, University of Bern
-d Support: email jann@@soz.unibe.ch
-d 
-f _\_eststo.ado
-f _\_eststo.hlp
-f e\estadd.ado
-f e\estadd.hlp
-f e\estout.ado
-f e\estout.hlp
-f e\eststo.ado
-f e\eststo.hlp
-f e\estpost.ado
-f e\estpost.hlp
-f e\esttab.ado
-f e\esttab.hlp
-e
-S http://fmwww.bc.edu/repec/bocode/c
-N coefplot.pkg
-D 25 Feb 2025
-U 6
-d 'COEFPLOT': module to plot regression coefficients and other results
-d 
-d   coefplot plots results from estimation commands or Stata
-d matrices. Results from multiple models or matrices can be
-d combined in a single graph. The default behavior of coefplot is
-d to draw markers for coefficients and horizontal spikes for
-d confidence intervals. However, coefplot can also produce various
-d other types of graphs.
-d 
-d KW: graphics
-d KW: coefficients
-d KW: estimation
-d 
-d Requires: Stata version 11
-d 
-d Distribution-Date: 20230225
-d 
-d Author: Ben Jann, University of Bern
-d Support: email jann@@soz.unibe.ch
-d 
-f c\coefplot.ado
-f c\coefplot.sthlp
-e
-S http://fmwww.bc.edu/repec/bocode/g
-N grstyle.pkg
-D 25 Feb 2025
-U 7
-d 'GRSTYLE': module to customize the overall look of graphs
-d 
-d  grstyle allows you to customize the overall look of graphs from
-d within a do-file without having to fiddle around with external
-d scheme files. The advantage of grstyle over manually editing a
-d scheme file is that everything needed to reproduce your graphs
-d can be included in a single do-file.
-d 
-d KW: graphics
-d KW: scheme files
-d KW: custom graphics
-d KW: plot
-d 
-d Requires: Stata version 9.2 and palettes from SSC (q.v.)
-d 
-d Distribution-Date: 20200919
-d 
-d Author: Ben Jann, University of Bern
-d Support: email jann@@soz.unibe.ch
-d 
-f g\grstyle.ado
-f g\grstyle.hlp
-f g\grstyle_set.ado
-f g\grstyle_set.hlp
-e
-S http://fmwww.bc.edu/repec/bocode/p
-N palettes.pkg
-D 25 Feb 2025
-U 8
-d 'PALETTES': module to provide color palettes, symbol palettes, and line pattern palettes
-d 
-d  The palettes module contains three commands: colorpalette,
-d symbolpalette, and linepalette. The commands provide color,
-d symbol, and line pattern palettes for use in Stata graphs.
-d 
-d KW: graphics
-d KW: colors
-d KW: marker symbols
-d KW: line patterns
-d 
-d Requires: Stata version 14.2 and colrspace from SSC (q.v.); (version 9.2 for colorpalette9)
-d 
-d Distribution-Date: 20240705
-d 
-d Author: Ben Jann, University of Bern
-d Support: email jann@@soz.unibe.ch
-d 
-f p\palettes.hlp
-f c\colorpalette.ado
-f c\colorpalette.sthlp
-f c\colorpalette9.ado
-f c\colorpalette9.hlp
-f l\linepalette.ado
-f l\linepalette.hlp
-f s\symbolpalette.ado
-f s\symbolpalette.hlp
-f c\colorcheck.ado
-f c\colorcheck.sthlp
-e
-S http://fmwww.bc.edu/repec/bocode/c
-N colrspace.pkg
-D 25 Feb 2025
-U 9
-d 'COLRSPACE': module providing a class-based color management system in Mata
-d 
-d   The colrspace module provides a class-based color management
-d system implemented in Mata. It supports a wide variety of color
-d spaces and translations among them, provides color generators and
-d a large collection of named palettes, and features functionality
-d such as color interpolation, grayscale conversion, or color
-d vision deficiency simulation.
-d 
-d KW: graphics
-d KW: color management
-d 
-d Requires: Stata version 14.2
-d 
-d Distribution-Date: 20240705
-d 
-d Author: Ben Jann, University of Bern
-d Support: email jann@@soz.unibe.ch
-d 
-f c\colrspace.sthlp
-f c\colrspace_source.sthlp
-f c\colrspace_library_generators.sthlp
-f c\colrspace_library_namedcolors.sthlp
-f c\colrspace_library_palettes.sthlp
-f c\colrspace_library_lsmaps.sthlp
-f c\colrspace_library_rgbmaps.sthlp
-f l\lcolrspace.mlib
-e
-S http://fmwww.bc.edu/repec/bocode/s
-N schemepack.pkg
-D 25 Feb 2025
-U 10
-d 'SCHEMEPACK': module providing ready-to-use graph schemes
-d 
-d  schemepack releases a suite of graph schemes as part of The
-d Stata Guide (https://medium.com/the-stata-guide) series. See the
-d help file (help schemepack) for details after installation.
-d 
-d KW: Stata
-d KW: scheme
-d KW: graphs
-d 
-d Requires: Stata version 15
-d 
-d Distribution-Date: 20221111
-d 
-d Author: Asjad Naqvi, Austrian Institute of Economic Research (WIFO)
-d Support: email asjadnaqvi@@gmail.com
-d 
-f s\schemepack.sthlp
-f s\scheme-black_brbg.scheme
-f s\scheme-black_cividis.scheme
-f s\scheme-black_hue.scheme
-f s\scheme-black_jet.scheme
-f s\scheme-black_piyg.scheme
-f s\scheme-black_ptol.scheme
-f s\scheme-black_set3.scheme
-f s\scheme-black_tableau.scheme
-f s\scheme-black_viridis.scheme
-f s\scheme-black_w3d.scheme
-f s\scheme-cblind1.scheme
-f s\scheme-gg_brbg.scheme
-f s\scheme-gg_cividis.scheme
-f s\scheme-gg_hue.scheme
-f s\scheme-gg_jet.scheme
-f s\scheme-gg_piyg.scheme
-f s\scheme-gg_ptol.scheme
-f s\scheme-gg_set3.scheme
-f s\scheme-gg_tableau.scheme
-f s\scheme-gg_viridis.scheme
-f s\scheme-gg_w3d.scheme
-f s\scheme-neon.scheme
-f s\scheme-rainbow.scheme
-f s\scheme-swift_red.scheme
-f s\scheme-tab1.scheme
-f s\scheme-tab2.scheme
-f s\scheme-tab3.scheme
-f s\scheme-ukraine.scheme
-f s\scheme-white_brbg.scheme
-f s\scheme-white_cividis.scheme
-f s\scheme-white_hue.scheme
-f s\scheme-white_jet.scheme
-f s\scheme-white_piyg.scheme
-f s\scheme-white_ptol.scheme
-f s\scheme-white_set3.scheme
-f s\scheme-white_tableau.scheme
-f s\scheme-white_viridis.scheme
-f s\scheme-white_w3d.scheme
-e
-S http://fmwww.bc.edu/repec/bocode/b
-N balancetable.pkg
-D  4 Mar 2025
-U 11
-d 'BALANCETABLE': module to build a balance table and print it in a LaTeX file or an Excel file
-d 
-d  The command balancetable allows checking the balance of
-d variables across subsamples (typically a treatment group and a
-d control group), by creating a table with subsample means and
-d standard deviations for the aforementioned variables, as well as
-d differences in means and corresponding standard errors (or
-d p-values). This well-formatted table is exported to LaTeX or
-d Excel, and it can be customized using several formatting options. d
-d KW: balance table
-d KW: export
-d KW: Excel
-d KW: LaTeX
-d 
-d Requires: Stata version 14 and listtab from SSC (q.v.)
-d 
-d Distribution-Date: 20181123
-d 
-d Author: Mattia Chiapello
-d Support: email chiapello.ma@@gmail.com
-d 
-f b\balancetable.ado
-f b\balancetable.sthlp
-e
-S http://fmwww.bc.edu/repec/bocode/l
-N listtab.pkg
-D  4 Mar 2025
-U 12
-d 'LISTTAB': module to list variables as rows of a TeX, HTML or word processor table
-d 
-d   listtab outputs a list of variables to the Stata log or to a
-d file as TeX, HTML or word processor table rows, which can then be
-d inserted into a TeX, HTML or word processor table by cutting and
-d pasting and/or file linking and/or embedding (eg using the TeX
-d \input command). listtab produces the table rows, but may also
-d produce a set of header lines before the table rows and/or footer
-d lines after the table rows, containing preambles and/or table
-d definitions and/or table headers and/or table footers, as
-d specified by the user.
-d 
-d KW: output
-d KW: LaTeX
-d KW: HTML
-d KW: RTF
-d 
-d Requires: Stata version 11.0
-d 
-d Distribution-Date: 20210709
-d 
-d Author: Roger Newson,  King's College London
-d Support: email roger.newson@@kcl.ac.uk
-d 
-f l\listtab.ado
-f l\listtab.sthlp
-f l\listtab_rstyle.ado
-f l\listtab_rstyle.sthlp
-f l\listtab_vars.ado
-f l\listtab_vars.sthlp
-e
 S http://fmwww.bc.edu/repec/bocode/e
 N egenmore.pkg
-D 12 Mar 2025
-U 13
+D 15 Apr 2025
+U 1
 d 'EGENMORE': modules to extend the generate function
 d 
 d  This package includes various -egen- functions. For full
@@ -596,4 +110,455 @@ f _\_gd2.ado
 f _\_grownvals.ado
 f _\_growsvals.ado
 f _\_gtruncdig.ado
+e
+S http://fmwww.bc.edu/repec/bocode/f
+N ftools.pkg
+D 15 Apr 2025
+U 2
+d 'FTOOLS': module to provide alternatives to common Stata commands optimized for large datasets
+d 
+d  ftools consists of a Mata file and several Stata commands: The
+d Mata file creates identifiers (factors) from variables by using
+d hash functions instead of sorting the data, so it runs in time
+d O(N) and not in O(N log N). The Stata commands exploit this to
+d avoid sort operations,  at the cost of being slower for small
+d datasets (mainly because of the cost involved in moving data from
+d Stata to Mata). Implemented commands are fcollapse, fegen group,
+d and fsort. Note that most of the capabilities of levels and
+d contract are already supported by these commands. Possible
+d commands include more egen functions and merge and reshape
+d alternatives.
+d 
+d KW: levels
+d KW: collapse
+d KW: contract
+d KW: egen
+d KW: sort
+d KW: factor variables
+d KW: Mata
+d 
+d Requires: Stata version 11.2
+d 
+d Distribution-Date: 20230821
+d 
+d Author: Sergio Correia, Board of Governors of the Federal Reserve System
+d Support: email sergio.correia@@gmail.com
+d 
+f f\ftools.ado
+f f\ftools.mata
+f f\ftools.sthlp
+f f\fcollapse.ado
+f f\fcollapse.sthlp
+f f\fegen.ado
+f f\fegen_group.ado
+f f\fegen.sthlp
+f f\fisid.ado
+f f\fisid.sthlp
+f f\flevelsof.ado
+f f\flevelsof.sthlp
+f f\fmerge.ado
+f f\fmerge.sthlp
+f f\freshape.ado
+f f\fsort.ado
+f f\fsort.sthlp
+f f\ftab.ado
+f j\join.ado
+f j\join.sthlp
+f l\local_inlist.ado
+f l\local_inlist.sthlp
+f f\fcollapse_functions.mata
+f f\fcollapse_main.mata
+f f\ftools_type_aliases.mata
+f f\ftools.mata
+f f\ftools_common.mata
+f f\ftools_hash1.mata
+f f\ftools_main.mata
+f f\ftools_experimental.mata
+f f\ftools_plugin.mata
+f f\ftools_type_aliases.mata
+f m\ms_compile_mata.ado
+f m\ms_expand_varlist.ado
+f m\ms_fvstrip.ado
+f m\ms_fvstrip.sthlp
+f m\ms_fvunab.ado
+f m\ms_get_version.ado
+f m\ms_parse_absvars.ado
+f m\ms_parse_varlist.ado
+f m\ms_parse_vce.ado
+f m\ms_add_comma.ado
+e
+S http://fmwww.bc.edu/repec/bocode/r
+N reghdfe.pkg
+D 15 Apr 2025
+U 3
+d 'REGHDFE': module to perform linear or instrumental-variable regression absorbing any number of high-dimensional fixed effects
+d 
+d  reghdfe fits a linear or instrumental-variable regression
+d absorbing an arbitrary number of categorical factors and
+d factorial interactions Optionally, it saves the estimated fixed
+d effects.
+d 
+d KW: regression
+d KW: instrumental variables
+d KW: fixed effects
+d KW: high dimension fixed effects
+d 
+d Requires: Stata version 11.2
+d 
+d Distribution-Date: 20230821
+d 
+d Author: Sergio Correia, Board of Governors of the Federal Reserve System
+d Support: email sergio.correia@@gmail.com
+d 
+f r\reghdfe.ado
+f r\reghdfe.mata
+f r\reghdfe3.ado
+f r\reghdfe_p.ado
+f r\reghdfe3_p.ado
+f r\reghdfe5.ado
+f r\reghdfe5_p.ado
+f r\reghdfe_estat.ado
+f r\reghdfe3_estat.ado
+f r\reghdfe5_estat.ado
+f r\reghdfe_parse.ado
+f r\reghdfe5_parse.ado
+f r\reghdfe_footnote.ado
+f r\reghdfe3_footnote.ado
+f r\reghdfe5_footnote.ado
+f e\estfe.ado
+f r\reghdfe_header.ado
+f r\reghdfe5_header.ado
+f r\reghdfe5_parse.ado
+f r\reghdfe.sthlp
+f r\reghdfe3.sthlp
+f r\reghdfe5.sthlp
+f r\reghdfe.mata
+f r\reghdfe_programming.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/p
+N ppmlhdfe.pkg
+D 15 Apr 2025
+U 4
+d 'PPMLHDFE': module for Poisson pseudo-likelihood regression with multiple levels of fixed effects
+d 
+d   ppmlhdfe implements Poisson pseudo-maximum likelihood
+d regressions (PPML) with multi-way fixed effects, as  described
+d by Correia, Guimarães, Zylkin (arXiv:1903.01690).  The estimator
+d employed is robust to statistical separation and    convergence
+d issues, due to the procedures developed in Correia, Guimarães,
+d Zylkin (arXiv:1903.01633).
+d 
+d KW: Poisson pseudo-likelihood
+d KW: ppml
+d KW: fixed effects
+d KW: high dimension fixed effects
+d 
+d Requires: Stata version 11.2, reghdfe, ftools  from SSC (q.v.)
+d 
+d Distribution-Date: 20230907
+d 
+d Author: Sergio Correia, Board of Governors of the Federal Reserve System
+d Support: email sergio.correia@@gmail.com
+d 
+d Author: Paulo Guimaraes, University of Porto
+d Support: email pguimaraes@@fep.up.pt
+d 
+d Author: Thomas Zylkin, University of Richmond
+d Support: email tzylkin@@richmond.edu
+d 
+f p\ppmlhdfe.ado
+f p\ppmlhdfe.sthlp
+f p\ppmlhdfe_header.ado
+f p\ppmlhdfe_p.ado
+f p\ppmlhdfe.mata
+f r\reghdfe5.mata
+f p\ppmlhdfe_functions.mata
+f p\ppmlhdfe_separation_relu.mata
+f p\ppmlhdfe_separation_simplex.mata
+e
+S http://fmwww.bc.edu/repec/bocode/x
+N xlincom.pkg
+D 15 Apr 2025
+U 5
+d 'XLINCOM': module to estimate multiple linear combinations of parameters
+d 
+d  xlincom computes point estimates, standard errors, t or z
+d statistics, p-values, and confidence intervals for single or
+d multiple linear combinations of coefficients as well as their
+d covariances. nlcom is also able to do this, but xlincom is much
+d faster (up to 300 times for complex models), and supports the
+d same syntax as lincom in most cases. xlincom internally calls
+d lincom for each linear combination and extracts estimates and
+d variances from its output. It has an optional post option to post
+d estimation results for subsequent testing or exporting with
+d pretty table commands.
+d 
+d KW: linear combinations
+d KW: lincom
+d KW: estimation
+d 
+d Requires: Stata version 8
+d 
+d Distribution-Date: 20230925
+d 
+d Author: Wouter Wakker
+d Support: email wouter.wakker@@outlook.com
+d 
+f x\xlincom.ado
+f x\xlincom_p.ado
+f x\xlincom.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/b
+N balancetable.pkg
+D 15 Apr 2025
+U 6
+d 'BALANCETABLE': module to build a balance table and print it in a LaTeX file or an Excel file
+d 
+d  The command balancetable allows checking the balance of
+d variables across subsamples (typically a treatment group and a
+d control group), by creating a table with subsample means and
+d standard deviations for the aforementioned variables, as well as
+d differences in means and corresponding standard errors (or
+d p-values). This well-formatted table is exported to LaTeX or
+d Excel, and it can be customized using several formatting options. d
+d KW: balance table
+d KW: export
+d KW: Excel
+d KW: LaTeX
+d 
+d Requires: Stata version 14 and listtab from SSC (q.v.)
+d 
+d Distribution-Date: 20181123
+d 
+d Author: Mattia Chiapello
+d Support: email chiapello.ma@@gmail.com
+d 
+f b\balancetable.ado
+f b\balancetable.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/e
+N estout.pkg
+D 15 Apr 2025
+U 7
+d 'ESTOUT': module to make regression tables
+d 
+d  estout produces a table of regression results from one or
+d several models for use with spreadsheets, LaTeX, HTML, or a
+d word-processor table. eststo stores a quick copy of the active
+d estimation results for later tabulation. esttab is a wrapper for
+d estout. It displays a pretty looking publication-style regression
+d table without much typing. estadd adds additional results to the
+d e()-returns for one or several models previously fitted and
+d stored. This package subsumes the previously circulated esto,
+d esta, estadd,  and estadd_plus. An earlier version of estout is
+d available  as estout1.
+d 
+d KW: estimates
+d KW: LaTeX
+d KW: HTML
+d KW: word processor
+d KW: output
+d 
+d Requires: Stata version 8.2
+d 
+d Distribution-Date: 20230212
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f _\_eststo.ado
+f _\_eststo.hlp
+f e\estadd.ado
+f e\estadd.hlp
+f e\estout.ado
+f e\estout.hlp
+f e\eststo.ado
+f e\eststo.hlp
+f e\estpost.ado
+f e\estpost.hlp
+f e\esttab.ado
+f e\esttab.hlp
+e
+S http://fmwww.bc.edu/repec/bocode/c
+N coefplot.pkg
+D 15 Apr 2025
+U 8
+d 'COEFPLOT': module to plot regression coefficients and other results
+d 
+d   coefplot plots results from estimation commands or Stata
+d matrices. Results from multiple models or matrices can be
+d combined in a single graph. The default behavior of coefplot is
+d to draw markers for coefficients and horizontal spikes for
+d confidence intervals. However, coefplot can also produce various
+d other types of graphs.
+d 
+d KW: graphics
+d KW: coefficients
+d KW: estimation
+d 
+d Requires: Stata version 11
+d 
+d Distribution-Date: 20230225
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f c\coefplot.ado
+f c\coefplot.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/g
+N grstyle.pkg
+D 15 Apr 2025
+U 9
+d 'GRSTYLE': module to customize the overall look of graphs
+d 
+d  grstyle allows you to customize the overall look of graphs from
+d within a do-file without having to fiddle around with external
+d scheme files. The advantage of grstyle over manually editing a
+d scheme file is that everything needed to reproduce your graphs
+d can be included in a single do-file.
+d 
+d KW: graphics
+d KW: scheme files
+d KW: custom graphics
+d KW: plot
+d 
+d Requires: Stata version 9.2 and palettes from SSC (q.v.)
+d 
+d Distribution-Date: 20200919
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f g\grstyle.ado
+f g\grstyle.hlp
+f g\grstyle_set.ado
+f g\grstyle_set.hlp
+e
+S http://fmwww.bc.edu/repec/bocode/p
+N palettes.pkg
+D 15 Apr 2025
+U 10
+d 'PALETTES': module to provide color palettes, symbol palettes, and line pattern palettes
+d 
+d  The palettes module contains three commands: colorpalette,
+d symbolpalette, and linepalette. The commands provide color,
+d symbol, and line pattern palettes for use in Stata graphs.
+d 
+d KW: graphics
+d KW: colors
+d KW: marker symbols
+d KW: line patterns
+d 
+d Requires: Stata version 14.2 and colrspace from SSC (q.v.); (version 9.2 for colorpalette9)
+d 
+d Distribution-Date: 20240705
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f p\palettes.hlp
+f c\colorpalette.ado
+f c\colorpalette.sthlp
+f c\colorpalette9.ado
+f c\colorpalette9.hlp
+f l\linepalette.ado
+f l\linepalette.hlp
+f s\symbolpalette.ado
+f s\symbolpalette.hlp
+f c\colorcheck.ado
+f c\colorcheck.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/c
+N colrspace.pkg
+D 15 Apr 2025
+U 11
+d 'COLRSPACE': module providing a class-based color management system in Mata
+d 
+d   The colrspace module provides a class-based color management
+d system implemented in Mata. It supports a wide variety of color
+d spaces and translations among them, provides color generators and
+d a large collection of named palettes, and features functionality
+d such as color interpolation, grayscale conversion, or color
+d vision deficiency simulation.
+d 
+d KW: graphics
+d KW: color management
+d 
+d Requires: Stata version 14.2
+d 
+d Distribution-Date: 20240705
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f c\colrspace.sthlp
+f c\colrspace_source.sthlp
+f c\colrspace_library_generators.sthlp
+f c\colrspace_library_namedcolors.sthlp
+f c\colrspace_library_palettes.sthlp
+f c\colrspace_library_lsmaps.sthlp
+f c\colrspace_library_rgbmaps.sthlp
+f l\lcolrspace.mlib
+e
+S http://fmwww.bc.edu/repec/bocode/s
+N schemepack.pkg
+D 15 Apr 2025
+U 12
+d 'SCHEMEPACK': module providing ready-to-use graph schemes
+d 
+d  schemepack releases a suite of graph schemes as part of The
+d Stata Guide (https://medium.com/the-stata-guide) series. See the
+d help file (help schemepack) for details after installation.
+d 
+d KW: Stata
+d KW: scheme
+d KW: graphs
+d 
+d Requires: Stata version 15
+d 
+d Distribution-Date: 20221111
+d 
+d Author: Asjad Naqvi, Austrian Institute of Economic Research (WIFO)
+d Support: email asjadnaqvi@@gmail.com
+d 
+f s\schemepack.sthlp
+f s\scheme-black_brbg.scheme
+f s\scheme-black_cividis.scheme
+f s\scheme-black_hue.scheme
+f s\scheme-black_jet.scheme
+f s\scheme-black_piyg.scheme
+f s\scheme-black_ptol.scheme
+f s\scheme-black_set3.scheme
+f s\scheme-black_tableau.scheme
+f s\scheme-black_viridis.scheme
+f s\scheme-black_w3d.scheme
+f s\scheme-cblind1.scheme
+f s\scheme-gg_brbg.scheme
+f s\scheme-gg_cividis.scheme
+f s\scheme-gg_hue.scheme
+f s\scheme-gg_jet.scheme
+f s\scheme-gg_piyg.scheme
+f s\scheme-gg_ptol.scheme
+f s\scheme-gg_set3.scheme
+f s\scheme-gg_tableau.scheme
+f s\scheme-gg_viridis.scheme
+f s\scheme-gg_w3d.scheme
+f s\scheme-neon.scheme
+f s\scheme-rainbow.scheme
+f s\scheme-swift_red.scheme
+f s\scheme-tab1.scheme
+f s\scheme-tab2.scheme
+f s\scheme-tab3.scheme
+f s\scheme-ukraine.scheme
+f s\scheme-white_brbg.scheme
+f s\scheme-white_cividis.scheme
+f s\scheme-white_hue.scheme
+f s\scheme-white_jet.scheme
+f s\scheme-white_piyg.scheme
+f s\scheme-white_ptol.scheme
+f s\scheme-white_set3.scheme
+f s\scheme-white_tableau.scheme
+f s\scheme-white_viridis.scheme
+f s\scheme-white_w3d.scheme
 e
