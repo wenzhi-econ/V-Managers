@@ -21,7 +21,7 @@ Input:
     "${RawMNEData}/AllSnapshotWC.dta"                <== raw data 
     "${RawCntyData}/2.WEF ProblemFactor.dta"         <== raw data (country level)
     "${RawCntyData}/3.WB FMShares Decade"            <== raw data (country level)
-    "${TempData}/01WorkersOutcomes.dta"              <== created in 0101 do file 
+    "${TempData}/FinalFullSample.dta"                <== created in 0101_01 do file 
     "${TempData}/FinalAnalysisSample.dta"            <== created in 0103_03 do file 
     
 Output:
@@ -30,11 +30,12 @@ Output:
     "${TempData}/0104Office_Size.dta"                           <== auxiliary dataset
     "${TempData}/0104AnalysisSample_WithHeteroIndicators.dta"   <== main output dataset
 
-Description of the Output Dataset:
+Description of the main output dataset:
     (1) It adds heterogeneity indicators used in heterogeneity table to the basic final analysis sample dataset "FinalAnalysisSample.dta".
+    (2) This dataset is only used for the heterogeneity table (0304 do file).
 
 RA: WWZ 
-Time: 2025-04-15
+Time: 2025-04-16
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -42,13 +43,13 @@ Time: 2025-04-15
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 //&? the construction of these variables need to be based on the full sample, instead of only the analysis sample.
-//&? thus, I use "${TempData}/0101_01WorkersOutcomes.dta" (created in 0101_01) as the starting point.
+//&? thus, I use "${TempData}/FinalFullSample.dta" (created in 0101_01) as the starting point.
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-1. managers' personal characteristics
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-use "${TempData}/0101_01WorkersOutcomes.dta", clear 
+use "${TempData}/FinalFullSample.dta", clear 
 sort IDlse YearMonth
 
 global Mngr_Vars Female WL Tenure AgeBand Func OfficeCode ISOCode HomeCountryISOCode
@@ -64,7 +65,7 @@ save "${TempData}/0104Mngr_Characteristics.dta", replace
 *-? s-1-2. managers' team-level average pay growth rates
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-use "${TempData}/0101_01WorkersOutcomes.dta", clear 
+use "${TempData}/FinalFullSample.dta", clear 
 sort  IDlse YearMonth
 xtset IDlse YearMonth
 
@@ -77,7 +78,7 @@ save "${TempData}/0104Mngr_TeamPayGrowth.dta", replace
 *-? s-1-3. offices' sizes and job diversity variables 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-use "${TempData}/0101_01WorkersOutcomes.dta", clear 
+use "${TempData}/FinalFullSample.dta", clear 
 sort  IDlse YearMonth
 
 keep IDlse YearMonth OfficeCode StandardJob
@@ -311,7 +312,5 @@ keep Year - OfficeJobSize ///
     OfficeSizeHigh1 JobNum1 LaborRegHigh1 LowFLFP1 ///
     WPerf1 WPerf0p10p901 TeamPerfMBase1
 
-
 sort IDlse YearMonth
 save "${TempData}/0104AnalysisSample_WithHeteroIndicators.dta", replace 
-

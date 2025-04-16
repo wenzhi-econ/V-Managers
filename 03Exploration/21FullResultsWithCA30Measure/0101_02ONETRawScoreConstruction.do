@@ -9,15 +9,19 @@ Input:
     "${RawONETData}/SJ Crosswalk.xlsx"  <== raw data 
 
 Output:
-    "${TempData}/0101_02ONET_RawTaskIntensity.dta" <== main output, will be used in 0107_02 
-    "${TempData}/temp_ONET_Abilities.dta"       <== auxiliary output, will be removed if $if_erase_temp_file==1
-    "${TempData}/temp_ONET_Skills.dta"          <== auxiliary output, will be removed if $if_erase_temp_file==1
-    "${TempData}/temp_ONET_Knowledge.dta"       <== auxiliary output, will be removed if $if_erase_temp_file==1
-    "${TempData}/temp_ONET_WorkContext.dta"     <== auxiliary output, will be removed if $if_erase_temp_file==1
-    "${TempData}/temp_ONET_SJCrosswalk.dta"     <== auxiliary output, will be removed if $if_erase_temp_file==1
+    "${TempData}/0101_02ONET_RawTaskIntensity.dta" <== main output, will be used in 0101_03 do file  
+    "${TempData}/temp_ONET_Abilities.dta"          <== auxiliary output, will be removed if $if_erase_temp_file==1
+    "${TempData}/temp_ONET_Skills.dta"             <== auxiliary output, will be removed if $if_erase_temp_file==1
+    "${TempData}/temp_ONET_Knowledge.dta"          <== auxiliary output, will be removed if $if_erase_temp_file==1
+    "${TempData}/temp_ONET_WorkContext.dta"        <== auxiliary output, will be removed if $if_erase_temp_file==1
+    "${TempData}/temp_ONET_SJCrosswalk.dta"        <== auxiliary output, will be removed if $if_erase_temp_file==1
+
+Description of the output dataset:
+    (1) It is a standard job level dataset, matched with occupations in O*NET.
+    (2) It contains raw scores on relevant O*NET descriptors about three task intensity: cognitive, routine, and manual. 
 
 RA: WWZ 
-Time: 2025-02-10
+Time: 2025-04-16
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??

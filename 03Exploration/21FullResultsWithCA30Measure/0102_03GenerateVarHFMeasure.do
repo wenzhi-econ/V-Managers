@@ -9,11 +9,21 @@ Input:
     "${TempData}/0102_02AgeContinuous.dta" <== created in 0102_02 do file 
 
 Output:
-    "${TempData}/0102_03EverWL2WorkerPanel.dta"
-    "${TempData}/0102_03HFMeasure.dta"     <== main output
+    "${TempData}/0102_03EverWL2WorkerPanel.dta" <== auxiliary dataset, which will be useful in many circumstances
+    "${TempData}/0102_03HFMeasure.dta"          <== main output
+
+Description of the main output dataset:
+    (1) It contains the full panel of those employees who have ever been WL2 in the dataset.
+    (2) Only for those employees can current age-based HF measure be constructed.
+    (3) The variables are named as: IDlseMHR IDMngr_Pre IDMngr_Post YearMonth CA30.
+        (a) The three ID variables are exactly the same. Their existence is for the convenience of future merge.
+        (b) The existence of YearMonth means that the dataset is in employee-year-month level. Even though the HF measure is individual-specific (i.e., doesn't vary with time), in the future merge, we also wish the employee's manager is in the dataset at the same time.
+        (c) CA30 is the HF measure. 
+
+impt: "${TempData}/0102_03HFMeasure.dta" will be used frequently, in particular if we requires full sample with HF measure.
 
 RA: WWZ 
-Time: 2025-04-14
+Time: 2025-04-16
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??

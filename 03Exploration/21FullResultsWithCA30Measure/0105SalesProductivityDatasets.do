@@ -10,10 +10,9 @@ Input:
 Output:
     "${TempData}/0105SalesProdOutcomes.dta"
 
-Description of the Output Dataset:
-    A panel of worker sample with the following variables:
-        IDlse YearMonth Productivity ProductivityStd ChannelFE 
-    In particular, the normalized measure "ProductivityStd" is used in some analysis based on this objective sales productivity dataset.
+Description of the output dataset:
+    (1) A panel of worker sample with the following variables: IDlse YearMonth Productivity ProductivityStd ChannelFE.
+    (2) In particular, the normalized measure "ProductivityStd" will be used later, as an objective productivity measure.
 
 RA: WWZ 
 Time: 2024-11-19

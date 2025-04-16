@@ -2,12 +2,12 @@
 This do file creates a corrected version of AgeBand.
 
 Input:
-    "${RawMNEData}/AllSnapshotWC.dta"
+    "${RawMNEData}/AllSnapshotWC.dta"        <== raw data
 
 Output:
-    "${TempData}/0102_01AgeBandUpdated.dta"
+    "${TempData}/0102_01AgeBandUpdated.dta"  <== output dataset
 
-Description of output:
+Description of the output dataset:
     It stores three variables (IDlse YearMonth AgeBandUpdated), where the original AgeBand variable is updated based on two features:
         (1) There should not be any decrease in AgeBand values for an employee as time goes by.
         (2) An employee cannot have two increases in AgeBand values since we only have 10 years of data.

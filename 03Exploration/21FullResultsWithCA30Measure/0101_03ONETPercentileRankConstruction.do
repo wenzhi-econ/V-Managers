@@ -2,7 +2,7 @@
 This do file transforms the raw ONET task intensity score to a percentile rank based on personnel records across all year-months.
 
 Input:
-    "${TempData}/0101_02ONET_RawTaskIntensity.dta"    <== created in 0107_01 do file 
+    "${TempData}/0101_02ONET_RawTaskIntensity.dta"    <== created in 0101_02 do file 
     "${RawMNEData}/AllSnapshotWC.dta"                 <== raw data 
     "${RawONETData}/Skills.xlsx"                      <== raw data 
 
@@ -16,10 +16,15 @@ Output:
     "${TempData}/0101_03FinalJobLevelPrank.dta" 
             <== main output dataset 
             <== this dataset will be merged with the main dataset when analyzing ONET outcomes
-            <== specifically, this dataset will be used in 0301_04 do file
+            <== specifically, this dataset will be used in 0103_03 do file
+
+Description of the main output dataset:
+    (1) It is a standard job level dataset, matched with occupations in O*NET.
+    (2) In addition to raw scores on relevant O*NET descriptors, it contains percentile rank measures that will be the main measurement of task intensity.
+    (3) The whole process of construcing intensity measures for three tasks follows strictly the paper: Guido Matias Cortes, Nir Jaimovich, and Henry E. Siu, "The Growing Importance of Social Tasks in High-Paying Occupations: Implications for Sorting," Journal of Human Resources 58, no. 5 (2023): 1429–51, https://doi.org/10.3368/jhr.58.5.0121-11455R1.
 
 RA: WWZ
-Time: 2025-03-12
+Time: 2025-04-16
 */
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??

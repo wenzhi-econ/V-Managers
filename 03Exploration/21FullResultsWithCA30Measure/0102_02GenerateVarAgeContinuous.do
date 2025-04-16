@@ -2,13 +2,13 @@
 This do file constructs a variable AgeContinuous, which is an imputed continuous version of AgeBand.
 
 Input: 
-    "${RawMNEData}/AllSnapshotWC.dta"
+    "${RawMNEData}/AllSnapshotWC.dta"       <== raw data 
     "${TempData}/0102_01AgeBandUpdated.dta" <== created in 0102_01 do file 
 
 Output:
-    "${TempData}/0102_02AgeContinuous.dta"
+    "${TempData}/0102_02AgeContinuous.dta"  <== output dataset
 
-Description of the output:
+Description of the output dataset:
     It contains an (imputed) continuous version of AgeBand variable -- AgeContinuous.
         (1) For those employees whose AgeBandUpdated (an updated version of AgeBand variable to get rid of some relevant measurement errors) has crossed the threshold, their exact age can be identified from the increase in AgeBandUpdated. 
         (2) For those employees whose AgeBand does not experience changes in the dataset, their age is imputed based on their length of presence in the dataset. The imputation starts from the midpoint and extends at an equal speed to both ends of the band.

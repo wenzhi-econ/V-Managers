@@ -8,7 +8,7 @@ In particular, workers in the event studies are those employees who satisfy the 
     Condition (b): Both the pre- (i.e., origin) and post-event (i.e., destination) managers are of work level 2.
 
 Input:
-    "${TempData}/0101_01WorkersOutcomes.dta" <== created in 0101 do file
+    "${TempData}/FinalFullSample.dta"   <== created in 0101_01 do file
     "${TempData}/0102_03HFMeasure.dta"  <== created in 0102_03 do file 
 
 Output:
@@ -38,16 +38,9 @@ save "${TempData}/temp_Mngr_WL.dta", replace
 *?? step 1. condition (a) -- first pure manager change event 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${TempData}/0101_01WorkersOutcomes.dta", clear 
+use "${TempData}/FinalFullSample.dta", clear 
 xtset IDlse YearMonth 
 sort  IDlse YearMonth
-
-foreach var in IDlseMHR {
-	replace `var' = l1.`var' if IDlseMHR==. & l1.IDlseMHR!=. 
-	replace `var' = f1.`var' if IDlseMHR==. & f1.IDlseMHR!=. & l1.IDlseMHR==. 
-}
-
-label variable IDlseMHR "Manager ID"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-1-1. create ChangeM: all manager changes

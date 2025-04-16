@@ -16,6 +16,11 @@ Output:
 
 Description of the output dataset:
     (1) It is the main dataset used in the event study, i.e., the analysis sample.
+    (2) In particular, the dataset contains the following variables:
+        outcome variables constructed in 0101_01, 0101_03 do files, and 
+        the event group identifiers, and event-relevant variables. 
+
+impt: This dataset will be used frequently if analysis sample dataset is required.
 
 RA: WWZ 
 Time: 2025-04-14
@@ -89,6 +94,8 @@ label variable IDlseMHR         "Manager ID"
 
 rename (CA30_Pre CA30_Post) (CA30Mngr_Pre CA30Mngr_Post)
 
+label variable TransferSJV         "= 1 when his StandardJob is diff. than last month but SalaryGrade is the same"
+label variable TransferSJVC        "Cumulative count of TransferSJV for an individual"
 label variable TransferSJ          "= 1 in months when an individual's StandardJob is diff. than preceding months"
 label variable TransferSJC         "Cumulative count of TransferSJ for an individual"
 label variable ChangeSalaryGrade   "= 1 in months when an individual's SalaryGrade is diff. than preceding months"

@@ -2,7 +2,7 @@
 This do file generates relevant event dummies used for event studies.
 
 Input:
-    "${TempData}/0101_01WorkersOutcomes.dta"                 <== created in 0101 do file 
+    "${TempData}/FinalFullSample.dta"                   <== created in 0101_01 do file 
     "${TempData}/0103_01CrossSectionalEventWorkers.dta" <== created in 0103_01 do file 
 
 Output:
@@ -20,7 +20,7 @@ Time: 2025-04-14
 *?? step 1. merge event dates to the outcome dataset 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-use "${TempData}/0101_01WorkersOutcomes.dta", clear 
+use "${TempData}/FinalFullSample.dta", clear 
 
 merge m:1 IDlse using "${TempData}/0103_01CrossSectionalEventWorkers.dta"
 keep if _merge==3

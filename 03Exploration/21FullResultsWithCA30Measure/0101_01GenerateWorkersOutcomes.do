@@ -5,18 +5,21 @@ Input:
     "${RawMNEData}/AllSnapshotWC.dta"
 
 Output:
-    "${TempData}/0101_01WorkersOutcomes.dta"
+    "${TempData}/FinalFullSample.dta"
 
-Description of the Output Dataset:
-    Full employee panel, with additional outcomes relevant to the event studies.
-    In particular, the dataset contains the following outcome variables:
-        variables related to vertical promotion  
-        variables related to lateral moves 
-        variables related to pay  
+Description of the output dataset:
+    (1) Full employee panel, with additional outcomes relevant to the event studies.
+    (2) In particular, the dataset contains the following outcome variables:
+        variables related to vertical promotion,
+        variables related to lateral moves, and
+        variables related to pay.
+
+impt: This dataset will be used frequently if full sample dataset is required.
 
 RA: WWZ 
-Time: 2025-03-12
+Time: 2025-04-16
 */
+
 use "${RawMNEData}/AllSnapshotWC.dta", clear
 xtset IDlse YearMonth 
 sort IDlse YearMonth
@@ -195,12 +198,70 @@ foreach var in IDlseMHR {
 *?? final step. save these worker outcomes  
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-order IDlse YearMonth IDlseMHR ///
-    TransferSJV TransferSJVC TransferFunc TransferFuncC TransferSubFunc TransferSubFuncC ///
+capture drop occurrence
+sort IDlse YearMonth
+bysort IDlse: generate occurrence = _n 
+order occurrence, after(YearMonth)
+
+order ///
+    Year YearMonth occurrence IDlse IDlseMHR ///
+    Female AgeBand Tenure WL Country ISOCode ///
+    Func SubFunc Org4 Office OfficeCode StandardJob SalaryGrade VPA ///
+    TransferSJV TransferSJVC TransferSJ TransferSJC ///
     ChangeSalaryGrade ChangeSalaryGradeC PromWL PromWLC ///
-    Func SubFunc Office ISOCode ///
-    LogPayBonus LogPay LogBonus ///
-    StandardJob SalaryGrade Org4 OfficeCode Pay Bonus Benefit Package
+    TransferFunc TransferFuncC TransferSubFunc TransferSubFuncC ///
+    TransferInternal TransferInternalC TransferInternalSJ TransferInternalSJC ///
+    LogPayBonus LogPay LogBonus Pay Bonus ///
+    Leaver LeaverPerm LeaverVol LeaverInv
+
+label variable Year             "Year"
+label variable YearMonth        "Year-Month"
+label variable occurrence       "Sequential occurrence number for each employee in that month"
+label variable IDlse            "Employee ID"
+label variable IDlseMHR         "Manager ID"
+
+label variable Female           "Female"
+label variable AgeBand          "Age band"
+label variable Tenure           "Years within the firm"
+label variable WL               "Work level: from lowest (1) to highest (6)"
+label variable Country          "Working country"
+label variable ISOCode          "ISO code of the working country"
+
+label variable Func             "Function"
+label variable SubFunc          "Subfunction"
+label variable Org4             "Level 4 organization description"
+label variable Office           "Work location: Office or Plant/Factory"
+label variable OfficeCode       "Work location code: Office or Plant/Factory"
+label variable StandardJob      "Standard job title"
+label variable SalaryGrade      "Salary grade"
+label variable VPA              "Performance rating"
+
+label variable TransferSJV         "= 1 when his StandardJob is diff. than last month but SalaryGrade is the same"
+label variable TransferSJVC        "Cumulative count of TransferSJV for an individual"
+label variable TransferSJ          "= 1 in months when an individual's StandardJob is diff. than preceding months"
+label variable TransferSJC         "Cumulative count of TransferSJ for an individual"
+label variable ChangeSalaryGrade   "= 1 in months when an individual's SalaryGrade is diff. than preceding months"
+label variable ChangeSalaryGradeC  "Cumulative count of ChangeSalaryGrade for an individual"
+label variable PromWL              "= 1 in months when WL is greater than preceding months"
+label variable PromWLC             "Cumulative count of PromWL for an individual"
+label variable TransferFunc        "= 1 in months when an individual's Func is diff. than preceding months"
+label variable TransferFuncC       "Cumulative count of TransferFunc for an individual"
+label variable TransferSubFunc     "= 1 in months when SubFunc is diff. than preceding months"
+label variable TransferSubFuncC    "Cumulative count of TransferSubFuncC for an individual"
+label variable TransferInternal    "= 1 in months when either SubFunc or Office or Org4 is diff than last months"
+label variable TransferInternalC   "Cumulative count of TransferInternal for an individual"
+label variable TransferInternalSJ  "= 1 in months when either StandardJob or Office or Org4 is diff than last months"
+label variable TransferInternalSJC "Cumulative count of TransferInternalSJ for an individual"
+
+label variable LogPayBonus         "Pay + bonus (logs)"
+label variable LogPay              "Pay (logs)"
+label variable LogBonus            "Bonus (logs)"
+label variable Pay                 "Pay"
+label variable Bonus               "Bonus"
+label variable Leaver              "= 1 in months when an individual leaves the firm"
+label variable LeaverPerm          "= 1 in the month when an individual leaves the firm permanently"
+label variable LeaverVol           "= 1 in the month when an individual quits (voluntarily exits)"
+label variable LeaverInv           "= 1 in the month when an individual is fired (involuntarily exits)"
 
 compress 
-save "${TempData}/0101_01WorkersOutcomes.dta", replace 
+save "${TempData}/FinalFullSample.dta", replace 
