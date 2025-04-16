@@ -15,3 +15,4 @@ foreach pkg in egenmore ftools reghdfe ppmlhdfe xlincom balancetable estout coef
 }
 
 net install mediation, from("http://fmwww.bc.edu/repec/bocode/m") replace
+net install binscatter, from("http://fmwww.bc.edu/repec/bocode/b") replace

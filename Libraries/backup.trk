@@ -1,4 +1,4 @@
-* 00000012
+* 00000013
 *! version 1.0.0
 * Do not erase or edit this file
 * It is used by Stata to track the ado and help
@@ -561,4 +561,45 @@ f s\scheme-white_set3.scheme
 f s\scheme-white_tableau.scheme
 f s\scheme-white_viridis.scheme
 f s\scheme-white_w3d.scheme
+e
+S http://fmwww.bc.edu/repec/bocode/m
+N mediation.pkg
+D 15 Apr 2025
+U 13
+d 'MEDIATION': module for causal mediation analysis and sensitivity analysis
+d 
+d  mediation estimates the role of particular causal mechanisms
+d that mediate a relationship between treatment and outcome
+d variables. Calculates causal mediation effects and direct effects
+d for models with continuous or binary dependent variables using
+d methods presented in Imai et al 2010. Also calculates sensitivity
+d analyses for mediation effects that are necessary due to
+d non-random assignment of mediating variable. Package replaces
+d earlier approaches like the "Baron-Kenny" method and "Sobel test"
+d for the case of continuous mediator and outcome variables,
+d producing identical results as these earlier methods but not put
+d in a causal inference framework and with sensitivity analyses to
+d the key identification assumption. For models with binary
+d mediators or outcomes, correct calculation of mediation effects
+d are implemented that take into account the use of non-linear
+d models such as probit.
+d 
+d KW: causal mediation effects
+d KW: binary outcome
+d KW: continuous outcome
+d 
+d Requires: Stata version 10 and moremata (q.v.)
+d 
+d Distribution-Date: 20121119
+d 
+d Author: Raymond Hicks, Niehaus Center for Globalization and Governance, Princeton University
+d Support: email rhicks@@princeton.edu
+d 
+d Author: Dustin Tingley, Harvard University
+d Support: email dtingley@@gov.harvard.edu
+d 
+f m\medeff.ado
+f m\medeff.sthlp
+f m\medsens.ado
+f m\medsens.sthlp
 e
