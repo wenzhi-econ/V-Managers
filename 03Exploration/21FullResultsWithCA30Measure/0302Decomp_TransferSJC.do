@@ -187,7 +187,7 @@ foreach var in TransferSJC SameMC DiffMC TransferFuncC {
         (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
         xlabel(-12(2)28, grid gstyle(dot) labsize(medsmall)) /// 
-        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
+        ylabel(-0.2(0.05)0.3, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTGain_`var'})
     graph save "${Results}/CA30_Outcome${number}_Gains_`var'.gph", replace
@@ -261,11 +261,11 @@ foreach var in TransferSJC SameMC DiffMC TransferFuncC {
 
 coefplot ///
     (TransferSJC,              keep(lc_1) rename(lc_1 = "All lateral moves")                noci recast(bar)) ///
-    (TransferSJSameMSameFuncC, keep(lc_1) rename(lc_1 = "Within team")                      noci recast(bar)) ///
-    (TransferSJDiffMSameFuncC, keep(lc_1) rename(lc_1 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_1) rename(lc_1 = "Different team, cross-functional") noci recast(bar) ) ///
+    (SameMC,                   keep(lc_1) rename(lc_1 = "Within team")                      noci recast(bar)) ///
+    (DiffMC,                   keep(lc_1) rename(lc_1 = "Different team, same function")    noci recast(bar)) ///
+    (TransferFuncC,            keep(lc_1) rename(lc_1 = "Different team, cross-functional") noci recast(bar)) ///
     , legend(off) xline(0, lpattern(dash)) ///
-    xscale(range(0 0.1)) xlabel(0(0.01)0.1, grid gstyle(dot) labsize(medlarge)) ///
+    xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
     ylabel(, labsize(large)) ///
     xsize(5) ysize(2) ///
     scheme(tab2) ///
@@ -276,11 +276,11 @@ graph save "${Results}/CA30_Gains_DecompTransferSJC_DuringMngrRotation_Q8.gph", 
 
 coefplot ///
     (TransferSJC,              keep(lc_2) rename(lc_2 = "All lateral moves")                noci recast(bar)) ///
-    (TransferSJSameMSameFuncC, keep(lc_2) rename(lc_2 = "Within team")                      noci recast(bar)) ///
-    (TransferSJDiffMSameFuncC, keep(lc_2) rename(lc_2 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_2) rename(lc_2 = "Different team, cross-functional") noci recast(bar) ) ///
+    (SameMC,                   keep(lc_2) rename(lc_2 = "Within team")                      noci recast(bar)) ///
+    (DiffMC,                   keep(lc_2) rename(lc_2 = "Different team, same function")    noci recast(bar)) ///
+    (TransferFuncC,            keep(lc_2) rename(lc_2 = "Different team, cross-functional") noci recast(bar)) ///
     , legend(off) xline(0, lpattern(dash)) ///
-    xscale(range(0 0.35)) xlabel(0(0.05)0.35, grid gstyle(dot) labsize(medlarge)) ///
+    xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
     ylabel(, labsize(large)) ///
     xsize(5) ysize(2) ///
     scheme(tab2) ///
@@ -288,5 +288,19 @@ coefplot ///
     title("Effects of gaining a high-flyer manager", size(large))
 
 graph save "${Results}/CA30_Gains_DecompTransferSJC_AfterMngrRotation_Q28.gph", replace
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 2. store the event studies results
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+keep ///
+    PTGain_* coeff_* quarter_* lb_* ub_* PTLoss_* PTDiff_* postevent_* ///
+    LtoL_* LtoH_* HtoH_* HtoL_* ///
+    coef1_* coefp1_* coef2_* coefp2_* coef3_* coefp3_* coef4_* coefp4_* coef5_* coefp5_* coef6_* coefp6_* ///
+    RI1_* rip1_* RI2_* rip2_* RI3_* rip3_*
+
+keep if inrange(_n, 1, 41)
+
+save "${Results}/CA30_DecompTransferSJC.dta", replace 
 
 log close

@@ -9,7 +9,7 @@ Input:
     "${TempData}/0104AnalysisSample_WithHeteroIndicators.dta" <== created in 0104 do file 
 
 Results:
-    "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex"
+    "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex"
 
 RA: WWZ 
 Time: 2025-04-15
@@ -194,70 +194,70 @@ foreach hetero_var in $Hetero_Vars {
 *?? step 4. results 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-esttab TenureMHigh_CSGC TenureMHigh_TSJVC TenureMHigh_PWLC TenureMHigh_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab TenureMHigh_CSGC TenureMHigh_TSJVC TenureMHigh_PWLC TenureMHigh_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , replace style(tex) fragment nocons nofloat nobaselevels noobs ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Manager tenure, high") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" "\begin{tabular}{lcccc}" "\hline\hline" "& \multicolumn{1}{c}{Pay increase} & \multicolumn{1}{c}{Lateral moves} & \multicolumn{1}{c}{Vertical moves} & \multicolumn{1}{c}{Exit from firm} \\") ///
     posthead("\hline \multicolumn{3}{c}{\textit{Panel (a): worker and manager characteristics}} \\ \hline")
-esttab SameOffice_CSGC SameOffice_TSJVC SameOffice_PWLC SameOffice_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab SameOffice_CSGC SameOffice_TSJVC SameOffice_PWLC SameOffice_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Same office as manager") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
-esttab SameGender_CSGC SameGender_TSJVC SameGender_PWLC SameGender_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab SameGender_CSGC SameGender_TSJVC SameGender_PWLC SameGender_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Same gender as manager") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
-esttab Young_CSGC Young_TSJVC Young_PWLC Young_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab Young_CSGC Young_TSJVC Young_PWLC Young_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Worker age, young") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
 
-esttab OfficeSizeHigh_CSGC OfficeSizeHigh_TSJVC OfficeSizeHigh_PWLC OfficeSizeHigh_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab OfficeSizeHigh_CSGC OfficeSizeHigh_TSJVC OfficeSizeHigh_PWLC OfficeSizeHigh_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Office size, large") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("\hline \multicolumn{3}{c}{\textit{Panel (b): office and country-wide characteristics}} \\ \hline") posthead("") prefoot("") postfoot("")
-esttab JobNum_CSGC JobNum_TSJVC JobNum_PWLC JobNum_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab JobNum_CSGC JobNum_TSJVC JobNum_PWLC JobNum_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Office job diversity, high") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
-esttab LaborRegHigh_CSGC LaborRegHigh_TSJVC LaborRegHigh_PWLC LaborRegHigh_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab LaborRegHigh_CSGC LaborRegHigh_TSJVC LaborRegHigh_PWLC LaborRegHigh_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Labor laws, high") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
-esttab LowFLFP_CSGC LowFLFP_TSJVC LowFLFP_PWLC LowFLFP_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab LowFLFP_CSGC LowFLFP_TSJVC LowFLFP_PWLC LowFLFP_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Female labor force participation, low [Female]") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
 
-esttab WPerf_CSGC WPerf_TSJVC WPerf_PWLC WPerf_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab WPerf_CSGC WPerf_TSJVC WPerf_PWLC WPerf_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Worker performance, high (p50)") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("\hline \multicolumn{3}{c}{\textit{Panel (c): worker performance and moves}} \\ \hline") posthead("") prefoot("") postfoot("")
-esttab WPerf0p10p90_CSGC WPerf0p10p90_TSJVC WPerf0p10p90_PWLC WPerf0p10p90_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab WPerf0p10p90_CSGC WPerf0p10p90_TSJVC WPerf0p10p90_PWLC WPerf0p10p90_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Worker performance, high (p90)") ///
     cells(b(star fmt(3)) se(par fmt(2))) starlevels(* 0.1 ** 0.05 *** 0.01) /// 
     prehead("") posthead("") prefoot("") postfoot("")
-esttab TeamPerfMBase_CSGC TeamPerfMBase_TSJVC TeamPerfMBase_PWLC TeamPerfMBase_Exit using "${Results}/CA30_HeterogeneityInFourMainOutcomes.tex" ///
+esttab TeamPerfMBase_CSGC TeamPerfMBase_TSJVC TeamPerfMBase_PWLC TeamPerfMBase_Exit using "${Results}/004ResultsBasedOnCA30/CA30_HeterogeneityInFourMainOutcomes.tex" ///
     , append style(tex) fragment nocons nofloat nobaselevels noobs nonumbers ///
     nomtitles collabels(,none) ///
     keep(lc_1) coeflabels(lc_1 "Team performance, high (p50)") ///
