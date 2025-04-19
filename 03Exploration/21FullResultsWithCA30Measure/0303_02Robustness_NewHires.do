@@ -5,7 +5,7 @@ The high-flyer measure used here is CA30.
 Notes on the event study regressions:
     (1) All four treatment groups are included (though Lto and Hto groups do not have same time window), while never-treated workers are not. 
     (2) The omitted group in the regressions are month -3, -2, and -1 for all four treatment groups.
-    (3) For LtoL and LtoH groups, the relative time period is [-36, +84], while for HtoH and HtoL groups, the relative time period is [-36, +60].
+    (3) For LtoL and LtoH groups, the relative time period is [-24, +84], while for HtoH and HtoL groups, the relative time period is [-24, +60].
 
 Some key results (quarterly aggregated coefficients with their p-values, and other key summary statistics) are stored in the output file. 
 
@@ -13,15 +13,15 @@ Input:
     "${TempData}/FinalAnalysisSample.dta" <== created in 0103_03 do file
 
 Output:
-    "${Results}/20250415log_EventStudiesWithCA30_TwoMainOutcomes_NewHires.txt"
+    "${Results}/20250417log_EventStudiesWithCA30_TwoMainOutcomes_NewHires.txt"
     "${Results}/CA30_TwoMainOutcomes_NewHires.dta"
 
 RA: WWZ 
-Time: 2025-04-15
+Time: 2025-04-17
 */
 
 capture log close
-log using "${Results}/20250415log_EventStudiesWithCA30_TwoMainOutcomes_NewHires", replace text
+log using "${Results}/20250417log_EventStudiesWithCA30_TwoMainOutcomes_NewHires", replace text
 
 use "${TempData}/FinalAnalysisSample.dta", clear
 
@@ -37,7 +37,7 @@ use "${TempData}/FinalAnalysisSample.dta", clear
 *impt: Programs stored in the 02*.do files are specifically designed for the following names.
 /* Naming patterns:
 For normal "event * relative period" dummies, e.g. CA30_LtoL_X_Pre1 CA30_LtoH_X_Post0 CA30_HtoH_X_Post12
-For binned dummies, e.g. CA30_LtoL_X_Pre_Before36 CA30_LtoH_X_Post_After84
+For binned dummies, e.g. CA30_LtoL_X_Pre_Before24 CA30_LtoH_X_Post_After84
 */
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -48,7 +48,7 @@ generate  CA30_Rel_Time = Rel_Time
 summarize CA30_Rel_Time, detail // range: [-131, +130]
 
 *!! time window of interest
-local max_pre_period  = 36 
+local max_pre_period  = 24 
 local Lto_max_post_period = 84
 local Hto_max_post_period = 60
 
@@ -96,7 +96,7 @@ generate byte CA30_HtoL_X_Post_After`Hto_max_post_period' = CA30_HtoL * (CA30_Re
 *-? s-0-2. global macros used in regressions 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-local max_pre_period  = 36 
+local max_pre_period  = 24 
 local Lto_max_post_period = 84
 local Hto_max_post_period = 60
 
@@ -131,10 +131,10 @@ global four_events_dummies ${CA30_LtoL_X_Pre} ${CA30_LtoL_X_Post} ${CA30_LtoH_X_
 
 display "${four_events_dummies}"
 
-    // CA30_LtoL_X_Pre_Before36 CA30_LtoL_X_Pre36 ... CA30_LtoL_X_Pre4 CA30_LtoL_X_Post0 CA30_LtoL_X_Post1 ... CA30_LtoL_X_Post84 CA30_LtoL_X_Pre_After84 
-    // CA30_LtoH_X_Pre_Before36 CA30_LtoH_X_Pre36 ... CA30_LtoH_X_Pre4 CA30_LtoH_X_Post0 CA30_LtoH_X_Post1 ... CA30_LtoH_X_Post84 CA30_LtoH_X_Pre_After84 
-    // CA30_HtoH_X_Pre_Before36 CA30_HtoH_X_Pre36 ... CA30_HtoH_X_Pre4 CA30_HtoH_X_Post0 CA30_HtoH_X_Post1 ... CA30_HtoH_X_Post60 CA30_HtoH_X_Pre_After60 
-    // CA30_HtoL_X_Pre_Before36 CA30_HtoL_X_Pre36 ... CA30_HtoL_X_Pre4 CA30_HtoL_X_Post0 CA30_HtoL_X_Post1 ... CA30_HtoL_X_Post60 CA30_HtoL_X_Pre_After60 
+    // CA30_LtoL_X_Pre_Before24 CA30_LtoL_X_Pre24 ... CA30_LtoL_X_Pre4 CA30_LtoL_X_Post0 CA30_LtoL_X_Post1 ... CA30_LtoL_X_Post84 CA30_LtoL_X_Pre_After84 
+    // CA30_LtoH_X_Pre_Before24 CA30_LtoH_X_Pre24 ... CA30_LtoH_X_Pre4 CA30_LtoH_X_Post0 CA30_LtoH_X_Post1 ... CA30_LtoH_X_Post84 CA30_LtoH_X_Pre_After84 
+    // CA30_HtoH_X_Pre_Before24 CA30_HtoH_X_Pre24 ... CA30_HtoH_X_Pre4 CA30_HtoH_X_Post0 CA30_HtoH_X_Post1 ... CA30_HtoH_X_Post60 CA30_HtoH_X_Pre_After60 
+    // CA30_HtoL_X_Pre_Before24 CA30_HtoL_X_Pre24 ... CA30_HtoL_X_Pre4 CA30_HtoL_X_Post0 CA30_HtoL_X_Post1 ... CA30_HtoL_X_Post60 CA30_HtoL_X_Pre_After60 
 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -167,19 +167,19 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
     *!! pre-event joint p-value
-    pretrend_LH_minus_LL, event_prefix(CA30) pre_window_len(36)
+    pretrend_LH_minus_LL, event_prefix(CA30) pre_window_len(24)
         global PTGain_`var' = r(pretrend)
         global PTGain_`var' = string(${PTGain_`var'}, "%4.3f")
         generate PTGain_`var' = ${PTGain_`var'} if inrange(_n, 1, 41)
             //&? store the results
 
     *!! quarterly estimates
-    LH_minus_LL, event_prefix(CA30) pre_window_len(36) post_window_len(84) outcome(`var')
+    LH_minus_LL, event_prefix(CA30) pre_window_len(24) post_window_len(84) outcome(`var')
     twoway ///
         (scatter coeff_`var'_gains quarter_`var'_gains, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
-        xlabel(-12(2)28, grid gstyle(dot) labsize(medsmall)) /// 
+        xlabel(-8(2)28, grid gstyle(dot) labsize(medsmall)) /// 
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTGain_`var'})
@@ -190,19 +190,19 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
     *!! pre-event joint p-value
-    pretrend_HL_minus_HH, event_prefix(CA30) pre_window_len(36)
+    pretrend_HL_minus_HH, event_prefix(CA30) pre_window_len(24)
         global PTLoss_`var' = r(pretrend)
         global PTLoss_`var' = string(${PTLoss_`var'}, "%4.3f")
         generate PTLoss_`var' = ${PTLoss_`var'} if inrange(_n, 1, 41)
             //&? store the results
 
     *!! quarterly estimates
-    HL_minus_HH, event_prefix(CA30) pre_window_len(36) post_window_len(60) outcome(`var')
+    HL_minus_HH, event_prefix(CA30) pre_window_len(24) post_window_len(60) outcome(`var')
     twoway ///
         (scatter coeff_`var'_loss quarter_`var'_loss, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_loss ub_`var'_loss quarter_`var'_loss, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
-        xlabel(-12(2)20, grid gstyle(dot) labsize(medsmall)) /// 
+        xlabel(-8(2)20, grid gstyle(dot) labsize(medsmall)) /// 
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTLoss_`var'})
@@ -213,7 +213,7 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
     *!! pre-event joint p-value
-    pretrend_Double_Diff, event_prefix(CA30) pre_window_len(36)
+    pretrend_Double_Diff, event_prefix(CA30) pre_window_len(24)
         global PTDiff_`var' = r(pretrend)
         global PTDiff_`var' = string(${PTDiff_`var'}, "%4.3f")
         generate PTDiff_`var' = ${PTDiff_`var'} if inrange(_n, 1, 41)
@@ -227,12 +227,12 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
             //&? store the results
 
     *!! quarterly estimates
-    Double_Diff, event_prefix(CA30) pre_window_len(36) post_window_len(60) outcome(`var')
+    Double_Diff, event_prefix(CA30) pre_window_len(24) post_window_len(60) outcome(`var')
     twoway ///
         (scatter coeff_`var'_ddiff quarter_`var'_ddiff, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_ddiff ub_`var'_ddiff quarter_`var'_ddiff, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
-        xlabel(-12(2)20, grid gstyle(dot) labsize(medsmall)) /// 
+        xlabel(-8(2)20, grid gstyle(dot) labsize(medsmall)) /// 
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note("Pre-trends joint p-value = ${PTDiff_`var'}" "Post coeffs. joint p-value = ${postevent_`var'}")

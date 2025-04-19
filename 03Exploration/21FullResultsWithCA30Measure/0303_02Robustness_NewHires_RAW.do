@@ -1,5 +1,5 @@
 /* 
-This do file establishes robustness in event study results on two main outcomes of interest, using Poisson regressions.
+This do file establishes robustness in event study results on two main outcomes of interest, using new hires among event workers.
 The high-flyer measure used here is CA30.
 
 Notes on the event study regressions:
@@ -13,24 +13,24 @@ Input:
     "${TempData}/FinalAnalysisSample.dta" <== created in 0103_03 do file
 
 Output:
-    "${Results}/20250415log_EventStudiesWithCA30_TwoMainOutcomes_Poisson.txt"
-    "${Results}/CA30_TwoMainOutcomes_Poisson.dta"
+    "${Results}/20250415log_EventStudiesWithCA30_TwoMainOutcomes_NewHires.txt"
+    "${Results}/CA30_TwoMainOutcomes_NewHires.dta"
 
 RA: WWZ 
 Time: 2025-04-15
 */
 
 capture log close
-log using "${Results}/20250415log_EventStudiesWithCA30_TwoMainOutcomes_Poisson", replace text
+log using "${Results}/20250415log_EventStudiesWithCA30_TwoMainOutcomes_NewHires", replace text
 
 use "${TempData}/FinalAnalysisSample.dta", clear
 
-/* keep if inrange(_n, 1, 100000)  */
+/* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
     // commented out when officially producing the results
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 0. construct variables and macros used in ppmlhdfe command
+*?? step 0. construct variables and macros used in reghdfe command
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *&& Months -1, -2, and -3 are omitted as the reference group.
 *impt: The variable name of the "event * relative period" dummies matter!
@@ -136,17 +136,22 @@ display "${four_events_dummies}"
     // CA30_HtoH_X_Pre_Before36 CA30_HtoH_X_Pre36 ... CA30_HtoH_X_Pre4 CA30_HtoH_X_Post0 CA30_HtoH_X_Post1 ... CA30_HtoH_X_Post60 CA30_HtoH_X_Pre_After60 
     // CA30_HtoL_X_Pre_Before36 CA30_HtoL_X_Pre36 ... CA30_HtoL_X_Pre4 CA30_HtoL_X_Post0 CA30_HtoL_X_Post1 ... CA30_HtoL_X_Post60 CA30_HtoL_X_Pre_After60 
 
+
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 1. event studies on the two main outcomes
+*?? step 1. robustness variable: cohortSingle
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+sort IDlse YearMonth
+bysort IDlse: egen TenureMin = min(Tenure)
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 2. event studies on the two main outcomes
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
 foreach var in TransferSJVC ChangeSalaryGradeC {
 
     if "`var'" == "TransferSJVC"       global title "Lateral move"
     if "`var'" == "ChangeSalaryGradeC" global title "Salary grade increase"
-
-    if "`var'" == "TransferSJVC"       global ylabelsetup -1.25(0.25)0.75
-    if "`var'" == "ChangeSalaryGradeC" global ylabelsetup -0.75(0.25)0.25
     
     if "`var'" == "TransferSJVC"       global number "1"
     if "`var'" == "ChangeSalaryGradeC" global number "2"
@@ -155,7 +160,7 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
     *-? step 1. Main Regression
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-    ppmlhdfe `var' ${four_events_dummies}, absorb(IDlse YearMonth) vce(cluster IDlseMHR) 
+    reghdfe `var' ${four_events_dummies} if TenureMin<2, absorb(IDlse YearMonth) vce(cluster IDlseMHR) 
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 2. LtoH versus LtoL
@@ -175,10 +180,10 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
         (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
         xlabel(-12(2)28, grid gstyle(dot) labsize(medsmall)) /// 
-        ylabel(${ylabelsetup}, grid gstyle(dot) labsize(medsmall)) ///
+        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTGain_`var'})
-    graph save "${Results}/CA30_Outcome${number}_Gains_`var'_Poisson.gph", replace
+    graph save "${Results}/CA30_Outcome${number}_Gains_`var'_NewHires.gph", replace
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 3. HtoL versus HtoH
@@ -201,7 +206,7 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTLoss_`var'})
-    graph save "${Results}/CA30_Outcome${number}_Loss_`var'_Poisson.gph", replace   
+    graph save "${Results}/CA30_Outcome${number}_Loss_`var'_NewHires.gph", replace   
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 4. Testing for asymmetries
@@ -231,7 +236,7 @@ foreach var in TransferSJVC ChangeSalaryGradeC {
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note("Pre-trends joint p-value = ${PTDiff_`var'}" "Post coeffs. joint p-value = ${postevent_`var'}")
-    graph save "${Results}/CA30_Outcome${number}_GainsMinusLoss_`var'_Poisson.gph", replace
+    graph save "${Results}/CA30_Outcome${number}_GainsMinusLoss_`var'_NewHires.gph", replace
     
 }
 
@@ -247,7 +252,7 @@ keep ///
 
 keep if inrange(_n, 1, 41)
 
-save "${Results}/CA30_TwoMainOutcomes_Poisson.dta", replace 
+save "${Results}/CA30_TwoMainOutcomes_NewHires.dta", replace 
 
 log close
 
