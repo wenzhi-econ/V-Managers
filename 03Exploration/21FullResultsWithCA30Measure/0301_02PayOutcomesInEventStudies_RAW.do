@@ -1,37 +1,29 @@
 /* 
-This do file runs event study regressions on a objective productivity measure: ProductivityStd.
+This do file runs event study regressions on three pay-relevant outcomes: LogPayBonus LogPay LogBonus.
 The high-flyer measure used here is CA30.
 
 Notes on the event study regressions:
     (1) All four treatment groups are included (though Lto and Hto groups do not have same time window), while never-treated workers are not. 
     (2) The omitted group in the regressions are month -3, -2, and -1 for all four treatment groups.
-    (3) For LtoL and LtoH groups, the relative time period is [-9, +84], while for HtoH and HtoL groups, the relative time period is [-9, +60].
+    (3) For LtoL and LtoH groups, the relative time period is [-36, +84], while for HtoH and HtoL groups, the relative time period is [-36, +60].
 
 Some key results (quarterly aggregated coefficients with their p-values, and other key summary statistics) are stored in the output file. 
 
 Input: 
-    "${TempData}/FinalAnalysisSample.dta"   <== created in 0103_03 do file
-    "${TempData}/0105SalesProdOutcomes.dta" <== created in 0105 do file 
+    "${TempData}/FinalAnalysisSample.dta" <== created in 0103_03 do file
 
 Output:
-    "${Results}/004ResultsBasedOnCA30/20250415log_EventStudiesWithCA30_ProdOutcome.txt"
-    "${Results}/004ResultsBasedOnCA30/CA30_ProdOutcome.dta"
+    "${Results}/20250414log_EventStudiesWithCA30_Outcome2_PayOutcomes.txt"
+    "${Results}/CA30_PayOutcomes.dta"
 
 RA: WWZ 
-Time: 2025-04-15
+Time: 2025-04-14
 */
 
 capture log close
-log using "${Results}/004ResultsBasedOnCA30/20250415log_EventStudiesWithCA30_ProdOutcome", replace text
+log using "${Results}/20250414log_EventStudiesWithCA30_Outcome2_PayOutcomes", replace text
 
 use "${TempData}/FinalAnalysisSample.dta", clear
-
-merge 1:1 IDlse YearMonth using "${TempData}/0105SalesProdOutcomes.dta", keepusing(ProductivityStd Productivity ChannelFE)
-    drop if _merge==2
-    drop _merge
-
-keep if ProductivityStd!=.
-    //impt: keep only observations with non-missing objective productivity measure.
 
 /* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
@@ -45,7 +37,7 @@ keep if ProductivityStd!=.
 *impt: Programs stored in the 02*.do files are specifically designed for the following names.
 /* Naming patterns:
 For normal "event * relative period" dummies, e.g. CA30_LtoL_X_Pre1 CA30_LtoH_X_Post0 CA30_HtoH_X_Post12
-For binned dummies, e.g. CA30_LtoL_X_Pre_Before6 CA30_LtoH_X_Post_After84
+For binned dummies, e.g. CA30_LtoL_X_Pre_Before36 CA30_LtoH_X_Post_After84
 */
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
@@ -56,7 +48,7 @@ generate  CA30_Rel_Time = Rel_Time
 summarize CA30_Rel_Time, detail // range: [-131, +130]
 
 *!! time window of interest
-local max_pre_period  = 6 
+local max_pre_period  = 36 
 local Lto_max_post_period = 84
 local Hto_max_post_period = 60
 
@@ -104,7 +96,7 @@ generate byte CA30_HtoL_X_Post_After`Hto_max_post_period' = CA30_HtoL * (CA30_Re
 *-? s-0-2. global macros used in regressions 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-local max_pre_period  = 6 
+local max_pre_period  = 36 
 local Lto_max_post_period = 84
 local Hto_max_post_period = 60
 
@@ -139,19 +131,24 @@ global four_events_dummies ${CA30_LtoL_X_Pre} ${CA30_LtoL_X_Post} ${CA30_LtoH_X_
 
 display "${four_events_dummies}"
 
-    // CA30_LtoL_X_Pre_Before6 CA30_LtoL_X_Pre6 ... CA30_LtoL_X_Pre4 CA30_LtoL_X_Post0 CA30_LtoL_X_Post1 ... CA30_LtoL_X_Post84 CA30_LtoL_X_Pre_After84 
-    // CA30_LtoH_X_Pre_Before6 CA30_LtoH_X_Pre6 ... CA30_LtoH_X_Pre4 CA30_LtoH_X_Post0 CA30_LtoH_X_Post1 ... CA30_LtoH_X_Post84 CA30_LtoH_X_Pre_After84 
-    // CA30_HtoH_X_Pre_Before6 CA30_HtoH_X_Pre6 ... CA30_HtoH_X_Pre4 CA30_HtoH_X_Post0 CA30_HtoH_X_Post1 ... CA30_HtoH_X_Post60 CA30_HtoH_X_Pre_After60 
-    // CA30_HtoL_X_Pre_Before6 CA30_HtoL_X_Pre6 ... CA30_HtoL_X_Pre4 CA30_HtoL_X_Post0 CA30_HtoL_X_Post1 ... CA30_HtoL_X_Post60 CA30_HtoL_X_Pre_After60 
+    // CA30_LtoL_X_Pre_Before36 CA30_LtoL_X_Pre36 ... CA30_LtoL_X_Pre4 CA30_LtoL_X_Post0 CA30_LtoL_X_Post1 ... CA30_LtoL_X_Post84 CA30_LtoL_X_Pre_After84 
+    // CA30_LtoH_X_Pre_Before36 CA30_LtoH_X_Pre36 ... CA30_LtoH_X_Pre4 CA30_LtoH_X_Post0 CA30_LtoH_X_Post1 ... CA30_LtoH_X_Post84 CA30_LtoH_X_Pre_After84 
+    // CA30_HtoH_X_Pre_Before36 CA30_HtoH_X_Pre36 ... CA30_HtoH_X_Pre4 CA30_HtoH_X_Post0 CA30_HtoH_X_Post1 ... CA30_HtoH_X_Post60 CA30_HtoH_X_Pre_After60 
+    // CA30_HtoL_X_Pre_Before36 CA30_HtoL_X_Pre36 ... CA30_HtoL_X_Pre4 CA30_HtoL_X_Post0 CA30_HtoL_X_Post1 ... CA30_HtoL_X_Post60 CA30_HtoL_X_Pre_After60 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 1. event studies on the two main outcomes
+*?? step 1. Salary Outcomes 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-foreach var in ProductivityStd {
+foreach var in LogPayBonus LogPay LogBonus {
 
-    if "`var'" == "ProductivityStd"       global title "Sales bonus (s.d.)"
-    if "`var'" == "ProductivityStd"       global number "13"
+    if "`var'" == "LogPayBonus" global title "Pay + bonus (logs)"
+    if "`var'" == "LogPay"      global title "Pay (logs)"
+    if "`var'" == "LogBonus"    global title "Bonus (logs)"
+
+    if "`var'" == "LogPayBonus" global number "3"
+    if "`var'" == "LogPay"      global number "4"
+    if "`var'" == "LogBonus"    global number "5"
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 1. Main Regression
@@ -164,53 +161,53 @@ foreach var in ProductivityStd {
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
     *!! pre-event joint p-value
-    pretrend_LH_minus_LL, event_prefix(CA30) pre_window_len(6)
+    pretrend_LH_minus_LL, event_prefix(CA30) pre_window_len(36)
         global PTGain_`var' = r(pretrend)
         global PTGain_`var' = string(${PTGain_`var'}, "%4.3f")
         generate PTGain_`var' = ${PTGain_`var'} if inrange(_n, 1, 41)
             //&? store the results
 
     *!! quarterly estimates
-    LH_minus_LL, event_prefix(CA30) pre_window_len(6) post_window_len(84) outcome(`var')
+    LH_minus_LL, event_prefix(CA30) pre_window_len(36) post_window_len(84) outcome(`var')
     twoway ///
         (scatter coeff_`var'_gains quarter_`var'_gains, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
-        xlabel(-2(2)28, grid gstyle(dot) labsize(medsmall)) /// 
+        xlabel(-12(2)28, grid gstyle(dot) labsize(medsmall)) /// 
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTGain_`var'})
-    graph save "${Results}/004ResultsBasedOnCA30/CA30_Outcome${number}_Gains_`var'.gph", replace
+    graph save "${Results}/CA30_Outcome${number}_Gains_`var'.gph", replace
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 3. HtoL versus HtoH
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
     *!! pre-event joint p-value
-    pretrend_HL_minus_HH, event_prefix(CA30) pre_window_len(6)
+    pretrend_HL_minus_HH, event_prefix(CA30) pre_window_len(36)
         global PTLoss_`var' = r(pretrend)
         global PTLoss_`var' = string(${PTLoss_`var'}, "%4.3f")
         generate PTLoss_`var' = ${PTLoss_`var'} if inrange(_n, 1, 41)
             //&? store the results
 
     *!! quarterly estimates
-    HL_minus_HH, event_prefix(CA30) pre_window_len(6) post_window_len(60) outcome(`var')
+    HL_minus_HH, event_prefix(CA30) pre_window_len(36) post_window_len(60) outcome(`var')
     twoway ///
         (scatter coeff_`var'_loss quarter_`var'_loss, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_loss ub_`var'_loss quarter_`var'_loss, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
-        xlabel(-2(2)20, grid gstyle(dot) labsize(medsmall)) /// 
+        xlabel(-12(2)20, grid gstyle(dot) labsize(medsmall)) /// 
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTLoss_`var'})
-    graph save "${Results}/004ResultsBasedOnCA30/CA30_Outcome${number}_Loss_`var'.gph", replace   
+    graph save "${Results}/CA30_Outcome${number}_Loss_`var'.gph", replace   
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 4. Testing for asymmetries
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
     *!! pre-event joint p-value
-    pretrend_Double_Diff, event_prefix(CA30) pre_window_len(6)
+    pretrend_Double_Diff, event_prefix(CA30) pre_window_len(36)
         global PTDiff_`var' = r(pretrend)
         global PTDiff_`var' = string(${PTDiff_`var'}, "%4.3f")
         generate PTDiff_`var' = ${PTDiff_`var'} if inrange(_n, 1, 41)
@@ -224,22 +221,53 @@ foreach var in ProductivityStd {
             //&? store the results
 
     *!! quarterly estimates
-    Double_Diff, event_prefix(CA30) pre_window_len(6) post_window_len(60) outcome(`var')
+    Double_Diff, event_prefix(CA30) pre_window_len(36) post_window_len(60) outcome(`var')
     twoway ///
         (scatter coeff_`var'_ddiff quarter_`var'_ddiff, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_ddiff ub_`var'_ddiff quarter_`var'_ddiff, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
-        xlabel(-2(2)20, grid gstyle(dot) labsize(medsmall)) /// 
+        xlabel(-12(2)20, grid gstyle(dot) labsize(medsmall)) /// 
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note("Pre-trends joint p-value = ${PTDiff_`var'}" "Post coeffs. joint p-value = ${postevent_`var'}")
-    graph save "${Results}/004ResultsBasedOnCA30/CA30_Outcome${number}_GainsMinusLoss_`var'.gph", replace
-    
-}
+    graph save "${Results}/CA30_Outcome${number}_GainsMinusLoss_`var'.gph", replace
 
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 2. store the event studies results
-*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+    *-? step 5. Additional three-quarter estimates plot 
+    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+    *&& Quarter 12 estimate is the average of Month 34, Month 35, and Month 36 estimates
+    *&& Quarter 20 estimate is the average of Month 58, Month 59, and Month 60 estimates
+    *&& Quarter 28 estimate is the average of Month 82, Month 83, and Month 84 estimates
+
+    xlincom ///
+        (((CA30_LtoH_X_Post34 - CA30_LtoL_X_Post34) + (CA30_LtoH_X_Post35 - CA30_LtoL_X_Post35) + (CA30_LtoH_X_Post36 - CA30_LtoL_X_Post36))/3) ///
+        (((CA30_LtoH_X_Post58 - CA30_LtoL_X_Post58) + (CA30_LtoH_X_Post59 - CA30_LtoL_X_Post59) + (CA30_LtoH_X_Post60 - CA30_LtoL_X_Post60))/3) ///
+        (((CA30_LtoH_X_Post82 - CA30_LtoL_X_Post82) + (CA30_LtoH_X_Post83 - CA30_LtoL_X_Post83) + (CA30_LtoH_X_Post84 - CA30_LtoL_X_Post84))/3) ///
+        , level(95) post
+
+    eststo `var'
+
+    if "`var'" == "LogBonus" {
+        global yaxis_setup "ylabel(0(0.5)1.5, labsize(medsmall)) yscale(range(0 1.5))"
+    }
+    else {
+        global yaxis_setup "ylabel(0(0.05)0.15, labsize(medsmall)) yscale(range(0 0.15))"
+    }
+
+    coefplot  ///
+        (`var', keep(lc_1) rename(lc_1 = "12 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
+        (`var', keep(lc_2) rename(lc_2 = "20 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
+        (`var', keep(lc_3) rename(lc_3 = "28 quarters") ciopts(lwidth(2 ..) lcolor(ebblue)))  ///
+        , ciopts(lwidth(2 ..)) levels(95) vertical legend(off) ///
+        graphregion(margin(medium)) plotregion(margin(medium)) ///
+        msymbol(d) mcolor(white) ///
+        title("${title}", span pos(12)) ///
+        yline(0, lpattern(dash)) ///
+        xlabel(, labsize(medlarge)) ///
+        ${yaxis_setup}
+
+    graph save "${Results}/CA30_Outcome${number}_GainsInThreeQuarters_`var'.gph", replace
+}
 
 keep ///
     PTGain_* coeff_* quarter_* lb_* ub_* PTLoss_* PTDiff_* postevent_* ///
@@ -249,6 +277,7 @@ keep ///
 
 keep if inrange(_n, 1, 41)
 
-save "${Results}/004ResultsBasedOnCA30/CA30_ProdOutcome.dta", replace 
+
+save "${Results}/CA30_PayOutcomes.dta", replace 
 
 log close
