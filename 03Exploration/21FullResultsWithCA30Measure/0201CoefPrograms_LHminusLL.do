@@ -12,7 +12,7 @@
 
 capture program drop LH_minus_LL
 program define LH_minus_LL, rclass 
-syntax, event_prefix(string) [PRE_window_len(integer 36) POST_window_len(integer 84) outcome(varname numeric min=1 max=1)] 
+syntax, event_prefix(string) [PRE_window_len(integer 36) POST_window_len(integer 84) outcome(varname numeric min=1 max=1) statistics(integer 1)] 
 /*
 This program has one mandatory option, and three optional options.
 The required option specifies the variable name used to measure "High-flyer" managers.
@@ -114,71 +114,73 @@ forvalues right_month_index = 3(3)`post_window_len' {
 *-? step 5. store key summary statistics
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
-*!! s-5-1. baseline means
-summarize `outcome' if e(sample)==1 & inrange(`event_prefix'_Rel_Time, -3, -1) & (`event_prefix'_LtoL==1)
-    local LtoL_base_mean = r(mean)
-    generate LtoL_`outcome' = `LtoL_base_mean' if inrange(_n, 1, `total_quarters')
+if `statistics' == 1 {
+    *!! s-5-1. baseline means
+    summarize `outcome' if e(sample)==1 & inrange(`event_prefix'_Rel_Time, -3, -1) & (`event_prefix'_LtoL==1)
+        local LtoL_base_mean = r(mean)
+        generate LtoL_`outcome' = `LtoL_base_mean' if inrange(_n, 1, `total_quarters')
 
-summarize `outcome' if e(sample)==1 & inrange(`event_prefix'_Rel_Time, -3, -1) & (`event_prefix'_LtoH==1)
-    local LtoH_base_mean = r(mean)
-    generate LtoH_`outcome' = `LtoH_base_mean' if inrange(_n, 1, `total_quarters')
+    summarize `outcome' if e(sample)==1 & inrange(`event_prefix'_Rel_Time, -3, -1) & (`event_prefix'_LtoH==1)
+        local LtoH_base_mean = r(mean)
+        generate LtoH_`outcome' = `LtoH_base_mean' if inrange(_n, 1, `total_quarters')
 
-*!! s-5-2. coefficients on the "LtoL * relative period" dummies
-lincom `event_prefix'_LtoL_X_Post24
-    local coef = r(estimate)
-    local p    = r(p)
-    generate coef1_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
-    generate coefp1_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+    *!! s-5-2. coefficients on the "LtoL * relative period" dummies
+    lincom `event_prefix'_LtoL_X_Post24
+        local coef = r(estimate)
+        local p    = r(p)
+        generate coef1_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+        generate coefp1_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
 
-lincom `event_prefix'_LtoL_X_Post60
-    local coef = r(estimate)
-    local p    = r(p)
-    generate coef2_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
-    generate coefp2_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+    lincom `event_prefix'_LtoL_X_Post60
+        local coef = r(estimate)
+        local p    = r(p)
+        generate coef2_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+        generate coefp2_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
 
-lincom `event_prefix'_LtoL_X_Post84
-    local coef = r(estimate)
-    local p    = r(p)
-    generate coef3_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
-    generate coefp3_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+    lincom `event_prefix'_LtoL_X_Post84
+        local coef = r(estimate)
+        local p    = r(p)
+        generate coef3_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+        generate coefp3_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
 
-*!! s-5-3. coefficients on the "LtoH * relative period" dummies
-lincom `event_prefix'_LtoH_X_Post24
-    local coef = r(estimate)
-    local p    = r(p)
-    generate coef4_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
-    generate coefp4_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+    *!! s-5-3. coefficients on the "LtoH * relative period" dummies
+    lincom `event_prefix'_LtoH_X_Post24
+        local coef = r(estimate)
+        local p    = r(p)
+        generate coef4_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+        generate coefp4_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
 
-lincom `event_prefix'_LtoH_X_Post60
-    local coef = r(estimate)
-    local p    = r(p)
-    generate coef5_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
-    generate coefp5_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+    lincom `event_prefix'_LtoH_X_Post60
+        local coef = r(estimate)
+        local p    = r(p)
+        generate coef5_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+        generate coefp5_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
 
-lincom `event_prefix'_LtoH_X_Post84
-    local coef = r(estimate)
-    local p    = r(p)
-    generate coef6_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
-    generate coefp6_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+    lincom `event_prefix'_LtoH_X_Post84
+        local coef = r(estimate)
+        local p    = r(p)
+        generate coef6_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+        generate coefp6_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
 
-*!! s-5-4. relative increase 
-nlcom (_b[`event_prefix'_LtoH_X_Post24] - _b[`event_prefix'_LtoL_X_Post24]) / _b[`event_prefix'_LtoL_X_Post24]
-    local coef = r(table)["b", 1]
-    local p    = r(table)["pvalue", 1]
-    generate RI1_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
-    generate rip1_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
+    *!! s-5-4. relative increase 
+    nlcom (_b[`event_prefix'_LtoH_X_Post24] - _b[`event_prefix'_LtoL_X_Post24]) / _b[`event_prefix'_LtoL_X_Post24]
+        local coef = r(table)["b", 1]
+        local p    = r(table)["pvalue", 1]
+        generate RI1_`outcome'  = `coef' if inrange(_n, 1, `total_quarters')
+        generate rip1_`outcome' = `p'    if inrange(_n, 1, `total_quarters')
 
-nlcom (_b[`event_prefix'_LtoH_X_Post60] - _b[`event_prefix'_LtoL_X_Post60]) / _b[`event_prefix'_LtoL_X_Post60]
-    local coef = r(table)["b", 1]
-    local p    = r(table)["pvalue", 1]
-    generate RI2_`outcome'   = `coef' if inrange(_n, 1, `total_quarters')
-    generate rip2_`outcome'  = `p'    if inrange(_n, 1, `total_quarters')
+    nlcom (_b[`event_prefix'_LtoH_X_Post60] - _b[`event_prefix'_LtoL_X_Post60]) / _b[`event_prefix'_LtoL_X_Post60]
+        local coef = r(table)["b", 1]
+        local p    = r(table)["pvalue", 1]
+        generate RI2_`outcome'   = `coef' if inrange(_n, 1, `total_quarters')
+        generate rip2_`outcome'  = `p'    if inrange(_n, 1, `total_quarters')
 
-nlcom (_b[`event_prefix'_LtoH_X_Post84] - _b[`event_prefix'_LtoL_X_Post84]) / _b[`event_prefix'_LtoL_X_Post84]
-    local coef = r(table)["b", 1]
-    local p    = r(table)["pvalue", 1]
-    generate RI3_`outcome'   = `coef' if inrange(_n, 1, `total_quarters')
-    generate rip3_`outcome'  = `p'    if inrange(_n, 1, `total_quarters')
+    nlcom (_b[`event_prefix'_LtoH_X_Post84] - _b[`event_prefix'_LtoL_X_Post84]) / _b[`event_prefix'_LtoL_X_Post84]
+        local coef = r(table)["b", 1]
+        local p    = r(table)["pvalue", 1]
+        generate RI3_`outcome'   = `coef' if inrange(_n, 1, `total_quarters')
+        generate rip3_`outcome'  = `p'    if inrange(_n, 1, `total_quarters')
+}
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? step 6. save the results 
