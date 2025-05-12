@@ -24,29 +24,10 @@ merge 1:1 IDlse YearMonth using "${TempData}/0105SalesProdOutcomes.dta", keepusi
     drop if _merge==2
     drop _merge
 
-keep if Productivity!=. & ISOCode=="IND"
+keep if ProductivityStd!=.
     //impt: keep only observations with non-missing objective productivity measure.
 
 summarize Rel_Time, detail
-/* 
-                 Relative time to the event
--------------------------------------------------------------
-      Percentiles      Smallest
- 1%          -13            -33
- 5%           -2            -33
-10%            7            -33       Obs              34,175
-25%           24            -32       Sum of wgt.      34,175
-
-50%           54                      Mean           54.63488
-                        Largest       Std. dev.      36.09901
-75%           86            123
-90%          102            123       Variance       1303.138
-95%          110            123       Skewness        -.01941
-99%          119            123       Kurtosis       1.822151
-*/
-
-generate Prod = log(Productivity + 1)
-label variable Prod "Sales bonus (logs)"
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 0. construct variables and macros used in reghdfe command
@@ -67,7 +48,7 @@ summarize CA30_Rel_Time, detail // range: [-131, +130]
 
 *!! time window of interest
 local max_pre_period  = 6 
-local Lto_max_post_period = 60
+local Lto_max_post_period = 84
 local Hto_max_post_period = 60
 
 *!! CA30_LtoL
@@ -115,7 +96,7 @@ generate byte CA30_HtoL_X_Post_After`Hto_max_post_period' = CA30_HtoL * (CA30_Re
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 local max_pre_period  = 6 
-local Lto_max_post_period = 60
+local Lto_max_post_period = 84
 local Hto_max_post_period = 60
 
 macro drop CA30_LtoL_X_Pre CA30_LtoL_X_Post CA30_LtoH_X_Pre CA30_LtoH_X_Post CA30_HtoH_X_Pre CA30_HtoH_X_Post CA30_HtoL_X_Pre CA30_HtoL_X_Post
@@ -149,8 +130,8 @@ global four_events_dummies ${CA30_LtoL_X_Pre} ${CA30_LtoL_X_Post} ${CA30_LtoH_X_
 
 display "${four_events_dummies}"
 
-    // CA30_LtoL_X_Pre_Before6 CA30_LtoL_X_Pre6 ... CA30_LtoL_X_Pre4 CA30_LtoL_X_Post0 CA30_LtoL_X_Post1 ... CA30_LtoL_X_Post60 CA30_LtoL_X_Pre_After60 
-    // CA30_LtoH_X_Pre_Before6 CA30_LtoH_X_Pre6 ... CA30_LtoH_X_Pre4 CA30_LtoH_X_Post0 CA30_LtoH_X_Post1 ... CA30_LtoH_X_Post60 CA30_LtoH_X_Pre_After60 
+    // CA30_LtoL_X_Pre_Before6 CA30_LtoL_X_Pre6 ... CA30_LtoL_X_Pre4 CA30_LtoL_X_Post0 CA30_LtoL_X_Post1 ... CA30_LtoL_X_Post84 CA30_LtoL_X_Pre_After84 
+    // CA30_LtoH_X_Pre_Before6 CA30_LtoH_X_Pre6 ... CA30_LtoH_X_Pre4 CA30_LtoH_X_Post0 CA30_LtoH_X_Post1 ... CA30_LtoH_X_Post84 CA30_LtoH_X_Pre_After84 
     // CA30_HtoH_X_Pre_Before6 CA30_HtoH_X_Pre6 ... CA30_HtoH_X_Pre4 CA30_HtoH_X_Post0 CA30_HtoH_X_Post1 ... CA30_HtoH_X_Post60 CA30_HtoH_X_Pre_After60 
     // CA30_HtoL_X_Pre_Before6 CA30_HtoL_X_Pre6 ... CA30_HtoL_X_Pre4 CA30_HtoL_X_Post0 CA30_HtoL_X_Post1 ... CA30_HtoL_X_Post60 CA30_HtoL_X_Pre_After60 
 
@@ -158,10 +139,10 @@ display "${four_events_dummies}"
 *?? step 1. event studies on the two main outcomes
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-foreach var in Prod {
+foreach var in ProductivityStd {
 
-    if "`var'" == "Prod"       global title "Sales bonus (logs)"
-    if "`var'" == "Prod"       global number "14"
+    if "`var'" == "ProductivityStd"       global title "Sales bonus (s.d.)"
+    if "`var'" == "ProductivityStd"       global number "15"
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 1. Main Regression
@@ -181,16 +162,16 @@ foreach var in Prod {
             //&? store the results
 
     *!! quarterly estimates
-    LH_minus_LL, event_prefix(CA30) pre_window_len(6) post_window_len(60) outcome(`var') statistics(0)
+    LH_minus_LL, event_prefix(CA30) pre_window_len(6) post_window_len(84) outcome(`var') statistics(0)
     twoway ///
         (scatter coeff_`var'_gains quarter_`var'_gains, lcolor(ebblue) mcolor(ebblue)) ///
         (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
-        xlabel(-2(2)20, grid gstyle(dot) labsize(medsmall)) /// 
+        xlabel(-2(2)28, grid gstyle(dot) labsize(medsmall)) /// 
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTGain_`var'})
-    graph export "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef1_Gains_Pre6Post60.pdf", replace as(pdf)
+    graph export "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef1_Gains_Pre6Post84.pdf", replace as(pdf)
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 3. HtoL versus HtoH
@@ -213,7 +194,7 @@ foreach var in Prod {
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTLoss_`var'})
-    graph export "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef2_Loss_Pre6Post60.pdf", replace as(pdf)   
+    graph export "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef2_Loss_Pre6Post84.pdf", replace as(pdf)   
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 4. Testing for asymmetries
@@ -243,6 +224,6 @@ foreach var in Prod {
         ylabel(, grid gstyle(dot) labsize(medsmall)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note("Pre-trends joint p-value = ${PTDiff_`var'}" "Post coeffs. joint p-value = ${postevent_`var'}")
-    graph export "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef3_GainsMinusLoss_Pre6Post60.pdf", replace as(pdf)
+    graph export "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef3_GainsMinusLoss_Pre6Post84.pdf", replace as(pdf)
     
 }

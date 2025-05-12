@@ -70,7 +70,7 @@ keep ///
     LogPayBonus LogPay LogBonus Pay Bonus ///
     Leaver LeaverPerm LeaverVol LeaverInv /// 
     Func SubFunc Org4 Office OfficeCode StandardJob SalaryGrade ///
-    Female Tenure WL Country ISOCode ///
+    Female Tenure WL Country ISOCode HomeCountryISOCode ///
     AgeBand AgeBandUpdated AgeContinuous q_exact_age AgeContinuous_exact AgeContinuous_imputed
 
 order ///
@@ -84,7 +84,7 @@ order ///
     LogPayBonus LogPay LogBonus Pay Bonus ///
     Leaver LeaverPerm LeaverVol LeaverInv /// 
     Func SubFunc Org4 Office OfficeCode StandardJob SalaryGrade ///
-    Female Tenure WL Country ISOCode ///
+    Female Tenure WL Country ISOCode HomeCountryISOCode ///
     AgeBand AgeBandUpdated AgeContinuous q_exact_age AgeContinuous_exact AgeContinuous_imputed
 
 label variable YearMonth        "Year-Month"
@@ -133,6 +133,7 @@ label variable Tenure             "Years within the firm"
 label variable WL                 "Work level: from lowest (1) to highest (6)"
 label variable Country            "Working country"
 label variable ISOCode            "ISO code of the working country"
+label variable HomeCountryISOCode "ISO code of the home country"
 label variable AgeBand            "Age band"
 label variable AgeBandUpdated     "Updated age band"
 label variable AgeContinuous      "Continuous age (with imputations)"

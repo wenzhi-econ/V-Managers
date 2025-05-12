@@ -24,29 +24,10 @@ merge 1:1 IDlse YearMonth using "${TempData}/0105SalesProdOutcomes.dta", keepusi
     drop if _merge==2
     drop _merge
 
-keep if Productivity!=. & ISOCode=="IND"
+keep if ProductivityStd!=.
     //impt: keep only observations with non-missing objective productivity measure.
 
 summarize Rel_Time, detail
-/* 
-                 Relative time to the event
--------------------------------------------------------------
-      Percentiles      Smallest
- 1%          -13            -33
- 5%           -2            -33
-10%            7            -33       Obs              34,175
-25%           24            -32       Sum of wgt.      34,175
-
-50%           54                      Mean           54.63488
-                        Largest       Std. dev.      36.09901
-75%           86            123
-90%          102            123       Variance       1303.138
-95%          110            123       Skewness        -.01941
-99%          119            123       Kurtosis       1.822151
-*/
-
-generate Prod = log(Productivity + 1)
-label variable Prod "Sales bonus (logs)"
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 0. construct variables and macros used in reghdfe command
@@ -158,10 +139,10 @@ display "${four_events_dummies}"
 *?? step 1. event studies on the two main outcomes
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-foreach var in Prod {
+foreach var in ProductivityStd {
 
-    if "`var'" == "Prod"       global title "Sales bonus (logs)"
-    if "`var'" == "Prod"       global number "14"
+    if "`var'" == "ProductivityStd"       global title "Sales bonus (s.d.)"
+    if "`var'" == "ProductivityStd"       global number "15"
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 1. Main Regression
