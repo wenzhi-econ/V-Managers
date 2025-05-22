@@ -1,50 +1,59 @@
 /* 
-This do file decomposes workers' lateral moves into three categories.
+This do file runs event study regressions on two modified lateral move outcomes: TransferSJLC TransferSJLLC.
 The high-flyer measure used here is CA30.
-
-In particular, I create three variables TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC such that 
-    TransferSJC = TransferSJSameMSameFuncC + TransferSJDiffMSameFuncC + TransferFuncC
-
-Then, I run event studies regressions on these four variables and report quarter 8 and quarter 28 estimates.
 
 Notes on the event study regressions:
     (1) All four treatment groups are included (though Lto and Hto groups do not have same time window), while never-treated workers are not. 
-    (2) The omitted group in the regressions are month 0 for all four treatment groups.
-    (3) For LtoL and LtoH groups, the relative time period is [0, +84], while for HtoH and HtoL groups, the relative time period is [0, +60].
+    (2) The omitted group in the regressions are month -3, -2, and -1 for all four treatment groups.
+    (3) For LtoL and LtoH groups, the relative time period is [-24, +84], while for HtoH and HtoL groups, the relative time period is [-24, +60].
+
+Some key results (quarterly aggregated coefficients with their p-values, and other key summary statistics) are stored in the output file. 
 
 Input: 
-    "${TempData}/FinalAnalysisSample.dta" <== created in 0103_03 do file
+    "${TempData}/FinalAnalysisSample.dta"   <== created in 0103_03 do file
 
 Output:
-    "${Results}/005EventStudiesWithCA30/20250502log_DecompTransferSJC.txt"
+    "${Results}/005EventStudiesWithCA30/20250516log_ModifiedTransferSJInEventStudies_Type1_Pre24Post84.txt"
+    "${Results}/005EventStudiesWithCA30/CA30_ModifiedTransferSJInEventStudies.dta"
 
 RA: WWZ 
-Time: 2025-05-02
+Time: 2025-05-16
 */
 
-
 capture log close
-log using "${Results}/005EventStudiesWithCA30/20250502log_DecompTransferSJC.txt", replace text
+log using "${Results}/005EventStudiesWithCA30/20250516log_ModifiedTransferSJInEventStudies_Type1_Pre24Post84.txt", replace text
 
-use "${TempData}/FinalAnalysisSample.dta", clear 
+use "${TempData}/FinalAnalysisSample.dta", clear
 
-/* keep if inrange(_n, 1, 1000)  */
+/* keep if inrange(_n, 1, 10000)  */
     // used to test the codes
     // commented out when officially producing the results
 
+
+foreach var in TransferSJ {
+    generate `var'LL =`var'
+    replace  `var'LL = 0 if ChangeSalaryGrade==1 | PromWL==1
+
+    generate `var'L =`var'
+    replace  `var'L = 0 if ChangeSalaryGrade==1
+
+    bysort IDlse (YearMonth): generate `var'LC  = sum(`var'L)
+    bysort IDlse (YearMonth): generate `var'LLC = sum(`var'LL)
+}
+
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 0. construct global macros used in regressions 
+*?? step 0. construct variables and macros used in reghdfe command
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *&& Months -1, -2, and -3 are omitted as the reference group.
 *impt: The variable name of the "event * relative period" dummies matter!
 *impt: Programs stored in the 02*.do files are specifically designed for the following names.
 /* Naming patterns:
 For normal "event * relative period" dummies, e.g. CA30_LtoL_X_Pre1 CA30_LtoH_X_Post0 CA30_HtoH_X_Post12
-For binned dummies, e.g. CA30_LtoL_X_Pre_Before24 CA30_LtoH_X_Post_After84
+For binned dummies, e.g. CA30_LtoL_X_Pre_Before36 CA30_LtoH_X_Post_After84
 */
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-0-1. event * period dummies 
+*-? s-0-1. "event * relative period" dummies 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 generate  CA30_Rel_Time = Rel_Time
@@ -140,26 +149,16 @@ display "${four_events_dummies}"
     // CA30_HtoL_X_Pre_Before24 CA30_HtoL_X_Pre24 ... CA30_HtoL_X_Pre4 CA30_HtoL_X_Post0 CA30_HtoL_X_Post1 ... CA30_HtoL_X_Post60 CA30_HtoL_X_Pre_After60 
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 1. run regressions and create the coefplot
+*?? step 1. event studies on the two main outcomes
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-rename (TransferSJSameMSameFuncC TransferSJDiffMSameFuncC) (SameMC DiffMC)
+foreach var in TransferSJLC TransferSJLLC {
 
-//impt: TransferSJC TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC
+    if "`var'" == "TransferSJLC"       global title "Lateral move (true)"
+    if "`var'" == "TransferSJLLC"      global title "Lateral move (true with WL restrictions)"
 
-foreach var in TransferSJC SameMC DiffMC TransferFuncC {
-
-    if "`var'" == "TransferSJC" global title "Standard job change"
-    if "`var'" == "TransferSJC" global number "2_0"
-
-    if "`var'" == "SameMC" global title "Standard job change: Within team"
-    if "`var'" == "SameMC" global number "2_1"
-
-    if "`var'" == "DiffMC" global title "Standard job change: Across teams, within function"
-    if "`var'" == "DiffMC" global number "2_2"
-
-    if "`var'" == "TransferFuncC" global title "Standard job change: Across teams, across function"
-    if "`var'" == "TransferFuncC" global number "2_3"
+    if "`var'" == "TransferSJLC"       global number "24"
+    if "`var'" == "TransferSJLLC"      global number "25"
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 1. Main Regression
@@ -185,10 +184,10 @@ foreach var in TransferSJC SameMC DiffMC TransferFuncC {
         (rcap lb_`var'_gains ub_`var'_gains quarter_`var'_gains, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
         xlabel(-8(2)28, grid gstyle(dot) labsize(medsmall)) /// 
-        ylabel(-0.3(0.05)0.3, grid gstyle(dot) labsize(medsmall)) ///
+        ylabel(-0.3(0.05)0.3, grid gstyle(dot) labsize(medsmall)) yscale(range(-0.3 0.3)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTGain_`var'})
-    graph save "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef1_Gains.gph", replace
+    graph save "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef1_Gains_Type1_Pre24Post84.gph", replace
     
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 3. HtoL versus HtoH
@@ -208,10 +207,10 @@ foreach var in TransferSJC SameMC DiffMC TransferFuncC {
         (rcap lb_`var'_loss ub_`var'_loss quarter_`var'_loss, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
         xlabel(-8(2)20, grid gstyle(dot) labsize(medsmall)) /// 
-        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
+        ylabel(-0.3(0.05)0.3, grid gstyle(dot) labsize(medsmall)) yscale(range(-0.3 0.3)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note(Pre-trends joint p-value = ${PTLoss_`var'})
-    graph save "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef2_Loss.gph", replace   
+    graph save "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef2_Loss_Type1_Pre24Post84.gph", replace   
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 4. Testing for asymmetries
@@ -238,54 +237,12 @@ foreach var in TransferSJC SameMC DiffMC TransferFuncC {
         (rcap lb_`var'_ddiff ub_`var'_ddiff quarter_`var'_ddiff, lcolor(ebblue)) ///
         , yline(0, lcolor(maroon)) xline(-1, lcolor(maroon)) ///
         xlabel(-8(2)20, grid gstyle(dot) labsize(medsmall)) /// 
-        ylabel(, grid gstyle(dot) labsize(medsmall)) ///
+        ylabel(-0.3(0.05)0.3, grid gstyle(dot) labsize(medsmall)) yscale(range(-0.3 0.3)) ///
         xtitle(Quarters since manager change, size(medlarge)) title("${title}", span pos(12)) ///
         legend(off) note("Pre-trends joint p-value = ${PTDiff_`var'}" "Post coeffs. joint p-value = ${postevent_`var'}")
-    graph save "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef3_GainsMinusLoss.gph", replace
-
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-    *-? step 5. Storing particular coefficients
-    *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+    graph save "${Results}/005EventStudiesWithCA30/CA30_Outcome${number}_`var'_Coef3_GainsMinusLoss_Type1_Pre24Post84.gph", replace
     
-    *&& Quarter 8th estimate = the average of Month 22, Month 23, and Month 24 estimates
-    *&& Quarter 28th estimate = the average of Month 82, Month 83, and Month 84 estimates
-    xlincom ///
-        (lc_1 = ((CA30_LtoH_X_Post22 - CA30_LtoL_X_Post22) + (CA30_LtoH_X_Post23 - CA30_LtoL_X_Post23) + (CA30_LtoH_X_Post24 - CA30_LtoL_X_Post24))/3) ///
-        (lc_2 = ((CA30_LtoH_X_Post82 - CA30_LtoL_X_Post82) + (CA30_LtoH_X_Post83 - CA30_LtoL_X_Post83) + (CA30_LtoH_X_Post84 - CA30_LtoL_X_Post84))/3) ///
-        , level(95) post
-
-    eststo `var'
 }
-
-coefplot ///
-    (TransferSJC,              keep(lc_1) rename(lc_1 = "All lateral moves")                noci recast(bar)) ///
-    (SameMC,                   keep(lc_1) rename(lc_1 = "Within team")                      noci recast(bar)) ///
-    (DiffMC,                   keep(lc_1) rename(lc_1 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_1) rename(lc_1 = "Different team, cross-functional") noci recast(bar)) ///
-    , legend(off) xline(0, lpattern(dash)) ///
-    xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
-    ylabel(, labsize(large)) ///
-    xsize(5) ysize(2) ///
-    scheme(tab2) ///
-    graphregion(margin(medium)) plotregion(margin(medium)) ///
-    title("Effects of gaining a high-flyer manager", size(large))
-
-graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJC_DuringMngrRotation_Q8.gph", replace
-
-coefplot ///
-    (TransferSJC,              keep(lc_2) rename(lc_2 = "All lateral moves")                noci recast(bar)) ///
-    (SameMC,                   keep(lc_2) rename(lc_2 = "Within team")                      noci recast(bar)) ///
-    (DiffMC,                   keep(lc_2) rename(lc_2 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_2) rename(lc_2 = "Different team, cross-functional") noci recast(bar)) ///
-    , legend(off) xline(0, lpattern(dash)) ///
-    xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
-    ylabel(, labsize(large)) ///
-    xsize(5) ysize(2) ///
-    scheme(tab2) ///
-    graphregion(margin(medium)) plotregion(margin(medium)) ///
-    title("Effects of gaining a high-flyer manager", size(large))
-
-graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJC_AfterMngrRotation_Q28.gph", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2. store the event studies results
@@ -299,6 +256,6 @@ keep ///
 
 keep if inrange(_n, 1, 41)
 
-save "${Results}/005EventStudiesWithCA30/CA30_DecompTransferSJC.dta", replace 
+save "${Results}/005EventStudiesWithCA30/CA30_ModifiedTransferSJInEventStudies_Pre24Post84.dta", replace 
 
 log close

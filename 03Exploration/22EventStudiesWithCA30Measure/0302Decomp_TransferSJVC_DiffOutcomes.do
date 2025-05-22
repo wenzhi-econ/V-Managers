@@ -1,9 +1,8 @@
 /* 
-This do file decomposes workers' lateral moves into three categories.
+This do file decomposes workers' lateral moves into two categories.
 The high-flyer measure used here is CA30.
 
-In particular, I create three variables TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC such that 
-    TransferSJC = TransferSJSameMSameFuncC + TransferSJDiffMSameFuncC + TransferFuncC
+In particular, I obtain two variables from the original dataset: TransferSJSameMVC TransferSJDiffMVC, and use them as outcomes in event studies.
 
 Then, I run event studies regressions on these four variables and report quarter 8 and quarter 28 estimates.
 
@@ -13,24 +12,69 @@ Notes on the event study regressions:
     (3) For LtoL and LtoH groups, the relative time period is [0, +84], while for HtoH and HtoL groups, the relative time period is [0, +60].
 
 Input: 
-    "${TempData}/FinalAnalysisSample.dta" <== created in 0103_03 do file
+    "${TempData}/FinalAnalysisSample.dta"       <== created in 0103_03 do file
+    "${FinalData}/Temp/AllSnapshotMCulture.dta" <== take as given, dataset from the original codes
 
 Output:
-    "${Results}/005EventStudiesWithCA30/20250502log_DecompTransferSJC.txt"
+    "${Results}/005EventStudiesWithCA30/20250515log_DecompTransferSJVC.txt"
 
 RA: WWZ 
-Time: 2025-05-02
+Time: 2025-05-15
 */
 
-
 capture log close
-log using "${Results}/005EventStudiesWithCA30/20250502log_DecompTransferSJC.txt", replace text
+log using "${Results}/005EventStudiesWithCA30/20250515log_DecompTransferSJVC.txt", replace text
 
 use "${TempData}/FinalAnalysisSample.dta", clear 
 
 /* keep if inrange(_n, 1, 1000)  */
     // used to test the codes
     // commented out when officially producing the results
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 1. decompose TransferSJV into three categories:
+*??         (1) within team (same manager)
+*??         (2) different team (different manager)
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-1. auxiliary variable: ChangeM and TransferSJSameM
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+*!! first month for a worker
+sort IDlse YearMonth
+bysort IDlse: egen temp_first_month = min(YearMonth)
+
+*!! if the worker changes his manager 
+capture drop ChangeM
+generate ChangeM = 0 
+replace  ChangeM = 1 if (IDlse[_n]==IDlse[_n-1] & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  ChangeM = 0  if YearMonth==temp_first_month & ChangeM==1
+replace  ChangeM = . if IDlseMHR==. 
+
+*!! lateral transfer under the same manager
+generate TransferSJSameM = TransferSJ
+replace  TransferSJSameM = 0 if ChangeM==1 
+
+*!! lateral transfer under different managers
+generate TransferSJDiffM = TransferSJ
+replace  TransferSJDiffM = 0 if TransferSJSameM==1 
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-2. decomposition 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+sort IDlse YearMonth
+
+foreach var in TransferSJSameM TransferSJDiffM {
+    generate `var'V =`var'
+    replace  `var'V = 0 if ChangeSalaryGrade==0	
+
+    bysort IDlse (YearMonth) : generate `var'VC= sum(`var'V)
+}
+
+order TransferSJSameMVC TransferSJDiffMVC, after(TransferSJVC)
+order ChangeM, after(IDlseMHR)
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 0. construct global macros used in regressions 
@@ -143,23 +187,18 @@ display "${four_events_dummies}"
 *?? step 1. run regressions and create the coefplot
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-rename (TransferSJSameMSameFuncC TransferSJDiffMSameFuncC) (SameMC DiffMC)
+rename (TransferSJSameMVC TransferSJDiffMVC) (SameMVC DiffMVC)
 
-//impt: TransferSJC TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC
+foreach var in TransferSJVC SameMVC DiffMVC {
 
-foreach var in TransferSJC SameMC DiffMC TransferFuncC {
+    if "`var'" == "TransferSJVC" global title "Lateral move"
+    if "`var'" == "TransferSJVC" global number "16"
 
-    if "`var'" == "TransferSJC" global title "Standard job change"
-    if "`var'" == "TransferSJC" global number "2_0"
+    if "`var'" == "SameMVC" global title "Lateral move: Within team "
+    if "`var'" == "SameMVC" global number "17"
 
-    if "`var'" == "SameMC" global title "Standard job change: Within team"
-    if "`var'" == "SameMC" global number "2_1"
-
-    if "`var'" == "DiffMC" global title "Standard job change: Across teams, within function"
-    if "`var'" == "DiffMC" global number "2_2"
-
-    if "`var'" == "TransferFuncC" global title "Standard job change: Across teams, across function"
-    if "`var'" == "TransferFuncC" global number "2_3"
+    if "`var'" == "DiffMVC" global title "Lateral move: Different team, same function"
+    if "`var'" == "DiffMVC" global number "18"
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 1. Main Regression
@@ -258,10 +297,9 @@ foreach var in TransferSJC SameMC DiffMC TransferFuncC {
 }
 
 coefplot ///
-    (TransferSJC,              keep(lc_1) rename(lc_1 = "All lateral moves")                noci recast(bar)) ///
-    (SameMC,                   keep(lc_1) rename(lc_1 = "Within team")                      noci recast(bar)) ///
-    (DiffMC,                   keep(lc_1) rename(lc_1 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_1) rename(lc_1 = "Different team, cross-functional") noci recast(bar)) ///
+    (TransferSJVC, keep(lc_1) rename(lc_1 = "All lateral moves") noci recast(bar)) ///
+    (SameMVC,      keep(lc_1) rename(lc_1 = "Within team")       noci recast(bar)) ///
+    (DiffMVC,      keep(lc_1) rename(lc_1 = "Different team")    noci recast(bar)) ///
     , legend(off) xline(0, lpattern(dash)) ///
     xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
     ylabel(, labsize(large)) ///
@@ -270,13 +308,12 @@ coefplot ///
     graphregion(margin(medium)) plotregion(margin(medium)) ///
     title("Effects of gaining a high-flyer manager", size(large))
 
-graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJC_DuringMngrRotation_Q8.gph", replace
+graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJVC_DuringMngrRotation_Q8.gph", replace
 
 coefplot ///
-    (TransferSJC,              keep(lc_2) rename(lc_2 = "All lateral moves")                noci recast(bar)) ///
-    (SameMC,                   keep(lc_2) rename(lc_2 = "Within team")                      noci recast(bar)) ///
-    (DiffMC,                   keep(lc_2) rename(lc_2 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_2) rename(lc_2 = "Different team, cross-functional") noci recast(bar)) ///
+    (TransferSJVC, keep(lc_2) rename(lc_2 = "All lateral moves") noci recast(bar)) ///
+    (SameMVC,      keep(lc_2) rename(lc_2 = "Within team")       noci recast(bar)) ///
+    (DiffMVC,      keep(lc_2) rename(lc_2 = "Different team")    noci recast(bar)) ///
     , legend(off) xline(0, lpattern(dash)) ///
     xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
     ylabel(, labsize(large)) ///
@@ -285,7 +322,7 @@ coefplot ///
     graphregion(margin(medium)) plotregion(margin(medium)) ///
     title("Effects of gaining a high-flyer manager", size(large))
 
-graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJC_AfterMngrRotation_Q28.gph", replace
+graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJVC_AfterMngrRotation_Q28.gph", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2. store the event studies results
@@ -299,6 +336,6 @@ keep ///
 
 keep if inrange(_n, 1, 41)
 
-save "${Results}/005EventStudiesWithCA30/CA30_DecompTransferSJC.dta", replace 
+save "${Results}/005EventStudiesWithCA30/CA30_DecompTransferSJVC.dta", replace 
 
 log close

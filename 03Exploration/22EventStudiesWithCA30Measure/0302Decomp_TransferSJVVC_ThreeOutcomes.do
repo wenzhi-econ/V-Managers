@@ -1,9 +1,8 @@
 /* 
-This do file decomposes workers' lateral moves into three categories.
+This do file decomposes workers' lateral moves into two categories.
 The high-flyer measure used here is CA30.
 
-In particular, I create three variables TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC such that 
-    TransferSJC = TransferSJSameMSameFuncC + TransferSJDiffMSameFuncC + TransferFuncC
+In particular, I obtain two variables from the original dataset: TransferSJSameMVC TransferSJDiffMVC, and use them as outcomes in event studies.
 
 Then, I run event studies regressions on these four variables and report quarter 8 and quarter 28 estimates.
 
@@ -13,18 +12,18 @@ Notes on the event study regressions:
     (3) For LtoL and LtoH groups, the relative time period is [0, +84], while for HtoH and HtoL groups, the relative time period is [0, +60].
 
 Input: 
-    "${TempData}/FinalAnalysisSample.dta" <== created in 0103_03 do file
+    "${TempData}/FinalAnalysisSample.dta"       <== created in 0103_03 do file
+    "${FinalData}/Temp/AllSnapshotMCulture.dta" <== take as given, dataset from the original codes
 
 Output:
-    "${Results}/005EventStudiesWithCA30/20250502log_DecompTransferSJC.txt"
+    "${Results}/005EventStudiesWithCA30/20250516log_DecompTransferSJVVC.txt"
 
 RA: WWZ 
-Time: 2025-05-02
+Time: 2025-05-16
 */
 
-
 capture log close
-log using "${Results}/005EventStudiesWithCA30/20250502log_DecompTransferSJC.txt", replace text
+log using "${Results}/005EventStudiesWithCA30/20250516log_DecompTransferSJVVC.txt", replace text
 
 use "${TempData}/FinalAnalysisSample.dta", clear 
 
@@ -33,7 +32,77 @@ use "${TempData}/FinalAnalysisSample.dta", clear
     // commented out when officially producing the results
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
-*?? step 0. construct global macros used in regressions 
+*?? step 1. decompose TransferSJVV into three categories:
+*??         (1) within team (same manager, same function)
+*??         (2) different team (different manager), and different function
+*??         (3) different team (different manager), but same function
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-1. auxiliary variable: ChangeM and TransferSJSameM
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+*!! first month for a worker
+capture drop temp_first_month
+sort IDlse YearMonth
+bysort IDlse: egen temp_first_month = min(YearMonth)
+
+*!! if the worker changes his manager 
+capture drop ChangeM
+generate ChangeM = 0 
+replace  ChangeM = 1 if (IDlse[_n]==IDlse[_n-1] & IDlseMHR[_n]!=IDlseMHR[_n-1])
+replace  ChangeM = 0  if YearMonth==temp_first_month & ChangeM==1
+replace  ChangeM = . if IDlseMHR==. 
+
+*!! lateral transfer under the same manager
+capture drop TransferSJSameM
+generate TransferSJSameM = TransferSJ
+replace  TransferSJSameM = 0 if ChangeM==1 
+
+*!! category (3): different manager + same function
+capture drop TransferSJDiffMSameFunc
+capture drop TransferSJDiffMSameFuncC
+generate TransferSJDiffMSameFunc = TransferSJ 
+replace  TransferSJDiffMSameFunc = 0 if TransferFunc==1 
+replace  TransferSJDiffMSameFunc = 0 if TransferSJSameM==1
+bysort IDlse: generate TransferSJDiffMSameFuncC= sum(TransferSJDiffMSameFunc)
+
+*!! category (1): same manager + same function
+capture drop TransferSJSameMSameFunc
+capture drop TransferSJSameMSameFuncC
+generate TransferSJSameMSameFunc = TransferSJ 
+replace  TransferSJSameMSameFunc = 0 if TransferFunc==1 
+replace  TransferSJSameMSameFunc = 0 if TransferSJDiffMSameFunc==1
+bysort IDlse: generate TransferSJSameMSameFuncC= sum(TransferSJSameMSameFunc)
+
+*!! category (2): different manager + different function
+*&& variable TransferFunc can accurately describe this category
+
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+*-? s-1-2. decomposition 
+*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
+
+sort IDlse YearMonth
+
+foreach var in TransferSJ TransferSJDiffMSameFunc TransferSJSameMSameFunc TransferFunc {
+
+    if "`var'" == "TransferSJ"              local newvar TransferSJVV
+    if "`var'" == "TransferSJDiffMSameFunc" local newvar DiffMSameFuncSJVV
+    if "`var'" == "TransferSJSameMSameFunc" local newvar SameMSameFuncSJVV
+    if "`var'" == "TransferFunc"            local newvar DiffFuncSJVV
+
+    generate `newvar' =`var'
+    replace  `newvar' = 0 if PromWL==0	
+
+    bysort IDlse (YearMonth) : generate `newvar'C= sum(`newvar')
+}
+
+capture drop test
+egen test = rowtotal(DiffMSameFuncSJVVC SameMSameFuncSJVVC DiffFuncSJVVC)
+count if test != TransferSJVVC //&? 0, perfect 
+
+*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
+*?? step 2. construct global macros used in regressions 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *&& Months -1, -2, and -3 are omitted as the reference group.
 *impt: The variable name of the "event * relative period" dummies matter!
@@ -44,7 +113,7 @@ For binned dummies, e.g. CA30_LtoL_X_Pre_Before24 CA30_LtoH_X_Post_After84
 */
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-0-1. event * period dummies 
+*-? s-2-1. event * period dummies 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 generate  CA30_Rel_Time = Rel_Time
@@ -96,7 +165,7 @@ forvalues time = 0/`Hto_max_post_period' {
 generate byte CA30_HtoL_X_Post_After`Hto_max_post_period' = CA30_HtoL * (CA30_Rel_Time > `Hto_max_post_period')
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-0-2. global macros used in regressions 
+*-? s-2-2. global macros used in regressions 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 local max_pre_period  = 24 
@@ -143,23 +212,20 @@ display "${four_events_dummies}"
 *?? step 1. run regressions and create the coefplot
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 
-rename (TransferSJSameMSameFuncC TransferSJDiffMSameFuncC) (SameMC DiffMC)
+//impt: TransferSJVVC SameMSameFuncSJVVC DiffMSameFuncSJVVC DiffFuncSJVVC
 
-//impt: TransferSJC TransferSJSameMSameFuncC TransferSJDiffMSameFuncC TransferFuncC
+rename (SameMSameFuncSJVVC DiffMSameFuncSJVVC) (SameMVVC DiffMVVC)
 
-foreach var in TransferSJC SameMC DiffMC TransferFuncC {
+foreach var in TransferSJVVC SameMVVC DiffMVVC DiffFuncSJVVC {
 
-    if "`var'" == "TransferSJC" global title "Standard job change"
-    if "`var'" == "TransferSJC" global number "2_0"
-
-    if "`var'" == "SameMC" global title "Standard job change: Within team"
-    if "`var'" == "SameMC" global number "2_1"
-
-    if "`var'" == "DiffMC" global title "Standard job change: Across teams, within function"
-    if "`var'" == "DiffMC" global number "2_2"
-
-    if "`var'" == "TransferFuncC" global title "Standard job change: Across teams, across function"
-    if "`var'" == "TransferFuncC" global number "2_3"
+    if "`var'" == "TransferSJVVC" global title "Lateral move (*)"
+    if "`var'" == "TransferSJVVC" global number "20"
+    if "`var'" == "SameMVVC"      global title "Lateral move (*): Within team"
+    if "`var'" == "SameMVVC"      global number "21"
+    if "`var'" == "DiffMVVC"      global title "Lateral move (*): Different team, same function"
+    if "`var'" == "DiffMVVC"      global number "22"
+    if "`var'" == "DiffFuncSJVVC" global title "Lateral move (*): Different function"
+    if "`var'" == "DiffFuncSJVVC" global number "23"
 
     *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
     *-? step 1. Main Regression
@@ -258,10 +324,10 @@ foreach var in TransferSJC SameMC DiffMC TransferFuncC {
 }
 
 coefplot ///
-    (TransferSJC,              keep(lc_1) rename(lc_1 = "All lateral moves")                noci recast(bar)) ///
-    (SameMC,                   keep(lc_1) rename(lc_1 = "Within team")                      noci recast(bar)) ///
-    (DiffMC,                   keep(lc_1) rename(lc_1 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_1) rename(lc_1 = "Different team, cross-functional") noci recast(bar)) ///
+    (TransferSJVVC,              keep(lc_1) rename(lc_1 = "All lateral moves")                noci recast(bar)) ///
+    (SameMVVC,                   keep(lc_1) rename(lc_1 = "Within team")                      noci recast(bar)) ///
+    (DiffMVVC,                   keep(lc_1) rename(lc_1 = "Different team, same function")    noci recast(bar)) ///
+    (DiffFuncSJVVC,              keep(lc_1) rename(lc_1 = "Different team, cross-functional") noci recast(bar)) ///
     , legend(off) xline(0, lpattern(dash)) ///
     xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
     ylabel(, labsize(large)) ///
@@ -270,13 +336,13 @@ coefplot ///
     graphregion(margin(medium)) plotregion(margin(medium)) ///
     title("Effects of gaining a high-flyer manager", size(large))
 
-graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJC_DuringMngrRotation_Q8.gph", replace
+graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJVVC_DuringMngrRotation_Q8.gph", replace
 
 coefplot ///
-    (TransferSJC,              keep(lc_2) rename(lc_2 = "All lateral moves")                noci recast(bar)) ///
-    (SameMC,                   keep(lc_2) rename(lc_2 = "Within team")                      noci recast(bar)) ///
-    (DiffMC,                   keep(lc_2) rename(lc_2 = "Different team, same function")    noci recast(bar)) ///
-    (TransferFuncC,            keep(lc_2) rename(lc_2 = "Different team, cross-functional") noci recast(bar)) ///
+    (TransferSJVVC,              keep(lc_2) rename(lc_2 = "All lateral moves")                noci recast(bar)) ///
+    (SameMVVC,                   keep(lc_2) rename(lc_2 = "Within team")                      noci recast(bar)) ///
+    (DiffMVVC,                   keep(lc_2) rename(lc_2 = "Different team, same function")    noci recast(bar)) ///
+    (DiffFuncSJVVC,              keep(lc_2) rename(lc_2 = "Different team, cross-functional") noci recast(bar)) ///
     , legend(off) xline(0, lpattern(dash)) ///
     xscale(range(0 0.2)) xlabel(0(0.01)0.2, grid gstyle(dot) labsize(medlarge)) ///
     ylabel(, labsize(large)) ///
@@ -285,7 +351,7 @@ coefplot ///
     graphregion(margin(medium)) plotregion(margin(medium)) ///
     title("Effects of gaining a high-flyer manager", size(large))
 
-graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJC_AfterMngrRotation_Q28.gph", replace
+graph save "${Results}/005EventStudiesWithCA30/CA30_Gains_DecompTransferSJVVC_AfterMngrRotation_Q28.gph", replace
 
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2. store the event studies results
@@ -299,6 +365,6 @@ keep ///
 
 keep if inrange(_n, 1, 41)
 
-save "${Results}/005EventStudiesWithCA30/CA30_DecompTransferSJC.dta", replace 
+save "${Results}/005EventStudiesWithCA30/CA30_DecompTransferSJVVC.dta", replace 
 
 log close
