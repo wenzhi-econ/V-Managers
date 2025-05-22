@@ -100,6 +100,25 @@ reghdfe NumRecommendB CA30_LtoH, absorb(Event_Time Func#Office) vce(cluster IDMn
     summarize NumRecommendB if e(sample)==1 & CA30_LtoH==0
     estadd scalar cmean = r(mean)
 
+generate NumSkillsB0    = (NumSkills>0) if NumSkills!=.
+generate NumCompletedB0 = (NumCompleted>0) if NumCompleted!=.
+generate NumRecommendB0 = (NumRecommend>0) if NumRecommend!=.
+
+reghdfe NumSkillsB0    CA30_LtoH, absorb(Event_Time Func#Office) vce(cluster IDMngr_Post)
+    eststo NumSkillsB0
+    summarize NumSkillsB0 if e(sample)==1 & CA30_LtoH==0
+    estadd scalar cmean = r(mean)
+
+reghdfe NumCompletedB0 CA30_LtoH, absorb(Event_Time Func#Office) vce(cluster IDMngr_Post)
+    eststo NumCompletedB0
+    summarize NumCompletedB0 if e(sample)==1 & CA30_LtoH==0
+    estadd scalar cmean = r(mean)  
+
+reghdfe NumRecommendB0 CA30_LtoH, absorb(Event_Time Func#Office) vce(cluster IDMngr_Post)
+    eststo NumRecommendB0
+    summarize NumRecommendB0 if e(sample)==1 & CA30_LtoH==0
+    estadd scalar cmean = r(mean)
+
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
 *?? step 2. flexible project panel
 *??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??*??
@@ -195,6 +214,39 @@ esttab CompletedProfileDummy ProjectRolesAppliedDummy NrProjectRolesApplied usin
     prefoot("${latex_midrule}") postfoot("${latex_midrule}")
 
 esttab NumSkillsB NumCompletedB NumRecommendB using "${latex_file}", ///
+    append style(tex) fragment nocons label nofloat nobaselevels nonumbers noobs nomtitles collabels(,none) ///
+    b(4) se(3) star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(CA30_LtoH) varlabels(CA30_LtoH "LtoH") ///
+    stats(cmean r2 N, labels("Mean, LtoL" "R-squared" "N") fmt(%9.3f %9.3f %9.0g)) ///
+    prehead("${latex_panel_B}") posthead("${latex_numbers_B}" "${latex_titles_B}" "${latex_midrule}") ///
+    prefoot("${latex_midrule}") postfoot("${latex_bottomrule}" "${latex_bottomrule}" "${latex_endtabular}")
+
+
+
+global latex_star         "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}"
+global latex_begintabular "\begin{tabular}{lccc}"
+global latex_endtabular   "\end{tabular}"
+global latex_toprule      "\toprule"
+global latex_midrule      "\midrule"
+global latex_bottomrule   "\bottomrule"
+global latex_numbers_A    "& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} \\"
+global latex_numbers_B    "& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} \\"
+
+global latex_titles_A     "& \multicolumn{1}{c}{Profile completed} & \multicolumn{1}{c}{\shortstack{Applied to any \\ project role}}  & \multicolumn{1}{c}{\shortstack{Number of project \\ roles applied}} \\"
+global latex_titles_B     "& \multicolumn{1}{c}{\shortstack{Number of \\ skills $> 0$}} & \multicolumn{1}{c}{\shortstack{Number of \\ completed items $> 0$}}  & \multicolumn{1}{c}{\shortstack{Number of \\ shared items $> 0$}} \\"
+global latex_panel_A      "\addlinespace[5pt] \multicolumn{3}{c}{\emph{Panel (a): Active learning behavior}} \\ [7pt]"
+global latex_panel_B      "\addlinespace[5pt] \multicolumn{3}{c}{\emph{Panel (b): Engagement in flexible projects}} \\ [7pt]"
+global latex_file         "${Results}/004ResultsBasedOnCA30/ActiveLearningAndFlexibleProject_CrossSection_Dummy0.tex"
+
+esttab CompletedProfileDummy ProjectRolesAppliedDummy NrProjectRolesApplied using "${latex_file}", ///
+    replace style(tex) fragment nocons label nofloat nobaselevels nonumbers noobs nomtitles collabels(,none) ///
+    b(4) se(3) star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(CA30_LtoH) varlabels(CA30_LtoH "LtoH") ///
+    stats(cmean r2 N, labels("Mean, LtoL" "R-squared" "N") fmt(%9.3f %9.3f %9.0g)) ///
+    prehead("${latex_star}" "${latex_begintabular}" "${latex_toprule}" "${latex_toprule}" "${latex_panel_A}") posthead("${latex_numbers_A}" "${latex_titles_A}" "${latex_midrule}") ///
+    prefoot("${latex_midrule}") postfoot("${latex_midrule}")
+
+esttab NumSkillsB0 NumCompletedB0 NumRecommendB0 using "${latex_file}", ///
     append style(tex) fragment nocons label nofloat nobaselevels nonumbers noobs nomtitles collabels(,none) ///
     b(4) se(3) star(* 0.10 ** 0.05 *** 0.01) ///
     keep(CA30_LtoH) varlabels(CA30_LtoH "LtoH") ///

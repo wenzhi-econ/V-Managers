@@ -80,7 +80,7 @@ label variable TransferSJ  "= 1 in the month when an individual's StandardJob is
 label variable TransferSJC "cumulative count of StandardJob transfers for an individual"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
-*-? s-2-2. standard job changes without salary grade changes
+*-? s-2-2. standard job changes with salary grade changes
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 
 generate TransferSJV = TransferSJ
@@ -92,8 +92,8 @@ replace temp = 0 if temp==. & StandardJob!=""
 generate TransferSJVC = temp 
 drop temp
 
-label variable TransferSJV  "= 1 when his StandardJob is diff. than last month but SalaryGrade is the same"
-label variable TransferSJVC "cumulative count of TransferSJ for an individual"
+label variable TransferSJV  "= 1 when his StandardJob is diff. than last month with SalaryGrade change"
+label variable TransferSJVC "cumulative count of TransferSJV for an individual"
 
 *-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?*-?
 *-? s-2-3. function changes 
